@@ -44,7 +44,7 @@ def analyze_requirements(state):
         temperature=0
     ).with_structured_output(WebsiteRequirements, method="json_schema")
 
-    system_prompt = """
+    system_prompt = r"""
 You are a senior product architect.
 
 Extract structured website requirements from the user prompt.

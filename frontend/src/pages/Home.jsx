@@ -11668,7 +11668,7 @@ import {
   BsEye,
 } from "react-icons/bs";
 
-const API_BASE_URL = "http://127.0.0.1:8011";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 // Storage keys
 const STORAGE_KEY = "ai_projects";

@@ -46,12 +46,12 @@
 
 
 # from langgraph.graph import StateGraph, START, END
-# from backend.state import AgentState
-# from backend.agents.analyzer import analyze_requirements
-# from backend.agents.researcher import research_node
-# from backend.agents.planner import planner_agent
-# from backend.agents.generator import coder_node
-# from backend.agents.validator import validator_node
+from state import AgentState
+from agents.analyzer import analyze_requirements
+from agents.researcher import research_node
+from agents.planner import planner_agent
+from agents.generator import coder_node
+from agents.validator import validator_node
 
 # # 1. Logic to decide whether to loop or finish
 # def should_continue(state: AgentState):
@@ -240,18 +240,75 @@
 
 
 
-# latest version
+# # latest version
+
+# from langgraph.graph import StateGraph, START, END
+# from backend.state import AgentState
+
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.planner import planner_agent
+# from backend.agents.frontend_scaffold import frontend_scaffold_node
+# from backend.agents.frontend_pages import frontend_pages_node
+# from backend.agents.backend_generator import backend_generator_node
+# from backend.agents.validator import validator_node
+# from backend.agents.frontend_router import frontend_router_node
+
+# MAX_RETRIES = 1
+
+# def should_continue(state: AgentState):
+#     errors = state.get("validation_errors", [])
+#     retry_count = state.get("retry_count", 0)
+
+#     if not errors or retry_count >= MAX_RETRIES:
+#         return END
+
+#     state["retry_count"] = retry_count + 1
+#     print(f"⚠ Retry {retry_count + 1}: {errors[0]}")
+#     return "planner"
+
+
+# workflow = StateGraph(AgentState)
+
+# workflow.add_node("analyzer", analyze_requirements)
+# workflow.add_node("planner", planner_agent)
+# workflow.add_node("frontend_scaffold", frontend_scaffold_node)
+# workflow.add_node("frontend_pages", frontend_pages_node)
+# workflow.add_node("frontend_router", frontend_router_node)
+# workflow.add_node("backend_generator", backend_generator_node)
+# workflow.add_node("validator", validator_node)
+
+# workflow.add_edge(START, "analyzer")
+# workflow.add_edge("analyzer", "planner")
+# workflow.add_edge("planner", "frontend_scaffold")
+# workflow.add_edge("frontend_scaffold", "frontend_pages")
+# workflow.add_edge("frontend_pages", "frontend_router")
+# workflow.add_edge("frontend_router", "backend_generator")
+# workflow.add_edge("backend_generator", "validator")
+
+# workflow.add_conditional_edges(
+#     "validator",
+#     should_continue,
+#     {
+#         "planner": "planner",
+#         END: END
+#     }
+# )
+
+# graph = workflow.compile()
+# print("✅ OPTIMIZED GRAPH COMPILED") 
+
+
 
 from langgraph.graph import StateGraph, START, END
-from backend.state import AgentState
+from state import AgentState
 
-from backend.agents.analyzer import analyze_requirements
-from backend.agents.planner import planner_agent
-from backend.agents.frontend_scaffold import frontend_scaffold_node
-from backend.agents.frontend_pages import frontend_pages_node
-from backend.agents.backend_generator import backend_generator_node
-from backend.agents.validator import validator_node
-from backend.agents.frontend_router import frontend_router_node
+from agents.analyzer import analyze_requirements
+from agents.planner import planner_agent
+from agents.frontend_scaffold import frontend_scaffold_node
+from agents.frontend_pages import frontend_pages_node
+from agents.backend_generator import backend_generator_node
+from agents.validator import validator_node
+from agents.frontend_router import frontend_router_node
 
 MAX_RETRIES = 1
 

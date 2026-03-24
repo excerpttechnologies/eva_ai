@@ -613,9 +613,8 @@
 #         "code_files": state.get("code_files", []) + generated_files
 #     }
 
-
 from langchain_ollama import ChatOllama
-from backend.state import AgentState
+from state import AgentState   # ✅ FIXED
 import re
 
 
@@ -641,12 +640,11 @@ def extract_jsx_body(code: str) -> str:
     """
     Extract only JSX inside return(...)
     """
-
     match = re.search(r"return\s*\(([\s\S]*)\)\s*;", code)
     if match:
         return match.group(1).strip()
 
-    # fallback: if model just returned JSX
+    # fallback
     return code.strip()
 
 
@@ -727,3 +725,5 @@ export default function {page}() {{
     return {
         "code_files": state.get("code_files", []) + generated_files
     }
+
+    

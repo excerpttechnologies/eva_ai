@@ -1,6 +1,6 @@
 import os
 from firecrawl import FirecrawlApp
-from backend.state import AgentState
+from state import AgentState
 
 
 def research_node(state: AgentState):

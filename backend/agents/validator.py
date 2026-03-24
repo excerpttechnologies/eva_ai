@@ -231,7 +231,7 @@
 
 
 
-from backend.state import AgentState
+from state import AgentState
 from typing import List
 
 CODE_EXTENSIONS = (".js", ".ts", ".tsx", ".jsx")
