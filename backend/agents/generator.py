@@ -2,8 +2,6 @@
 # from langchain_core.messages import SystemMessage, HumanMessage
 # import json
 
-from state import AgentState
-
 # def code_generator_node(state):
 #     # Initialize Qwen2.5-Coder
 #     # temperature=0.2 adds a slight creative touch while remaining reliable
@@ -443,13 +441,140 @@ from state import AgentState
 #     return json.loads(text[start:end])
 
 
-def coder_node(state: AgentState):
-    # Placeholder for frontend generation - returns dummy file for testing
-    return {
-        "code_files": state.get("code_files", []) + [
-            {
-                "filename": "index.html",
-                "content": "<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Hello World</h1></body></html>"
-            }
-        ]
-    }
+# def coder_node(state: AgentState):
+#     print("🔥 FULL PRODUCTION FRONTEND GENERATOR RUNNING")
+
+#     llm = ChatOllama(
+#         model="deepseek-coder:6.7b",
+#         temperature=0.2
+#     )
+
+#     system_prompt = """
+# You are a senior frontend architect.
+
+# Generate a COMPLETE, runnable React project using:
+
+# - Vite
+# - React 18
+# - React Router v6
+# - Tailwind CSS (fully configured)
+
+# ----------------------------------------
+# MANDATORY PROJECT STRUCTURE
+# ----------------------------------------
+
+# Root:
+# - package.json
+# - vite.config.js
+# - postcss.config.js
+# - tailwind.config.js
+# - index.html
+
+# src/
+# - main.jsx
+# - App.jsx
+# - index.css
+# - pages/ (MUST exist)
+
+# ----------------------------------------
+# REQUIREMENTS
+# ----------------------------------------
+
+# 1. package.json must include: latest verions of all
+#    - react
+#    - react-dom
+#    - react-router-dom
+#    - tailwindcss
+#    - postcss
+#    - autoprefixer
+#    - vite
+#    - @vitejs/plugin-react
+
+# 2. Tailwind must be fully configured.
+# 3. index.css must contain:
+#    @tailwind base;
+#    @tailwind components;
+#    @tailwind utilities;
+
+# 4. Use React 18 createRoot.
+# 5. App.jsx must use React Router v6 (Routes + Route).
+# 6. For EVERY route in App.jsx, there MUST be a matching file inside src/pages.
+# 7. All pages must:
+#    - Be valid React components
+#    - Export default
+#    - Use Tailwind styling
+#    - Have clean SaaS layout
+
+# ----------------------------------------
+# STRICT RULES
+# ----------------------------------------
+
+# - DO NOT generate backend code
+# - DO NOT generate Express
+# - DO NOT generate FastAPI
+# - DO NOT use JSON.stringify
+# - DO NOT use backticks
+# - DO NOT wrap output in markdown
+# - All file content must be plain strings
+# - Return ONLY valid JSON
+
+# ------------------------------------------
+
+# Return STRICT JSON:
+
+# {
+#   "files": [
+#     { "filename": "...", "content": "..." }
+#   ]
+# }
+# """
+
+#     # Use pages from requirements if available
+#     requirements = state.get("requirements", {})
+#     pages = requirements.get("pages", [])
+
+#     user_prompt = f"""
+# Project requirements:
+# {json.dumps(requirements, indent=2)}
+
+# Pages to create:
+# {json.dumps(pages, indent=2)}
+
+# Generate a modern SaaS UI with clean layout,
+# navigation bar, hero section, and consistent Tailwind styling.
+
+# Ensure:
+# - src/pages folder exists
+# - All listed pages are created
+# - Routing matches pages
+# """
+
+#     response = llm.invoke([
+#         SystemMessage(content=system_prompt),
+#         HumanMessage(content=user_prompt)
+#     ])
+
+#     print("🔥 FRONTEND RAW OUTPUT:")
+#     print(response.content)
+
+#     try:
+#         result = extract_json(response.content)
+#     except Exception as e:
+#         return {
+#             "code_files": state.get("code_files", []),
+#             "validation_errors": [f"Frontend JSON parse failed: {str(e)}"]
+#         }
+
+#     frontend_files = result.get("files", [])
+
+#     if not frontend_files:
+#         return {
+#             "code_files": state.get("code_files", []),
+#             "validation_errors": ["Frontend generator returned no files"]
+#         }
+
+#     print(f"✅ Frontend generated {len(frontend_files)} files")
+
+#     return {
+#         "code_files": state.get("code_files", []) + frontend_files
+#     }

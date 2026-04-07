@@ -46,12 +46,12 @@
 
 
 # from langgraph.graph import StateGraph, START, END
-from state import AgentState
-from agents.analyzer import analyze_requirements
-from agents.researcher import research_node
-from agents.planner import planner_agent
-from agents.generator import coder_node
-from agents.validator import validator_node
+# from backend.state import AgentState
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.researcher import research_node
+# from backend.agents.planner import planner_agent
+# from backend.agents.generator import coder_node
+# from backend.agents.validator import validator_node
 
 # # 1. Logic to decide whether to loop or finish
 # def should_continue(state: AgentState):
@@ -240,7 +240,7 @@ from agents.validator import validator_node
 
 
 
-# # latest version
+# latest version
 
 # from langgraph.graph import StateGraph, START, END
 # from backend.state import AgentState
@@ -252,6 +252,7 @@ from agents.validator import validator_node
 # from backend.agents.backend_generator import backend_generator_node
 # from backend.agents.validator import validator_node
 # from backend.agents.frontend_router import frontend_router_node
+# from backend.agents.fixer_agent import fixer_agent
 
 # MAX_RETRIES = 1
 
@@ -295,33 +296,607 @@ from agents.validator import validator_node
 # )
 
 # graph = workflow.compile()
-# print("✅ OPTIMIZED GRAPH COMPILED") 
+# print("✅ OPTIMIZED GRAPH COMPILED")
+
+# from langgraph.graph import StateGraph, START, END
+# from backend.state import AgentState
+
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.planner import planner_agent
+# from backend.agents.frontend_scaffold import frontend_scaffold_node
+# from backend.agents.frontend_pages import frontend_pages_node
+# from backend.agents.backend_generator import backend_generator_node
+# from backend.agents.frontend_router import frontend_router_node
+# from backend.agents.validator import validator_node
+# from backend.agents.fixer_agent import fixer_agent
 
 
+# MAX_RETRIES = 1
+
+
+# def should_fix(state: AgentState):
+#     errors = state.get("validation_errors", [])
+#     retry_count = state.get("retry_count", 0)
+
+#     if errors and retry_count < MAX_RETRIES:
+#         state["retry_count"] = retry_count + 1
+#         print(f"🛠 Fix attempt {retry_count + 1}")
+#         return "fixer"
+
+#     return END
+
+
+# workflow = StateGraph(AgentState)
+
+# # =========================
+# # Nodes
+# # =========================
+
+# workflow.add_node("analyzer", analyze_requirements)
+# workflow.add_node("planner", planner_agent)
+
+# workflow.add_node("frontend_scaffold", frontend_scaffold_node)
+# workflow.add_node("frontend_pages", frontend_pages_node)
+# workflow.add_node("backend_generator", backend_generator_node)
+
+# workflow.add_node("frontend_router", frontend_router_node)
+
+# workflow.add_node("validator", validator_node)
+# workflow.add_node("fixer", fixer_agent)
+
+# # =========================
+# # Flow
+# # =========================
+
+# workflow.add_edge(START, "analyzer")
+# workflow.add_edge("analyzer", "planner")
+
+# # -------------------------
+# # Parallel Generation
+# # -------------------------
+
+# workflow.add_edge("planner", "frontend_scaffold")
+# workflow.add_edge("planner", "frontend_pages")
+# workflow.add_edge("planner", "backend_generator")
+
+# # -------------------------
+# # Router (after pages)
+# # -------------------------
+
+# workflow.add_edge("frontend_pages", "frontend_router")
+# workflow.add_edge("frontend_scaffold", "frontend_router")
+
+# # -------------------------
+# # Validation
+# # -------------------------
+
+# workflow.add_edge("frontend_router", "validator")
+# workflow.add_edge("backend_generator", "validator")
+
+# # -------------------------
+# # Fix if needed
+# # -------------------------
+
+# workflow.add_conditional_edges(
+#     "validator",
+#     should_fix,
+#     {
+#         "fixer": "fixer",
+#         END: END
+#     }
+# )
+
+# # After fixing → validate again
+# workflow.add_edge("fixer", "validator")
+
+# graph = workflow.compile()
+
+# print("🚀 PARALLEL AI BUILDER GRAPH READY")
+
+
+
+# from langgraph.graph import StateGraph, START, END
+# from backend.state import AgentState
+
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.planner import planner_agent
+# from backend.agents.frontend_scaffold import frontend_scaffold_node
+# from backend.agents.frontend_pages import frontend_pages_node
+# from backend.agents.backend_generator import backend_generator_node
+# from backend.agents.frontend_router import frontend_router_node
+# from backend.agents.validator import validator_node
+# from backend.agents.fixer_agent import fixer_agent
+
+
+# MAX_RETRIES = 1
+
+
+# # ==============================================================
+# # Conditional Fix Logic
+# # ==============================================================
+
+# def should_fix(state: AgentState):
+#     errors = state.get("validation_errors", [])
+#     retry_count = state.get("retry_count", 0)
+
+#     if errors and retry_count < MAX_RETRIES:
+#         state["retry_count"] = retry_count + 1
+#         print(f"🛠 Fix attempt {retry_count + 1}")
+#         return "fixer"
+
+#     return END
+
+
+# # ==============================================================
+# # JOIN NODE (CRITICAL FIX)
+# # ==============================================================
+
+# def join_node(state: AgentState):
+#     print("✅ JOIN NODE: All frontend parts ready")
+#     return state
+
+
+# # ==============================================================
+# # Graph
+# # ==============================================================
+
+# workflow = StateGraph(AgentState)
+
+
+# # =========================
+# # Nodes
+# # =========================
+
+# workflow.add_node("analyzer", analyze_requirements)
+# workflow.add_node("planner", planner_agent)
+
+# workflow.add_node("frontend_scaffold", frontend_scaffold_node)
+# workflow.add_node("frontend_pages", frontend_pages_node)
+# workflow.add_node("backend_generator", backend_generator_node)
+
+# workflow.add_node("join", join_node)  # ✅ NEW
+
+# workflow.add_node("frontend_router", frontend_router_node)
+
+# workflow.add_node("validator", validator_node)
+# workflow.add_node("fixer", fixer_agent)
+
+
+# # =========================
+# # Flow
+# # =========================
+
+# workflow.add_edge(START, "analyzer")
+# workflow.add_edge("analyzer", "planner")
+
+
+# # -------------------------
+# # Parallel Generation
+# # -------------------------
+
+# workflow.add_edge("planner", "frontend_scaffold")
+# workflow.add_edge("planner", "frontend_pages")
+# workflow.add_edge("planner", "backend_generator")
+
+
+# # -------------------------
+# # Synchronization (FIX)
+# # -------------------------
+
+# workflow.add_edge("frontend_scaffold", "join")
+# workflow.add_edge("frontend_pages", "join")
+
+
+# # -------------------------
+# # Router AFTER BOTH READY
+# # -------------------------
+
+# workflow.add_edge("join", "frontend_router")
+
+
+# # -------------------------
+# # Validation
+# # -------------------------
+
+# workflow.add_edge("frontend_router", "validator")
+# workflow.add_edge("backend_generator", "validator")
+
+
+# # -------------------------
+# # Fix Loop
+# # -------------------------
+
+# workflow.add_conditional_edges(
+#     "validator",
+#     should_fix,
+#     {
+#         "fixer": "fixer",
+#         END: END
+#     }
+# )
+
+# workflow.add_edge("fixer", "validator")
+
+
+# # =========================
+# # Compile
+# # =========================
+
+# graph = workflow.compile()
+
+# print("🚀 PARALLEL AI BUILDER GRAPH READY (FIXED VERSION)")
+
+
+# latest version
+
+# """
+# graph.py  -  LangGraph workflow for AI Builder.
+
+# Bugs fixed vs the original:
+
+# 1. PARALLEL STATE MERGE (critical)
+#    - code_files now uses Annotated[List, merge_code_files] reducer in AgentState
+#    - All three parallel nodes safely append to the same list without overwriting
+#    - join_node deduplicates by filename (last writer wins = pages override scaffold)
+
+# 2. BACKEND GENERATOR CONNECTED TO join_all (critical)
+#    - Previously: backend_generator → validator (DIRECT, bypassing join)
+#    - validator was called TWICE and saw incomplete state on first call
+#    - Fixed: all three parallel branches → join_all → frontend_router → validator
+
+# 3. should_fix NO LONGER MUTATES STATE (critical)
+#    - Conditional edge functions must be pure in LangGraph
+#    - Moved retry_count increment into fixer_agent's return value
+
+# 4. MAX_RETRIES bumped to 3
+#    - 1 attempt was never enough for complex JSX/structure errors
+
+# 5. TOPOLOGY: join_all waits for ALL THREE parallel branches
+#    - scaffold + pages + backend all feed into join_all
+#    - frontend_router only runs after everything is ready
+#    - single clean path: join_all → frontend_router → validator → (fix loop) → END
+
+# 6. retry_count initialized in state and incremented by fixer_agent (not graph)
+# """
+
+# from __future__ import annotations
+
+# import operator
+# from typing import Annotated, List
+
+# from langgraph.graph import StateGraph, START, END
+# from typing_extensions import TypedDict
+
+# from backend.state import AgentState
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.planner import planner_agent
+# from backend.agents.frontend_scaffold import frontend_scaffold_node
+# from backend.agents.frontend_pages import frontend_pages_node
+# from backend.agents.backend_generator import backend_generator_node
+# from backend.agents.frontend_router import frontend_router_node
+# from backend.agents.validator import validator_node
+# from backend.agents.fixer_agent import fixer_agent
+
+
+# MAX_RETRIES = 3
+
+
+# # ──────────────────────────────────────────────────────────────
+# # code_files reducer — merges lists from parallel branches
+# # ──────────────────────────────────────────────────────────────
+
+# def _merge_code_files(existing: List[dict], incoming: List[dict]) -> List[dict]:
+#     """
+#     Merge two code_files lists, deduplicating by filename.
+#     Last writer wins — pages/router output overrides scaffold stubs.
+#     Called automatically by LangGraph when parallel nodes write to code_files.
+#     """
+#     file_map = {f["filename"]: f for f in (existing or [])}
+#     for f in (incoming or []):
+#         file_map[f["filename"]] = f     # later write wins
+#     return list(file_map.values())
+
+
+# # ──────────────────────────────────────────────────────────────
+# # JOIN node — synchronises after all parallel branches complete
+# # ──────────────────────────────────────────────────────────────
+
+# def join_all(state: AgentState) -> dict:
+#     """
+#     Wait for scaffold + pages + backend to all finish.
+#     By the time this runs, LangGraph has already called _merge_code_files
+#     to combine all three code_files lists, so dedup is already done.
+#     We just log and pass through.
+#     """
+#     files = state.get("code_files", [])
+#     fe = sum(1 for f in files if f["filename"].startswith("frontend/"))
+#     be = sum(1 for f in files if f["filename"].startswith("backend/"))
+#     print(f"✅ JOIN: {len(files)} files ready ({fe} frontend, {be} backend)")
+#     return {}   # no state change needed — files already merged by reducer
+
+
+# # ──────────────────────────────────────────────────────────────
+# # Conditional edge — pure function, no state mutation
+# # ──────────────────────────────────────────────────────────────
+
+# def should_fix(state: AgentState) -> str:
+#     """
+#     Pure routing function — must NOT mutate state.
+#     retry_count is incremented by fixer_agent's return value instead.
+#     """
+#     errors      = state.get("validation_errors", [])
+#     retry_count = state.get("retry_count", 0)
+
+#     if errors and retry_count < MAX_RETRIES:
+#         print(f"🛠  Fix attempt {retry_count + 1}/{MAX_RETRIES} "
+#               f"({len(errors)} error(s))")
+#         return "fixer"
+
+#     if errors:
+#         print(f"⚠️  {len(errors)} error(s) remain after {retry_count} fix attempt(s) — finishing")
+#     else:
+#         print("✅  Validation passed")
+
+#     return END
+
+
+# # ──────────────────────────────────────────────────────────────
+# # Build graph
+# # ──────────────────────────────────────────────────────────────
+
+# workflow = StateGraph(AgentState)
+
+# # Nodes
+# workflow.add_node("analyzer",          analyze_requirements)
+# workflow.add_node("planner",           planner_agent)
+# workflow.add_node("frontend_scaffold", frontend_scaffold_node)
+# workflow.add_node("frontend_pages",    frontend_pages_node)
+# workflow.add_node("backend_generator", backend_generator_node)
+# workflow.add_node("join_all",          join_all)           # waits for all 3 branches
+# workflow.add_node("frontend_router",   frontend_router_node)
+# workflow.add_node("validator",         validator_node)
+# workflow.add_node("fixer",             fixer_agent)
+
+# # Sequential start
+# workflow.add_edge(START,      "analyzer")
+# workflow.add_edge("analyzer", "planner")
+
+# # Fan-out: planner triggers all three parallel generators
+# workflow.add_edge("planner", "frontend_scaffold")
+# workflow.add_edge("planner", "frontend_pages")
+# workflow.add_edge("planner", "backend_generator")
+
+# # Fan-in: ALL THREE must complete before join_all proceeds
+# workflow.add_edge("frontend_scaffold", "join_all")
+# workflow.add_edge("frontend_pages",    "join_all")
+# workflow.add_edge("backend_generator", "join_all")
+
+# # Router runs after everything is merged
+# workflow.add_edge("join_all",        "frontend_router")
+# workflow.add_edge("frontend_router", "validator")
+
+# # Fix loop
+# workflow.add_conditional_edges(
+#     "validator",
+#     should_fix,
+#     {
+#         "fixer": "fixer",
+#         END:     END,
+#     },
+# )
+# workflow.add_edge("fixer", "validator")
+
+# # Compile
+# graph = workflow.compile()
+
+# print("🚀 AI BUILDER GRAPH READY")
+
+
+# """
+# graph.py  -  LangGraph workflow for AI Builder.
+
+# Bugs fixed vs the original:
+
+# 1. PARALLEL STATE MERGE (critical)
+#    - code_files now uses Annotated[List, merge_code_files] reducer in AgentState
+#    - All three parallel nodes safely append to the same list without overwriting
+#    - join_node deduplicates by filename (last writer wins = pages override scaffold)
+
+# 2. BACKEND GENERATOR CONNECTED TO join_all (critical)
+#    - Previously: backend_generator → validator (DIRECT, bypassing join)
+#    - validator was called TWICE and saw incomplete state on first call
+#    - Fixed: all three parallel branches → join_all → frontend_router → validator
+
+# 3. should_fix NO LONGER MUTATES STATE (critical)
+#    - Conditional edge functions must be pure in LangGraph
+#    - Moved retry_count increment into fixer_agent's return value
+
+# 4. MAX_RETRIES bumped to 3
+#    - 1 attempt was never enough for complex JSX/structure errors
+
+# 5. TOPOLOGY: join_all waits for ALL THREE parallel branches
+#    - scaffold + pages + backend all feed into join_all
+#    - frontend_router only runs after everything is ready
+#    - single clean path: join_all → frontend_router → validator → (fix loop) → END
+
+# 6. retry_count initialized in state and incremented by fixer_agent (not graph)
+# """
+
+# from __future__ import annotations
+
+# import operator
+# from typing import Annotated, List
+
+# from langgraph.graph import StateGraph, START, END
+# from typing_extensions import TypedDict
+
+# from backend.state import AgentState
+# from backend.agents.analyzer import analyze_requirements
+# from backend.agents.planner import planner_agent
+# from backend.agents.frontend_scaffold import frontend_scaffold_node
+# from backend.agents.frontend_pages import frontend_pages_node
+# from backend.agents.backend_generator import backend_generator_node
+# from backend.agents.frontend_router import frontend_router_node
+# from backend.agents.validator import validator_node
+# from backend.agents.fixer_agent import fixer_agent
+
+
+# MAX_RETRIES = 3
+
+
+# # ──────────────────────────────────────────────────────────────
+# # code_files reducer — merges lists from parallel branches
+# # ──────────────────────────────────────────────────────────────
+
+# def _merge_code_files(existing: List[dict], incoming: List[dict]) -> List[dict]:
+#     """
+#     Merge two code_files lists, deduplicating by filename.
+#     Last writer wins — pages/router output overrides scaffold stubs.
+#     Called automatically by LangGraph when parallel nodes write to code_files.
+#     """
+#     file_map = {f["filename"]: f for f in (existing or [])}
+#     for f in (incoming or []):
+#         file_map[f["filename"]] = f     # later write wins
+#     return list(file_map.values())
+
+
+# # ──────────────────────────────────────────────────────────────
+# # JOIN node — synchronises after all parallel branches complete
+# # ──────────────────────────────────────────────────────────────
+
+# def join_all(state: AgentState) -> dict:
+#     """
+#     Wait for scaffold + pages + backend to all finish.
+#     By the time this runs, LangGraph has already called _merge_code_files
+#     to combine all three code_files lists, so dedup is already done.
+#     We just log and pass through.
+#     """
+#     files = state.get("code_files", [])
+#     fe = sum(1 for f in files if f["filename"].startswith("frontend/"))
+#     be = sum(1 for f in files if f["filename"].startswith("backend/"))
+#     print(f"✅ JOIN: {len(files)} files ready ({fe} frontend, {be} backend)")
+#     return {}   # no state change needed — files already merged by reducer
+
+
+# # ──────────────────────────────────────────────────────────────
+# # Conditional edge — pure function, no state mutation
+# # ──────────────────────────────────────────────────────────────
+
+# def should_fix(state: AgentState) -> str:
+#     """
+#     Pure routing function — must NOT mutate state.
+#     retry_count is incremented by fixer_agent's return value instead.
+#     """
+#     errors      = state.get("validation_errors", [])
+#     retry_count = state.get("retry_count", 0)
+
+#     if errors and retry_count < MAX_RETRIES:
+#         print(f"🛠  Fix attempt {retry_count + 1}/{MAX_RETRIES} "
+#               f"({len(errors)} error(s))")
+#         return "fixer"
+
+#     if errors:
+#         print(f"⚠️  {len(errors)} error(s) remain after {retry_count} fix attempt(s) — finishing")
+#     else:
+#         print("✅  Validation passed")
+
+#     return END
+
+
+# # ──────────────────────────────────────────────────────────────
+# # Build graph
+# # ──────────────────────────────────────────────────────────────
+
+# workflow = StateGraph(AgentState)
+
+# # Nodes
+# workflow.add_node("analyzer",          analyze_requirements)
+# workflow.add_node("planner",           planner_agent)
+# workflow.add_node("frontend_scaffold", frontend_scaffold_node)
+# workflow.add_node("frontend_pages",    frontend_pages_node)
+# workflow.add_node("backend_generator", backend_generator_node)
+# workflow.add_node("join_all",          join_all)           # waits for all 3 branches
+# workflow.add_node("frontend_router",   frontend_router_node)
+# workflow.add_node("validator",         validator_node)
+# workflow.add_node("fixer",             fixer_agent)
+
+# # Sequential start
+# workflow.add_edge(START,      "analyzer")
+# workflow.add_edge("analyzer", "planner")
+
+# # Fan-out: planner triggers all three parallel generators
+# workflow.add_edge("planner", "frontend_scaffold")
+# workflow.add_edge("planner", "frontend_pages")
+# workflow.add_edge("planner", "backend_generator")
+
+# # Fan-in: ALL THREE must complete before join_all proceeds
+# workflow.add_edge("frontend_scaffold", "join_all")
+# workflow.add_edge("frontend_pages",    "join_all")
+# workflow.add_edge("backend_generator", "join_all")
+
+# # Router runs after everything is merged
+# workflow.add_edge("join_all",        "frontend_router")
+# workflow.add_edge("frontend_router", "validator")
+
+# # Fix loop
+# workflow.add_conditional_edges(
+#     "validator",
+#     should_fix,
+#     {
+#         "fixer": "fixer",
+#         END:     END,
+#     },
+# )
+# workflow.add_edge("fixer", "validator")
+
+# # Compile
+# graph = workflow.compile()
+
+# print("🚀 AI BUILDER GRAPH READY")
+
+
+from __future__ import annotations
 
 from langgraph.graph import StateGraph, START, END
-from state import AgentState
 
-from agents.analyzer import analyze_requirements
-from agents.planner import planner_agent
-from agents.frontend_scaffold import frontend_scaffold_node
-from agents.frontend_pages import frontend_pages_node
-from agents.backend_generator import backend_generator_node
-from agents.validator import validator_node
-from agents.frontend_router import frontend_router_node
+from backend.state import AgentState
+from backend.agents.analyzer import analyze_requirements
+from backend.agents.planner import planner_agent
+from backend.agents.frontend_scaffold import frontend_scaffold_node
+from backend.agents.frontend_pages import frontend_pages_node
+from backend.agents.backend_generator import backend_generator_node
+from backend.agents.frontend_router import frontend_router_node
+from backend.agents.validator import validator_node
+from backend.agents.fixer_agent import fixer_agent
 
-MAX_RETRIES = 1
 
-def should_continue(state: AgentState):
+MAX_RETRIES = 3
+
+
+def join_all(state: AgentState) -> dict:
+    """Wait for all parallel branches to complete."""
+    files = state.get("code_files", [])
+    fe = sum(1 for f in files if f["filename"].startswith("frontend/"))
+    be = sum(1 for f in files if f["filename"].startswith("backend/"))
+    print(f"JOIN: {len(files)} files ready ({fe} frontend, {be} backend)")
+    return {}
+
+
+def should_fix(state: AgentState) -> str:
+    """Determine if we need to fix errors."""
     errors = state.get("validation_errors", [])
     retry_count = state.get("retry_count", 0)
 
-    if not errors or retry_count >= MAX_RETRIES:
-        return END
+    if errors and retry_count < MAX_RETRIES:
+        print(f"Fix attempt {retry_count + 1}/{MAX_RETRIES} ({len(errors)} errors)")
+        return "fixer"
 
-    state["retry_count"] = retry_count + 1
-    print(f"⚠ Retry {retry_count + 1}: {errors[0]}")
-    return "planner"
+    if errors:
+        print(f"{len(errors)} errors remain after {retry_count} fixes")
+    else:
+        print("Validation passed")
+
+    return "end"
 
 
 workflow = StateGraph(AgentState)
@@ -330,26 +905,36 @@ workflow.add_node("analyzer", analyze_requirements)
 workflow.add_node("planner", planner_agent)
 workflow.add_node("frontend_scaffold", frontend_scaffold_node)
 workflow.add_node("frontend_pages", frontend_pages_node)
-workflow.add_node("frontend_router", frontend_router_node)
 workflow.add_node("backend_generator", backend_generator_node)
+workflow.add_node("join_all", join_all)
+workflow.add_node("frontend_router", frontend_router_node)
 workflow.add_node("validator", validator_node)
+workflow.add_node("fixer", fixer_agent)
 
 workflow.add_edge(START, "analyzer")
 workflow.add_edge("analyzer", "planner")
+
 workflow.add_edge("planner", "frontend_scaffold")
-workflow.add_edge("frontend_scaffold", "frontend_pages")
-workflow.add_edge("frontend_pages", "frontend_router")
-workflow.add_edge("frontend_router", "backend_generator")
-workflow.add_edge("backend_generator", "validator")
+workflow.add_edge("planner", "frontend_pages")
+workflow.add_edge("planner", "backend_generator")
+
+workflow.add_edge("frontend_scaffold", "join_all")
+workflow.add_edge("frontend_pages", "join_all")
+workflow.add_edge("backend_generator", "join_all")
+
+workflow.add_edge("join_all", "frontend_router")
+workflow.add_edge("frontend_router", "validator")
 
 workflow.add_conditional_edges(
     "validator",
-    should_continue,
+    should_fix,
     {
-        "planner": "planner",
-        END: END
-    }
+        "fixer": "fixer",
+        "end": END,
+    },
 )
+workflow.add_edge("fixer", "validator")
 
 graph = workflow.compile()
-print("✅ OPTIMIZED GRAPH COMPILED")
+
+print("AI BUILDER GRAPH READY")

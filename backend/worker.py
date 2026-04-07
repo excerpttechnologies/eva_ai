@@ -32,9 +32,10 @@
 #             "message": str(e),
 #             "traceback": traceback.format_exc()
 #         }
-from utils.artifact_writer import save_and_zip
-from jobs import jobs
-from graph import graph
+
+from backend.utils.artifact_writer import save_and_zip
+from backend.jobs import jobs
+from backend.graph import graph
 
 
 def run_graph(job_id: str, state):
@@ -42,6 +43,8 @@ def run_graph(job_id: str, state):
         jobs[job_id]["status"] = "running"
 
         result = graph.invoke(state)
+        # print("FINAL FILE COUNT:", len(files))
+
 
         files = result.get("code_files", [])
 

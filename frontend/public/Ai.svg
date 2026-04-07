@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80"><style>
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.45;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(48px)}}
+@keyframes arc{from{stroke-dashoffset:150}to{stroke-dashoffset:0}}
+@keyframes node-flash{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes type-cur{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+  <circle cx="40" cy="40" r="28" fill="none" stroke="#534AB7" stroke-width="2" stroke-dasharray="8 4" style="animation:spin 6s linear infinite;transform-origin:40px 40px"/>
+  <circle cx="40" cy="40" r="18" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1.5"/>
+  <circle cx="40" cy="40" r="18" fill="none" stroke="#534AB7" stroke-width="2" stroke-dasharray="5 3" style="animation:spin 4s linear infinite reverse;transform-origin:40px 40px"/>
+  <text x="40" y="37" text-anchor="middle" font-size="7" font-weight="500" fill="#3C3489" font-family="sans-serif">AI</text>
+  <text x="40" y="47" text-anchor="middle" font-size="5" fill="#534AB7" font-family="sans-serif">BUILDER</text>
+  <circle cx="40" cy="12" r="4" fill="#534AB7" style="animation:pulse 2s ease-in-out infinite;transform-origin:40px 12px"/>
+  <circle cx="12" cy="40" r="3" fill="#AFA9EC" style="animation:pulse 2s ease-in-out infinite .5s;transform-origin:12px 40px"/>
+  <circle cx="68" cy="40" r="3" fill="#AFA9EC" style="animation:pulse 2s ease-in-out infinite 1s;transform-origin:68px 40px"/>
+</svg>

@@ -11619,8 +11619,14244 @@
 
 
 
+// import React, { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "motion/react";
+// import { useSearchParams } from "react-router-dom";
+// import axios from "axios";
+// import {
+//   SandpackProvider,
+//   SandpackLayout,
+//   SandpackCodeEditor,
+//   SandpackPreview,
+//   SandpackConsole,
+//   SandpackFileExplorer,
+// } from "@codesandbox/sandpack-react";
+// import {
+//   HiOutlineChat,
+//   HiOutlinePlus,
+//   HiOutlineX,
+//   HiOutlinePaperAirplane,
+//   HiOutlineShoppingCart,
+//   HiOutlineUserGroup,
+//   HiOutlineVideoCamera,
+//   HiOutlinePhotograph,
+//   HiOutlineLocationMarker,
+//   HiOutlineMap,
+//   HiOutlineCode,
+//   HiOutlineDownload,
+//   HiOutlineFolder,
+//   HiOutlineCheckCircle,
+//   HiOutlineRefresh,
+//   HiOutlineFolderOpen,
+//   HiOutlineChevronLeft,
+//   HiOutlineChevronRight,
+//   HiOutlineExclamation,
+//   HiOutlineMenu,
+//   HiOutlineEye,
+//   HiOutlineCog,
+//   HiOutlineArrowsExpand,
+//   HiOutlineSun,
+//   HiOutlineMoon,
+// } from "react-icons/hi";
+// import {
+//   BsRobot,
+//   BsHourglassSplit,
+//   BsExclamationTriangle,
+//   BsBug,
+//   BsWrench,
+//   BsCodeSquare,
+//   BsEye,
+// } from "react-icons/bs";
+
+// const API_BASE_URL = "http://127.0.0.1:8000";
+
+// // Storage keys
+// const STORAGE_KEY = "ai_projects";
+// const THEME_KEY = "ai_theme";
+// const EXPLORER_WIDTH_KEY = "explorer_width";
+
+// // Theme definitions
+// const themes = {
+//   dark: {
+//     bg: "#0B0F0E",
+//     sidebar: "#111413",
+//     card: "#151918",
+//     border: "#1F2A27",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#E5E7EB",
+//     textSecondary: "#9CA3AF",
+//     inputBg: "#1A1F1D",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#1F2A27",
+//     iconBg: "#1A1F1D",
+//     sandpackBg: "#1e1e1e",
+//     blue: "#3B82F6",
+//   },
+//   light: {
+//     bg: "#F9FAFB",
+//     sidebar: "#FFFFFF",
+//     card: "#F3F4F6",
+//     border: "#E5E7EB",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#111827",
+//     textSecondary: "#6B7280",
+//     inputBg: "#FFFFFF",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#F3F4F6",
+//     iconBg: "#F3F4F6",
+//     sandpackBg: "#FFFFFF",
+//     blue: "#3B82F6",
+//   },
+// };
+
+// const Home = () => {
+//   const [searchParams, setSearchParams] = useSearchParams();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [hoveredChat, setHoveredChat] = useState(null);
+//   const [message, setMessage] = useState("");
+//   const [messages, setMessages] = useState([]);
+//   const [showHelp, setShowHelp] = useState(true);
+//   const [isTyping, setIsTyping] = useState(false);
+
+//   // Theme State
+//   const [currentTheme, setCurrentTheme] = useState("dark");
+//   const theme = themes[currentTheme];
+
+//   // API States
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [jobStatus, setJobStatus] = useState(null);
+//   const [jobId, setJobId] = useState(null);
+//   const [projectFiles, setProjectFiles] = useState(null);
+//   const [downloadUrl, setDownloadUrl] = useState(null);
+//   const [recentProjects, setRecentProjects] = useState([]);
+//   const [pollingAttempts, setPollingAttempts] = useState(0);
+//   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+//   const [warningDismissed, setWarningDismissed] = useState(false);
+//   const [inputError, setInputError] = useState("");
+//   const [isPollingActive, setIsPollingActive] = useState(false);
+//   const [jobErrorMessage, setJobErrorMessage] = useState("");
+//   const [jobErrorDetails, setJobErrorDetails] = useState(null);
+//   const [initialLoadDone, setInitialLoadDone] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [showDiagnostic, setShowDiagnostic] = useState(false);
+//   const [diagnosticData, setDiagnosticData] = useState(null);
+
+//   // Sandpack Files
+//   const [sandpackFiles, setSandpackFiles] = useState({});
+//   const [showSandpack, setShowSandpack] = useState(false);
+
+//   // Sidebar State
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   // View Toggle State (preview/code)
+//   const [workspaceView, setWorkspaceView] = useState("preview");
+
+//   // Fullscreen State
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+
+//   // Mobile Workspace Toggle
+//   const [showMobileWorkspace, setShowMobileWorkspace] = useState(false);
+
+//   const messagesEndRef = useRef(null);
+//   const messagesContainerRef = useRef(null);
+//   const inputRef = useRef(null);
+//   const workspaceRef = useRef(null);
+
+//   // Refs for polling management
+//   const pollingIntervalRef = useRef(null);
+//   const currentJobIdRef = useRef(null);
+//   const isPollingRef = useRef(false);
+//   const abortControllerRef = useRef(null);
+
+//   // All 8 templates available
+//   const allTemplates = [
+//     { name: "Education ERP", icon: <HiOutlineCode />, bg: theme.green },
+//     { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.green },
+//     { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.green },
+//     { name: "Chat App", icon: <HiOutlineChat />, bg: theme.green },
+//     { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.green },
+//     { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.green },
+//     { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.green },
+//     { name: "Travel App", icon: <HiOutlineMap />, bg: theme.green },
+//   ];
+
+//   // Only show 4 templates in sidebar
+//   const sidebarTemplates = allTemplates.slice(0, 4);
+
+//   // Load theme from localStorage on mount
+//   useEffect(() => {
+//     const savedTheme = localStorage.getItem(THEME_KEY);
+//     if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
+//       setCurrentTheme(savedTheme);
+//     }
+//   }, []);
+
+//   // Toggle theme function
+//   const toggleTheme = () => {
+//     const newTheme = currentTheme === "dark" ? "light" : "dark";
+//     setCurrentTheme(newTheme);
+//     localStorage.setItem(THEME_KEY, newTheme);
+//   };
+
+//   // Clean code content from markdown code blocks
+//   const cleanCodeContent = (content) => {
+//     const codeBlockRegex = /```[a-z]*\n([\s\S]*?)```/g;
+//     const match = codeBlockRegex.exec(content);
+
+//     let cleaned = match ? match[1].trim() : content;
+
+//     // Remove Tailwind build directives (for Sandpack preview)
+//     cleaned = cleaned
+//       .replace(/@tailwind base;/g, "")
+//       .replace(/@tailwind components;/g, "")
+//       .replace(/@tailwind utilities;/g, "");
+
+//     return cleaned;
+//   };
+
+//   // Convert API files to Sandpack format with Tailwind support
+//   const convertToSandpackFiles = (files) => {
+//     const sandpackFiles = {};
+
+//     files.forEach((file) => {
+//       // Skip backend files for preview
+//       if (file.filename.startsWith("backend/")) {
+//         return;
+//       }
+
+//       // Handle frontend files
+//       let filename = file.filename;
+//       if (filename.startsWith("frontend/")) {
+//         filename = filename.replace("frontend/", "");
+//       }
+
+//       // Only include relevant frontend files
+//       if (
+//         filename.startsWith("src/") ||
+//         filename === "index.html" ||
+//         filename === "package.json" ||
+//         filename === "vite.config.js" ||
+//         filename === "postcss.config.js" ||
+//         filename === "tailwind.config.js"
+//       ) {
+//         // Clean the content from markdown code blocks
+//         let cleanContent = cleanCodeContent(file.content);
+
+//         // Map the file path correctly
+//         let sandpackPath = filename;
+//         if (sandpackPath === "index.html") {
+//           sandpackPath = "/index.html";
+//         } else if (!sandpackPath.startsWith("/")) {
+//           sandpackPath = "/" + sandpackPath;
+//         }
+
+//         sandpackFiles[sandpackPath] = {
+//           code: cleanContent,
+//         };
+//       }
+//     });
+
+//     // Ensure there's an entry file
+//     if (
+//       !sandpackFiles["/src/index.js"] &&
+//       !sandpackFiles["/src/index.jsx"] &&
+//       !sandpackFiles["/src/main.jsx"]
+//     ) {
+//       sandpackFiles["/src/main.jsx"] = {
+//         code: `import React from 'react'
+// import ReactDOM from 'react-dom/client'
+// import App from './App'
+// import './index.css'
+
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// )`,
+//       };
+//     }
+
+//     // Ensure App.jsx exists
+//     if (!sandpackFiles["/src/App.jsx"] && !sandpackFiles["/src/App.js"]) {
+//       sandpackFiles["/src/App.jsx"] = {
+//         code: `import React from 'react'
+
+// export default function App() {
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+//       <h1 className="text-3xl font-bold text-gray-800">Welcome to Your App</h1>
+//     </div>
+//   )
+// }`,
+//       };
+//     }
+
+//     // Ensure index.css exists with Tailwind directives
+//     if (!sandpackFiles["/src/index.css"]) {
+//       sandpackFiles["/src/index.css"] = {
+//         code: `@tailwind base;
+// @tailwind components;
+// @tailwind utilities;`,
+//       };
+//     }
+
+//     // Ensure tailwind.config.js exists
+//     if (!sandpackFiles["/tailwind.config.js"]) {
+//       sandpackFiles["/tailwind.config.js"] = {
+//         code: `/** @type {import('tailwindcss').Config} */
+// export default {
+//   content: [
+//     "./index.html",
+//     "./src/**/*.{js,ts,jsx,tsx}",
+//   ],
+//   theme: {
+//     extend: {},
+//   },
+//   plugins: [],
+// }`,
+//       };
+//     }
+
+//     // Ensure postcss.config.js exists
+//     if (!sandpackFiles["/postcss.config.js"]) {
+//       sandpackFiles["/postcss.config.js"] = {
+//         code: `export default {
+//   plugins: {
+//     tailwindcss: {},
+//     autoprefixer: {},
+//   },
+// }`,
+//       };
+//     }
+
+//     return sandpackFiles;
+//   };
+
+//   // Auto-scroll to bottom when messages change
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages, jobId, projectFiles]);
+
+//   // Auto-show Sandpack when files are ready
+//   useEffect(() => {
+//     if (
+//       jobStatus === "completed" &&
+//       projectFiles &&
+//       Object.keys(sandpackFiles).length > 0
+//     ) {
+//       setShowSandpack(true);
+//     }
+//   }, [jobStatus, projectFiles, sandpackFiles]);
+
+//   const scrollToBottom = () => {
+//     setTimeout(() => {
+//       if (messagesEndRef.current) {
+//         messagesEndRef.current.scrollIntoView({
+//           behavior: "smooth",
+//           block: "end",
+//         });
+//       }
+//     }, 100);
+//   };
+
+//   // Load recent projects from localStorage on mount
+//   useEffect(() => {
+//     loadRecentProjects();
+//   }, []);
+
+//   // Handle URL parameter on mount and when it changes
+//   useEffect(() => {
+//     const projectId = searchParams.get("project");
+
+//     if (projectId && !isLoading) {
+//       // Clear current state before loading new project
+//       setMessages([]);
+//       setShowHelp(false);
+//       setProjectFiles(null);
+//       setSandpackFiles({});
+//       setShowSandpack(false);
+//       setJobStatus(null);
+//       setJobErrorMessage("");
+//       setJobErrorDetails(null);
+
+//       // Load the project
+//       setTimeout(() => {
+//         loadProject(projectId);
+//       }, 100);
+//     } else if (!projectId && !initialLoadDone) {
+//       setShowHelp(true);
+//       setInitialLoadDone(true);
+//     }
+//   }, [searchParams]);
+
+//   // Cleanup polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       stopPolling();
+//     };
+//   }, []);
+
+//   // Handle fullscreen toggle
+//   const toggleFullscreen = () => {
+//     if (!isFullscreen) {
+//       if (workspaceRef.current.requestFullscreen) {
+//         workspaceRef.current.requestFullscreen();
+//       }
+//     } else {
+//       if (document.exitFullscreen) {
+//         document.exitFullscreen();
+//       }
+//     }
+//     setIsFullscreen(!isFullscreen);
+//   };
+
+//   // Listen for fullscreen change events
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       setIsFullscreen(!!document.fullscreenElement);
+//     };
+
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () => {
+//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//     };
+//   }, []);
+
+//   // Diagnostic function to check localStorage
+//   const runDiagnostic = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       const data = {
+//         exists: !!stored,
+//         raw: stored,
+//         parsed: null,
+//         currentProject: jobId,
+//         projectData: null,
+//       };
+
+//       if (stored) {
+//         try {
+//           data.parsed = JSON.parse(stored);
+//           if (jobId) {
+//             data.projectData = data.parsed.find((p) => p.id === jobId);
+//           }
+//         } catch (e) {
+//           data.parseError = e.message;
+//         }
+//       }
+
+//       setDiagnosticData(data);
+//       setShowDiagnostic(true);
+//     } catch (e) {
+//       console.error("Diagnostic error:", e);
+//     }
+//   };
+
+//   // Fix localStorage data
+//   const fixLocalStorage = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+
+//         // Fix any projects with missing fields
+//         const fixed = projects.map((p) => {
+//           if (!p.messages) p.messages = [];
+//           if (!p.error && p.status === "failed") {
+//             p.error = "Unknown error";
+//             p.errorDetails = { message: "Unknown error" };
+//           }
+//           if (!p.preview) {
+//             p.preview =
+//               p.status === "failed"
+//                 ? "Generation failed"
+//                 : p.status === "processing"
+//                   ? "Processing..."
+//                   : "No preview";
+//           }
+//           if (!p.prompt) p.prompt = "Unknown prompt";
+//           if (!p.totalFiles) p.totalFiles = p.files ? p.files.length : 0;
+//           return p;
+//         });
+
+//         localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+//         setRecentProjects(fixed);
+
+//         // Reload current project if any
+//         if (jobId) {
+//           loadProject(jobId);
+//         }
+//       }
+//     } catch (e) {
+//       console.error("Fix error:", e);
+//     }
+//   };
+
+//   const loadRecentProjects = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         setRecentProjects(projects);
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//   };
+
+//   // Save project to localStorage
+//   const saveProjectToStorage = (id, files, conversation, prompt = "") => {
+//     try {
+//       const packageJson = files.find(
+//         (f) =>
+//           f.filename === "package.json" ||
+//           f.filename === "frontend/package.json",
+//       );
+//       let projectName = "Project";
+//       if (packageJson) {
+//         try {
+//           const parsed = JSON.parse(packageJson.content);
+//           projectName = parsed.name || projectName;
+//         } catch (e) {
+//           console.error("Error parsing package.json", e);
+//         }
+//       }
+
+//       // Count frontend and backend files
+//       const frontendFiles = files.filter(
+//         (f) =>
+//           f.filename.startsWith("frontend/") ||
+//           !f.filename.startsWith("backend/"),
+//       ).length;
+//       const backendFiles = files.filter((f) =>
+//         f.filename.startsWith("backend/"),
+//       ).length;
+
+//       const projectInfo = {
+//         id: id,
+//         title: projectName,
+//         timestamp: new Date().toLocaleString(),
+//         preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//         files: files,
+//         messages: conversation,
+//         prompt:
+//           prompt ||
+//           conversation.find((m) => m.sender === "user")?.text ||
+//           "Project generation",
+//         status: "completed",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: files.length,
+//         frontendFiles: frontendFiles,
+//         backendFiles: backendFiles,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         projectInfo,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving project:", error);
+//       return [];
+//     }
+//   };
+
+//   // Save pending job to localStorage
+//   const savePendingJob = (id, prompt) => {
+//     try {
+//       const pendingProject = {
+//         id: id,
+//         title: "Processing...",
+//         timestamp: new Date().toLocaleString(),
+//         preview: `Building: "${prompt.substring(0, 50)}${prompt.length > 50 ? "..." : ""}"`,
+//         files: null,
+//         messages: [],
+//         prompt: prompt,
+//         status: "processing",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: 0,
+//         frontendFiles: 0,
+//         backendFiles: 0,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         pendingProject,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving pending job:", error);
+//       return [];
+//     }
+//   };
+
+//   // Update project status in localStorage
+//   const updateProjectStatus = (
+//     id,
+//     status,
+//     files = null,
+//     messages = [],
+//     errorDetails = null,
+//     prompt = "",
+//   ) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = existingProjects.map((project) => {
+//         if (project.id === id) {
+//           if (status === "completed" && files) {
+//             const packageJson = files.find(
+//               (f) =>
+//                 f.filename === "package.json" ||
+//                 f.filename === "frontend/package.json",
+//             );
+//             let projectName = "Project";
+//             if (packageJson) {
+//               try {
+//                 const parsed = JSON.parse(packageJson.content);
+//                 projectName = parsed.name || projectName;
+//               } catch (e) {
+//                 console.error("Error parsing package.json", e);
+//               }
+//             }
+
+//             // Count frontend and backend files
+//             const frontendFiles = files.filter(
+//               (f) =>
+//                 f.filename.startsWith("frontend/") ||
+//                 !f.filename.startsWith("backend/"),
+//             ).length;
+//             const backendFiles = files.filter((f) =>
+//               f.filename.startsWith("backend/"),
+//             ).length;
+
+//             return {
+//               ...project,
+//               title: projectName,
+//               status: "completed",
+//               files: files,
+//               messages: messages,
+//               preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//               error: null,
+//               errorDetails: null,
+//               prompt: prompt || project.prompt,
+//               totalFiles: files.length,
+//               frontendFiles: frontendFiles,
+//               backendFiles: backendFiles,
+//             };
+//           } else if (status === "failed") {
+//             return {
+//               ...project,
+//               status: "failed",
+//               title: "Failed Project",
+//               preview: "Generation failed",
+//               files: null,
+//               messages: messages,
+//               error: errorDetails?.message || "Unknown error",
+//               errorDetails: errorDetails,
+//               prompt: prompt || project.prompt,
+//             };
+//           } else {
+//             return {
+//               ...project,
+//               status: status,
+//               messages: messages,
+//             };
+//           }
+//         }
+//         return project;
+//       });
+
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error updating project status:", error);
+//       return [];
+//     }
+//   };
+
+//   // Get project by ID from localStorage
+//   const getProjectById = (id) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         const project = projects.find((p) => p.id === id);
+//         return project;
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//     return null;
+//   };
+
+//   // Stop polling function
+//   const stopPolling = () => {
+//     if (pollingIntervalRef.current) {
+//       clearInterval(pollingIntervalRef.current);
+//       pollingIntervalRef.current = null;
+//     }
+
+//     if (abortControllerRef.current) {
+//       abortControllerRef.current.abort();
+//       abortControllerRef.current = null;
+//     }
+
+//     isPollingRef.current = false;
+//     setIsPollingActive(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//   };
+
+//   // Check if response is for current job
+//   const isResponseForCurrentJob = (id) => {
+//     return id === currentJobIdRef.current;
+//   };
+
+//   // Poll status function
+//   const pollStatus = async (id) => {
+//     if (!isPollingRef.current || !isResponseForCurrentJob(id)) {
+//       return;
+//     }
+
+//     try {
+//       setPollingAttempts((prev) => prev + 1);
+
+//       const response = await axios.get(`${API_BASE_URL}/status/${id}`, {
+//         timeout: 10000,
+//         signal: abortControllerRef.current?.signal,
+//       });
+
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (response.data.status === "completed") {
+//         stopPolling();
+
+//         const resultResponse = await axios.get(`${API_BASE_URL}/result/${id}`, {
+//           signal: abortControllerRef.current?.signal,
+//         });
+
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         setProjectFiles(resultResponse.data.files);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(resultResponse.data.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsProcessing(false);
+
+//         const packageJson = resultResponse.data.files.find(
+//           (f) =>
+//             f.filename === "package.json" ||
+//             f.filename === "frontend/package.json",
+//         );
+//         let projectName = "Project";
+//         if (packageJson) {
+//           try {
+//             const parsed = JSON.parse(packageJson.content);
+//             projectName = parsed.name || projectName;
+//           } catch (e) {
+//             console.error("Error parsing package.json", e);
+//           }
+//         }
+
+//         // Count frontend and backend files
+//         const frontendFiles = resultResponse.data.files.filter(
+//           (f) =>
+//             f.filename.startsWith("frontend/") ||
+//             !f.filename.startsWith("backend/"),
+//         ).length;
+//         const backendFiles = resultResponse.data.files.filter((f) =>
+//           f.filename.startsWith("backend/"),
+//         ).length;
+
+//         const successMessage = {
+//           id: Date.now(),
+//           text: `✅ **Project Generated Successfully!**
+          
+// I've created a complete ${projectName} project with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, successMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt from messages
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         saveProjectToStorage(
+//           id,
+//           resultResponse.data.files,
+//           allMessages,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (response.data.status === "failed") {
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+
+//         // Extract error message from response
+//         const errorMsg =
+//           response.data.error?.message ||
+//           "Unknown error occurred during project generation";
+//         const errorDetails = response.data.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         // Add detailed error message to chat
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Generation Failed**
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Possible reasons:**
+// - The AI couldn't generate valid code for your request
+// - The request contained invalid syntax or requirements
+// - There was a server-side processing error
+// - The prompt was too complex or ambiguous
+
+// **Suggestions:**
+// - Try a simpler and more specific request
+// - Check for any syntax errors in your prompt
+// - Try one of the template projects first
+// - Make sure your request includes specific features
+
+// Click "New Project" to try again.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           errorDetails,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (
+//         response.data.status === "processing" ||
+//         response.data.status === "running"
+//       ) {
+//         setJobStatus("processing");
+//         updateProjectStatus(id, "processing");
+//       }
+
+//       if (
+//         isResponseForCurrentJob(id) &&
+//         pollingAttempts >= 60 &&
+//         !showTimeoutWarning &&
+//         !warningDismissed
+//       ) {
+//         setShowTimeoutWarning(true);
+//       }
+//     } catch (error) {
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (
+//         axios.isCancel(error) ||
+//         error.name === "AbortError" ||
+//         error.code === "ERR_CANCELED"
+//       ) {
+//         return;
+//       }
+
+//       console.error("Status check error:", error);
+
+//       // Handle network errors
+//       if (pollingAttempts > 10) {
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+//         setJobErrorMessage(error.message);
+//         setJobErrorDetails({ type: "network_error", message: error.message });
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Connection Error**
+
+// Unable to reach the server. Please check:
+
+// - The backend server is running at ${API_BASE_URL}
+// - Your internet connection
+// - No firewall blocking the connection
+
+// **Error details:** ${error.message}
+
+// **Technical Details:**
+// \`\`\`
+// Type: Network Error
+// Code: ${error.code || "N/A"}
+// Status: ${error.response?.status || "N/A"}
+// \`\`\`
+
+// **Solutions:**
+// 1. Start the backend server with: \`uvicorn main:app --reload\`
+// 2. Check if the server is running on port 8000
+// 3. Disable any firewall temporarily
+// 4. Try refreshing the page`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           { type: "network_error", message: error.message },
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       }
+//     }
+//   };
+
+//   // Start continuous polling
+//   const startPolling = (id) => {
+//     stopPolling();
+
+//     currentJobIdRef.current = id;
+//     setJobId(id);
+//     setJobStatus("processing");
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     isPollingRef.current = true;
+//     setIsPollingActive(true);
+
+//     abortControllerRef.current = new AbortController();
+
+//     pollStatus(id);
+
+//     pollingIntervalRef.current = setInterval(() => {
+//       if (isPollingRef.current && isResponseForCurrentJob(id)) {
+//         pollStatus(id);
+//       }
+//     }, 2000);
+//   };
+
+//   // Load project from localStorage or API
+//   const loadProject = async (id) => {
+//     // Prevent multiple loads
+//     if (!id || id === "null" || id === "undefined") {
+//       setShowHelp(true);
+//       setIsLoading(false);
+//       setIsProcessing(false);
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     stopPolling();
+
+//     setJobId(id);
+//     setIsProcessing(false);
+//     setShowHelp(false);
+//     setJobStatus("loading");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowSandpack(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     currentJobIdRef.current = id;
+
+//     try {
+//       // FIRST: Check API for current status
+//       let apiStatus = null;
+//       let apiError = null;
+
+//       try {
+//         const statusResponse = await axios.get(`${API_BASE_URL}/status/${id}`);
+//         apiStatus = statusResponse.data;
+//       } catch (apiErr) {
+//         apiError = apiErr;
+//       }
+
+//       // SECOND: Check localStorage
+//       const project = getProjectById(id);
+
+//       // PRIORITY 1: If API says completed, use API data
+//       if (apiStatus && apiStatus.status === "completed") {
+//         try {
+//           const resultResponse = await axios.get(
+//             `${API_BASE_URL}/result/${id}`,
+//           );
+//           setProjectFiles(resultResponse.data.files);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(
+//             resultResponse.data.files,
+//           );
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+
+//           const packageJson = resultResponse.data.files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           // Count frontend and backend files
+//           const frontendFiles = resultResponse.data.files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = resultResponse.data.files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([successMessage]);
+
+//           // Get prompt from localStorage if available
+//           const userPrompt = project?.prompt || "";
+//           saveProjectToStorage(
+//             id,
+//             resultResponse.data.files,
+//             [successMessage],
+//             userPrompt,
+//           );
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } catch (resultErr) {
+//           // Fall through to other options
+//         }
+//       }
+
+//       // PRIORITY 2: If API says processing
+//       if (
+//         apiStatus &&
+//         (apiStatus.status === "processing" || apiStatus.status === "running")
+//       ) {
+//         setJobStatus("processing");
+//         setIsProcessing(true);
+//         setIsLoading(false);
+
+//         // Use messages from localStorage if available
+//         if (project && project.messages) {
+//           setMessages(project.messages);
+//         } else {
+//           const processingMessage = {
+//             id: Date.now(),
+//             text: `🔄 **Project is still processing...**
+
+// Job ID: ${id}
+
+// The project is still being built. This may take a few moments.
+
+// I'll update you when it's ready!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+//           setMessages([processingMessage]);
+//         }
+
+//         startPolling(id);
+//         return;
+//       }
+
+//       // PRIORITY 3: If API says failed
+//       if (apiStatus && apiStatus.status === "failed") {
+//         setJobStatus("failed");
+
+//         const errorMsg =
+//           apiStatus.error?.message || "Project generation failed";
+//         const errorDetails = apiStatus.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Failed**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The request might have contained invalid syntax
+// - There was a server-side processing error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         setMessages([errorMessage]);
+
+//         // Update localStorage with failed status
+//         if (project) {
+//           updateProjectStatus(
+//             id,
+//             "failed",
+//             null,
+//             [errorMessage],
+//             errorDetails,
+//             project.prompt,
+//           );
+//         } else {
+//           // Create new failed project in localStorage
+//           const failedProject = {
+//             id: id,
+//             title: "Failed Project",
+//             timestamp: new Date().toLocaleString(),
+//             preview: "Generation failed",
+//             files: null,
+//             messages: [errorMessage],
+//             prompt: "Unknown",
+//             status: "failed",
+//             createdAt: new Date().toISOString(),
+//             error: errorMsg,
+//             errorDetails: errorDetails,
+//             totalFiles: 0,
+//             frontendFiles: 0,
+//             backendFiles: 0,
+//           };
+
+//           const stored = localStorage.getItem(STORAGE_KEY);
+//           let existingProjects = [];
+//           if (stored) {
+//             try {
+//               existingProjects = JSON.parse(stored);
+//             } catch (e) {
+//               console.error("Error parsing stored projects", e);
+//             }
+//           }
+
+//           const updated = [
+//             failedProject,
+//             ...existingProjects.filter((p) => p.id !== id),
+//           ].slice(0, 20);
+//           localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//           setRecentProjects(updated);
+//         }
+
+//         setIsLoading(false);
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // PRIORITY 4: Use localStorage data if API is not available
+//       if (project) {
+//         if (project.files) {
+//           // Completed project from localStorage
+//           setProjectFiles(project.files);
+//           setMessages(project.messages || []);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(project.files);
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } else if (project.status === "processing") {
+//           // Processing project from localStorage
+//           setMessages(project.messages || []);
+//           setJobStatus("processing");
+//           setIsProcessing(true);
+//           setIsLoading(false);
+//           startPolling(id);
+//           return;
+//         } else if (project.status === "failed") {
+//           // Failed project from localStorage
+//           setJobStatus("failed");
+
+//           const errorMsg = project.error || "This project failed to generate";
+//           const errorDetails = project.errorDetails || { message: errorMsg };
+
+//           setJobErrorMessage(errorMsg);
+//           setJobErrorDetails(errorDetails);
+
+//           const errorMessage = {
+//             id: Date.now(),
+//             text: `❌ **Project Failed to Load**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The project might have had syntax errors
+// - The server might have encountered an error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([errorMessage]);
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         }
+//       }
+
+//       // PRIORITY 5: No data found anywhere
+//       setJobStatus("failed");
+//       setJobErrorMessage("Project not found");
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Project Not Found**
+
+// No project found with ID: ${id}
+
+// The project may have expired or been deleted.
+
+// **Troubleshooting:**
+// - Check if the backend server is running at ${API_BASE_URL}
+// - The project ID might be incorrect
+// - Try creating a new project
+
+// Click "New Project" to start a new one.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     } catch (error) {
+//       console.error("Error loading project:", error);
+//       setJobStatus("failed");
+//       setJobErrorMessage(error.message);
+//       setJobErrorDetails({ type: "load_error", message: error.message });
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Error Loading Project**
+
+// Could not load the project. The project may have expired or been deleted.
+
+// **Error details:** ${error.message}
+
+// **Possible reasons:**
+// - The project ID is invalid
+// - The project has been deleted from the server
+// - The server is not responding
+
+// **Solutions:**
+// - Check if the backend server is running
+// - Try creating a new project
+// - Clear your browser cache and try again`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleBuildRequest = async (prompt) => {
+//     if (!prompt || prompt.trim().length < 3) {
+//       setInputError("Please enter a valid request (minimum 3 characters)");
+//       return;
+//     }
+
+//     setInputError("");
+//     setIsProcessing(true);
+//     setJobStatus("processing");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setShowSandpack(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     try {
+//       const buildResponse = await axios.post(`${API_BASE_URL}/build`, null, {
+//         params: { prompt },
+//         timeout: 30000,
+//       });
+
+//       const { job_id } = buildResponse.data;
+
+//       if (!job_id) {
+//         throw new Error("No job ID returned from server");
+//       }
+
+//       savePendingJob(job_id, prompt);
+//       setSearchParams({ project: job_id });
+
+//       const processingMessage = {
+//         id: Date.now(),
+//         text: `🔄 **Processing your request...**\n\n**Job ID:** ${job_id}\n**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"\n**Status:** Building your project...\n\nThis may take 30-60 seconds depending on complexity.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, processingMessage]);
+//       scrollToBottom();
+
+//       startPolling(job_id);
+//     } catch (error) {
+//       console.error("Build request failed:", error);
+
+//       let errorMessage = "Failed to start project generation.";
+//       let errorDetails = {};
+
+//       if (error.code === "ECONNABORTED") {
+//         errorMessage = "Request timeout. The server took too long to respond.";
+//         errorDetails = { type: "timeout", code: "ECONNABORTED" };
+//       } else if (error.response) {
+//         errorMessage = `Server error: ${error.response.status} - ${error.response.data?.detail || error.response.statusText}`;
+//         errorDetails = {
+//           type: "server_error",
+//           status: error.response.status,
+//           data: error.response.data,
+//         };
+//       } else if (error.request) {
+//         errorMessage =
+//           "Cannot connect to server. Please check if the backend is running.";
+//         errorDetails = { type: "connection_error", message: error.message };
+//       } else {
+//         errorMessage = error.message;
+//         errorDetails = { type: "unknown_error", message: error.message };
+//       }
+
+//       const errorMsg = {
+//         id: Date.now(),
+//         text: `❌ **Build Request Failed**
+
+// **Error:** ${errorMessage}
+
+// **Technical Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Troubleshooting:**
+// 1. Make sure the backend server is running at ${API_BASE_URL}
+// 2. Check if the server is accessible (try opening ${API_BASE_URL}/docs in browser)
+// 3. Verify there are no CORS issues
+// 4. Try again with a simpler request
+
+// Click "New Project" to try again.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, errorMsg]);
+//       setIsProcessing(false);
+//       setJobStatus("error");
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleSendMessage = () => {
+//     if (message.trim() && !isProcessing) {
+//       setInputError("");
+
+//       const userMessageObj = {
+//         id: Date.now(),
+//         text: message,
+//         sender: "user",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, userMessageObj]);
+//       scrollToBottom();
+
+//       const lowercaseMsg = message.toLowerCase();
+
+//       const isProjectRequest =
+//         lowercaseMsg.includes("create") ||
+//         lowercaseMsg.includes("build") ||
+//         lowercaseMsg.includes("make") ||
+//         lowercaseMsg.includes("generate") ||
+//         lowercaseMsg.includes("develop") ||
+//         lowercaseMsg.includes("website") ||
+//         lowercaseMsg.includes("app") ||
+//         lowercaseMsg.includes("application");
+
+//       const matchedTemplate = allTemplates.find((t) =>
+//         lowercaseMsg.includes(t.name.toLowerCase()),
+//       );
+
+//       if (isProjectRequest || matchedTemplate) {
+//         setIsTyping(true);
+//         setShowHelp(false);
+
+//         const currentMessage = message;
+//         setMessage("");
+
+//         setTimeout(() => {
+//           setIsTyping(false);
+
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: `🔄 **Starting project generation...**\n\nI'll create a complete ${matchedTemplate ? matchedTemplate.name : "custom"} project for you. This will take a few moments. Please wait...`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           scrollToBottom();
+//           handleBuildRequest(currentMessage);
+//         }, 1000);
+//       } else {
+//         setMessage("");
+//         setShowHelp(false);
+//         setIsTyping(true);
+
+//         setTimeout(() => {
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: "I can help you build complete projects! Try asking me to create something specific like:\n\n• 'Create a modern education ERP website'\n• 'Build an e-commerce platform'\n• 'Make a social media dashboard'\n• 'Generate a chat application'\n\nWhat would you like me to build for you today?",
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           setIsTyping(false);
+//           scrollToBottom();
+//         }, 1500);
+//       }
+//     }
+//   };
+
+//   const handleKeyPress = (e) => {
+//     if (e.key === "Enter" && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSendMessage();
+//     }
+//   };
+
+//   const handleNewChat = () => {
+//     stopPolling();
+
+//     setMessages([]);
+//     setShowHelp(true);
+//     setMessage("");
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobId(null);
+//     setJobStatus(null);
+//     setDownloadUrl(null);
+//     setIsProcessing(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setInputError("");
+//     setIsPollingActive(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     currentJobIdRef.current = null;
+
+//     setSearchParams({});
+
+//     scrollToBottom();
+//   };
+
+//   const handleTemplateClick = (templateName) => {
+//     const templateMsg = {
+//       id: Date.now(),
+//       text: `I want to build a ${templateName} application`,
+//       sender: "user",
+//       timestamp: new Date().toLocaleTimeString([], {
+//         hour: "2-digit",
+//         minute: "2-digit",
+//       }),
+//     };
+//     setMessages([templateMsg]);
+//     setShowHelp(false);
+//     scrollToBottom();
+
+//     let prompt = "";
+
+//     switch (templateName) {
+//       case "Education ERP":
+//         prompt =
+//           "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard.";
+//         break;
+//       case "E-commerce":
+//         prompt =
+//           "Build a full E-commerce website with product catalog, shopping cart, and user authentication.";
+//         break;
+//       case "Social Media":
+//         prompt =
+//           "Create a Social Media platform with user profiles, posts, likes, and comments.";
+//         break;
+//       case "Chat App":
+//         prompt =
+//           "Build a Real-time Chat Application with private messaging and group chats.";
+//         break;
+//       case "Video App":
+//         prompt =
+//           "Create a Video Streaming Platform with video upload, video player, playlists, and subscriptions.";
+//         break;
+//       case "Music App":
+//         prompt =
+//           "Build a Music Streaming App with audio playback, playlists, and album browsing.";
+//         break;
+//       case "Food App":
+//         prompt =
+//           "Create a Food Delivery App with restaurant listings, menu browsing, and order tracking.";
+//         break;
+//       case "Travel App":
+//         prompt =
+//           "Build a Travel Booking Platform with property listings, search filters, and booking calendar.";
+//         break;
+//       default:
+//         prompt = `Create a complete ${templateName} application with modern UI and responsive design.`;
+//     }
+
+//     handleBuildRequest(prompt);
+//   };
+
+//   const handleDownload = () => {
+//     if (downloadUrl) {
+//       window.open(downloadUrl, "_blank");
+//     }
+//   };
+
+//   // Handle project click from sidebar
+//   const handleProjectClick = (jobId) => {
+//     // Clear current state before loading new project
+//     setMessages([]);
+//     setShowHelp(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobStatus(null);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     // Set the URL parameter
+//     setSearchParams({ project: jobId });
+//   };
+
+//   // Loading animation component
+//   const ProcessingAnimation = () => {
+//     const [dots, setDots] = useState("");
+
+//     useEffect(() => {
+//       const interval = setInterval(() => {
+//         setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+//       }, 500);
+//       return () => clearInterval(interval);
+//     }, []);
+
+//     return (
+//       <div className="flex flex-col items-center justify-center p-8">
+//         <div className="relative">
+//           <motion.div
+//             animate={{ rotate: 360 }}
+//             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+//             className="w-16 h-16 border-4 border-t-transparent rounded-full"
+//             style={{ borderColor: theme.green, borderTopColor: "transparent" }}
+//           />
+//           <div className="absolute inset-0 flex items-center justify-center">
+//             <BsRobot className="text-xl" style={{ color: theme.green }} />
+//           </div>
+//         </div>
+//         <p
+//           className="mt-4 text-sm font-medium"
+//           style={{ color: theme.textPrimary }}
+//         >
+//           Building your project{dots}
+//         </p>
+//         {pollingAttempts > 0 && (
+//           <p className="mt-1 text-xs" style={{ color: theme.textSecondary }}>
+//             Elapsed: {Math.floor(pollingAttempts * 2)} seconds
+//           </p>
+//         )}
+//       </div>
+//     );
+//   };
+
+//   // Enhanced Error Display Component
+//   const ErrorDisplay = ({ message, details }) => {
+//     const [showDetails, setShowDetails] = useState(false);
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.red + "40",
+//           backgroundColor: theme.red + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.red + "20" }}
+//           >
+//             <BsExclamationTriangle
+//               className="text-2xl"
+//               style={{ color: theme.red }}
+//             />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.red }}
+//             >
+//               Project Generation Failed
+//             </h3>
+//             <div className="space-y-3">
+//               <div
+//                 className="p-3 rounded-lg"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderLeft: `4px solid ${theme.red}`,
+//                 }}
+//               >
+//                 <p
+//                   className="text-sm font-mono"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   {message || "Unknown error occurred"}
+//                 </p>
+//               </div>
+
+//               {details && (
+//                 <div>
+//                   <button
+//                     onClick={() => setShowDetails(!showDetails)}
+//                     className="flex items-center gap-2 text-xs mb-2"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <BsBug className="text-xs" />
+//                     {showDetails
+//                       ? "Hide technical details"
+//                       : "Show technical details"}
+//                   </button>
+
+//                   {showDetails && (
+//                     <pre
+//                       className="p-3 rounded-lg text-xs overflow-auto max-h-40"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       {JSON.stringify(details, null, 2)}
+//                     </pre>
+//                   )}
+//                 </div>
+//               )}
+
+//               <div className="mt-4">
+//                 <h4
+//                   className="text-sm font-semibold mb-2"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   Common Solutions:
+//                 </h4>
+//                 <ul className="space-y-2">
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>Try a simpler or more specific request</span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Check if your request has valid syntax and clear
+//                       requirements
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Try again with a different project type from the templates
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Make sure the backend server is running properly
+//                     </span>
+//                   </li>
+//                 </ul>
+//               </div>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={handleNewChat}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <HiOutlinePlus className="text-base" />
+//                   New Project
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => window.location.reload()}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineRefresh className="text-base" />
+//                   Refresh Page
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Diagnostic Display Component
+//   const DiagnosticDisplay = ({ data, onClose, onFix }) => {
+//     if (!data) return null;
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.yellow + "40",
+//           backgroundColor: theme.yellow + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.yellow + "20" }}
+//           >
+//             <BsWrench className="text-2xl" style={{ color: theme.yellow }} />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.yellow }}
+//             >
+//               Diagnostic Information
+//             </h3>
+//             <div className="space-y-3">
+//               <pre
+//                 className="p-3 rounded-lg text-xs overflow-auto max-h-96"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   color: theme.textSecondary,
+//                 }}
+//               >
+//                 {JSON.stringify(data, null, 2)}
+//               </pre>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onFix}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <BsWrench className="text-base" />
+//                   Fix localStorage
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onClose}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineX className="text-base" />
+//                   Close
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Get template for Sandpack
+//   const getSandpackTemplate = () => {
+//     // Check if it's a React project
+//     if (
+//       sandpackFiles["/src/App.jsx"] ||
+//       sandpackFiles["/src/App.js"] ||
+//       sandpackFiles["/src/main.jsx"]
+//     ) {
+//       return "react";
+//     }
+//     return "react"; // Default to react
+//   };
+
+//   // Get dependencies from package.json and ensure Tailwind is included
+//   const getDependencies = () => {
+//     const packageJsonFile = projectFiles?.find(
+//       (f) =>
+//         f.filename === "package.json" || f.filename === "frontend/package.json",
+//     );
+//     let dependencies = {};
+
+//     if (packageJsonFile) {
+//       try {
+//         const cleanContent = cleanCodeContent(packageJsonFile.content);
+//         const packageJson = JSON.parse(cleanContent);
+//         dependencies = packageJson.dependencies || {};
+//       } catch (e) {
+//         console.error("Error parsing package.json", e);
+//       }
+//     }
+
+//     // Ensure Tailwind dependencies are present
+//     return {
+//       ...dependencies,
+//       react: dependencies.react || "^18.2.0",
+//       "react-dom": dependencies["react-dom"] || "^18.2.0",
+//       "react-router-dom": dependencies["react-router-dom"] || "^6.3.0",
+//     };
+//   };
+
+//   // Prepare recent chats for sidebar with enhanced information
+//   const recentChats = recentProjects.map((project) => {
+//     let icon, color, title;
+
+//     if (project.status === "processing") {
+//       icon = <HiOutlineRefresh className="animate-spin" />;
+//       color = theme.yellow;
+//       title = project.title || "Processing...";
+//     } else if (project.status === "failed") {
+//       icon = <HiOutlineExclamation />;
+//       color = theme.red;
+//       title = "Failed Project";
+//     } else if (project.status === "completed") {
+//       icon = <HiOutlineCheckCircle />;
+//       color = theme.green;
+//       title = project.title || "Completed Project";
+//     } else {
+//       icon = <HiOutlineFolder />;
+//       color = theme.textPrimary;
+//       title = project.title || "Project";
+//     }
+
+//     // Create preview text without "frontend" word
+//     let previewText = "";
+//     if (project.status === "completed" && project.totalFiles) {
+//       previewText = `${project.totalFiles} files total (${project.frontendFiles || 0} frontend, ${project.backendFiles || 0} backend)`;
+//     } else if (project.prompt) {
+//       previewText =
+//         project.prompt.substring(0, 50) +
+//         (project.prompt.length > 50 ? "..." : "");
+//     } else {
+//       previewText = project.preview || "No preview";
+//     }
+
+//     return {
+//       id: project.id,
+//       title: title,
+//       preview: previewText,
+//       time: project.timestamp,
+//       icon: icon,
+//       color: color,
+//       jobId: project.id,
+//       status: project.status,
+//       prompt: project.prompt,
+//       error: project.error,
+//       totalFiles: project.totalFiles || 0,
+//       frontendFiles: project.frontendFiles || 0,
+//       backendFiles: project.backendFiles || 0,
+//     };
+//   });
+
+//   // Resizable Panel Component (moved inside Home to access theme)
+//   const ResizablePanel = ({ children, defaultWidth = 25, minWidth = 15, maxWidth = 40, direction = "right", storageKey = "panel_width" }) => {
+//     const [width, setWidth] = useState(() => {
+//       const saved = localStorage.getItem(storageKey);
+//       return saved ? parseInt(saved) : defaultWidth;
+//     });
+//     const [isResizing, setIsResizing] = useState(false);
+//     const panelRef = useRef(null);
+
+//     useEffect(() => {
+//       const handleMouseMove = (e) => {
+//         if (!isResizing) return;
+
+//         const container = panelRef.current?.parentElement;
+//         if (!container) return;
+
+//         const containerRect = container.getBoundingClientRect();
+//         let newWidth;
+
+//         if (direction === "right") {
+//           newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+//         } else {
+//           newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
+//         }
+
+//         // Clamp width between min and max
+//         newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+        
+//         setWidth(newWidth);
+//         localStorage.setItem(storageKey, Math.round(newWidth));
+//       };
+
+//       const handleMouseUp = () => {
+//         setIsResizing(false);
+//         document.body.style.cursor = "default";
+//         document.body.style.userSelect = "auto";
+//       };
+
+//       if (isResizing) {
+//         document.addEventListener("mousemove", handleMouseMove);
+//         document.addEventListener("mouseup", handleMouseUp);
+//         document.body.style.cursor = "col-resize";
+//         document.body.style.userSelect = "none";
+//       }
+
+//       return () => {
+//         document.removeEventListener("mousemove", handleMouseMove);
+//         document.removeEventListener("mouseup", handleMouseUp);
+//       };
+//     }, [isResizing, direction, minWidth, maxWidth]);
+
+//     return (
+//       <div
+//         ref={panelRef}
+//         className="relative h-full"
+//         style={{ width: `${width}%` }}
+//       >
+//         {children}
+//         <div
+//           className={`absolute top-0 bottom-0 w-1 cursor-col-resize hover:bg-opacity-50 transition-colors ${
+//             direction === "right" ? "-right-0.5" : "-left-0.5"
+//           } ${isResizing ? "bg-blue-500" : "hover:bg-blue-500"}`}
+//           style={{
+//             backgroundColor: isResizing ? theme.blue : "transparent",
+//             zIndex: 20,
+//           }}
+//           onMouseDown={(e) => {
+//             e.preventDefault();
+//             setIsResizing(true);
+//           }}
+//         />
+//       </div>
+//     );
+//   };
+
+//   return (
+//     <div
+//       className="h-screen w-full overflow-hidden transition-colors duration-300"
+//       style={{ backgroundColor: theme.bg }}
+//     >
+//       {/* Mobile Menu Overlay */}
+//       <AnimatePresence>
+//         {isMobileMenuOpen && (
+//           <motion.div
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             exit={{ opacity: 0 }}
+//             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+//             onClick={() => setIsMobileMenuOpen(false)}
+//           />
+//         )}
+//       </AnimatePresence>
+
+//       {/* Mobile Sidebar */}
+//       <motion.aside
+//         initial={{ x: "-100%" }}
+//         animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
+//         transition={{ type: "tween", duration: 0.3 }}
+//         className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-xl overflow-y-auto"
+//         style={{ backgroundColor: theme.sidebar }}
+//       >
+//         <SidebarContent
+//           recentChats={recentChats}
+//           templates={sidebarTemplates}
+//           allTemplates={allTemplates}
+//           onClose={() => setIsMobileMenuOpen(false)}
+//           theme={theme}
+//           hoveredChat={hoveredChat}
+//           setHoveredChat={setHoveredChat}
+//           onNewChat={handleNewChat}
+//           onProjectClick={handleProjectClick}
+//           onTemplateClick={handleTemplateClick}
+//           currentTheme={currentTheme}
+//           toggleTheme={toggleTheme}
+//         />
+//       </motion.aside>
+
+//       {/* Desktop Layout */}
+//       <div className="flex h-full w-full">
+//         {/* Desktop Sidebar with Collapse Toggle */}
+//         <motion.aside
+//           animate={{ width: sidebarCollapsed ? 80 : 288 }}
+//           className="hidden lg:block h-full border-r relative transition-all duration-300"
+//           style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+//         >
+//           <button
+//             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+//             className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg"
+//             style={{
+//               backgroundColor: theme.card,
+//               borderColor: theme.border,
+//               color: theme.textPrimary,
+//             }}
+//           >
+//             {sidebarCollapsed ? (
+//               <HiOutlineChevronRight />
+//             ) : (
+//               <HiOutlineChevronLeft />
+//             )}
+//           </button>
+
+//           {sidebarCollapsed ? (
+//             <CollapsedSidebar
+//               theme={theme}
+//               onNewChat={handleNewChat}
+//               recentChats={recentChats}
+//               onProjectClick={handleProjectClick}
+//             />
+//           ) : (
+//             <SidebarContent
+//               recentChats={recentChats}
+//               templates={sidebarTemplates}
+//               allTemplates={allTemplates}
+//               theme={theme}
+//               hoveredChat={hoveredChat}
+//               setHoveredChat={setHoveredChat}
+//               onNewChat={handleNewChat}
+//               onProjectClick={handleProjectClick}
+//               onTemplateClick={handleTemplateClick}
+//               currentTheme={currentTheme}
+//               toggleTheme={toggleTheme}
+//             />
+//           )}
+//         </motion.aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 h-full flex flex-col w-full min-w-0">
+//           {/* Fixed Header */}
+//           <div
+//             className="flex-shrink-0 border-b w-full"
+//             style={{
+//               backgroundColor: theme.sidebar,
+//               borderColor: theme.border,
+//             }}
+//           >
+//             <div className="flex items-center justify-between px-4 py-3">
+//               <div className="flex items-center gap-3">
+//                 <button
+//                   onClick={() => setIsMobileMenuOpen(true)}
+//                   className="lg:hidden p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineMenu className="text-lg" />
+//                 </button>
+//                 <h2
+//                   className="text-sm font-medium hidden sm:block"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   AI Developer Assistant
+//                 </h2>
+//               </div>
+
+//               <div className="flex items-center gap-2">
+//                 {/* Theme Toggle Button */}
+//                 <motion.button
+//                   whileHover={{ scale: 1.05 }}
+//                   whileTap={{ scale: 0.95 }}
+//                   onClick={toggleTheme}
+//                   className="p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                   title={
+//                     currentTheme === "dark"
+//                       ? "Switch to Light Mode"
+//                       : "Switch to Dark Mode"
+//                   }
+//                 >
+//                   {currentTheme === "dark" ? (
+//                     <HiOutlineSun className="text-lg" />
+//                   ) : (
+//                     <HiOutlineMoon className="text-lg" />
+//                   )}
+//                 </motion.button>
+
+//                 {/* Mobile Workspace Toggle Button */}
+//                 {jobStatus === "completed" && (
+//                   <button
+//                     onClick={() => setShowMobileWorkspace(!showMobileWorkspace)}
+//                     className="lg:hidden p-2 rounded-full"
+//                     style={{
+//                       backgroundColor: theme.card,
+//                       color: showMobileWorkspace ? theme.green : theme.textPrimary,
+//                     }}
+//                     title={showMobileWorkspace ? "Show Chat" : "Show Workspace"}
+//                   >
+//                     {showMobileWorkspace ? (
+//                       <HiOutlineChat className="text-lg" />
+//                     ) : (
+//                       <HiOutlineCode className="text-lg" />
+//                     )}
+//                   </button>
+//                 )}
+
+//                 {jobId && (
+//                   <>
+//                     <span
+//                       className="text-xs px-2 py-1 rounded-full hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       Job: {jobId.substring(0, 8)}...
+//                     </span>
+//                     {jobStatus === "processing" && isPollingActive && (
+//                       <div className="flex items-center gap-1">
+//                         <motion.div
+//                           animate={{ rotate: 360 }}
+//                           transition={{
+//                             duration: 2,
+//                             repeat: Infinity,
+//                             ease: "linear",
+//                           }}
+//                         >
+//                           <HiOutlineRefresh
+//                             className="text-lg"
+//                             style={{ color: theme.green }}
+//                           />
+//                         </motion.div>
+//                         {pollingAttempts > 0 && (
+//                           <span
+//                             className="text-xs hidden sm:inline"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             {Math.floor(pollingAttempts * 2)}s
+//                           </span>
+//                         )}
+//                       </div>
+//                     )}
+//                     {jobStatus === "completed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.green + "20",
+//                           color: theme.green,
+//                         }}
+//                       >
+//                         <HiOutlineCheckCircle className="text-xs" />
+//                         Completed
+//                       </span>
+//                     )}
+//                     {jobStatus === "failed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.red + "20",
+//                           color: theme.red,
+//                         }}
+//                       >
+//                         <HiOutlineExclamation className="text-xs" />
+//                         Failed
+//                       </span>
+//                     )}
+//                   </>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Two Column Layout - Responsive */}
+//           <div className="flex-1 flex overflow-hidden">
+//             {/* Left Column - Messages Area */}
+//             <div
+//               className={`
+//                 ${jobStatus === "completed" ? "lg:w-2/5" : "w-full"} 
+//                 ${jobStatus === "completed" && showMobileWorkspace ? "hidden lg:flex" : "flex"}
+//                 border-r overflow-hidden flex-col transition-all duration-300
+//               `}
+//               style={{ borderColor: theme.border }}
+//             >
+//               <div
+//                 className="p-3 border-b"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <h3
+//                   className="text-xs font-semibold uppercase"
+//                   style={{ color: theme.textSecondary }}
+//                 >
+//                   AI Conversation
+//                 </h3>
+//               </div>
+//               <div
+//                 ref={messagesContainerRef}
+//                 className="flex-1 overflow-y-auto"
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 <div className="p-6">
+//                   <div className="max-w-full mx-auto">
+//                     {/* Timeout Warning Banner */}
+//                     <AnimatePresence>
+//                       {showTimeoutWarning &&
+//                         jobStatus === "processing" &&
+//                         !warningDismissed && (
+//                           <motion.div
+//                             initial={{ opacity: 0, y: -20 }}
+//                             animate={{ opacity: 1, y: 0 }}
+//                             exit={{ opacity: 0, y: -20 }}
+//                             className="mb-4 p-4 rounded-lg border"
+//                             style={{
+//                               backgroundColor: theme.yellow + "20",
+//                               borderColor: theme.yellow,
+//                             }}
+//                           >
+//                             <div className="flex items-start gap-3">
+//                               <BsHourglassSplit
+//                                 className="text-xl flex-shrink-0 animate-pulse"
+//                                 style={{ color: theme.yellow }}
+//                               />
+//                               <div className="flex-1">
+//                                 <h4
+//                                   className="text-sm font-semibold"
+//                                   style={{ color: theme.yellow }}
+//                                 >
+//                                   Taking longer than expected
+//                                 </h4>
+//                                 <p
+//                                   className="text-xs mt-1"
+//                                   style={{ color: theme.textSecondary }}
+//                                 >
+//                                   Your project is still being built. Complex
+//                                   projects can take 2-5 minutes.
+//                                 </p>
+//                                 <div className="flex gap-2 mt-3">
+//                                   <button
+//                                     onClick={() => {
+//                                       setWarningDismissed(true);
+//                                       setShowTimeoutWarning(false);
+//                                     }}
+//                                     className="text-xs px-3 py-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: "transparent",
+//                                       color: theme.textSecondary,
+//                                       border: `1px solid ${theme.border}`,
+//                                     }}
+//                                   >
+//                                     Dismiss
+//                                   </button>
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           </motion.div>
+//                         )}
+//                     </AnimatePresence>
+
+//                     {/* Diagnostic Display */}
+//                     {showDiagnostic && diagnosticData && (
+//                       <DiagnosticDisplay
+//                         data={diagnosticData}
+//                         onClose={() => setShowDiagnostic(false)}
+//                         onFix={fixLocalStorage}
+//                       />
+//                     )}
+
+//                     <AnimatePresence mode="wait">
+//                       {showHelp && messages.length === 0 ? (
+//                         /* Help Section */
+//                         <motion.div
+//                           key="help"
+//                           initial={{ opacity: 0, y: 10 }}
+//                           animate={{ opacity: 1, y: 0 }}
+//                           exit={{ opacity: 0, y: -10 }}
+//                           transition={{ duration: 0.2 }}
+//                         >
+//                           <h2
+//                             className="text-lg sm:text-xl font-semibold mb-2"
+//                             style={{ color: theme.textPrimary }}
+//                           >
+//                             What would you like to build today?
+//                           </h2>
+//                           <p
+//                             className="text-sm mb-6"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build complete projects and get a VS
+//                             Code-like environment!
+//                           </p>
+
+//                           {/* Project Templates - Show all 8 templates in help section */}
+//                           <div className="mb-8">
+//                             <h3
+//                               className="text-sm font-semibold mb-2"
+//                               style={{ color: theme.textPrimary }}
+//                             >
+//                               Popular Projects
+//                             </h3>
+//                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+//                               {allTemplates.map((template, index) => (
+//                                 <motion.button
+//                                   key={index}
+//                                   whileHover={{ scale: 1.02 }}
+//                                   whileTap={{ scale: 0.98 }}
+//                                   className="text-white p-3 rounded-xl flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-all"
+//                                   style={{ backgroundColor: template.bg }}
+//                                   onClick={() =>
+//                                     handleTemplateClick(template.name)
+//                                   }
+//                                 >
+//                                   <span className="text-xl">
+//                                     {template.icon}
+//                                   </span>
+//                                   <span className="text-xs font-medium text-center">
+//                                     {template.name}
+//                                   </span>
+//                                 </motion.button>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </motion.div>
+//                       ) : (
+//                         /* Messages */
+//                         <motion.div
+//                           key="messages"
+//                           initial={{ opacity: 0 }}
+//                           animate={{ opacity: 1 }}
+//                           exit={{ opacity: 0 }}
+//                         >
+//                           {messages.map((msg, index) => (
+//                             <motion.div
+//                               key={msg.id}
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               transition={{
+//                                 duration: 0.2,
+//                                 delay: index * 0.05,
+//                               }}
+//                               className={`mb-4 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+//                             >
+//                               <div
+//                                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+//                                   msg.sender === "user"
+//                                     ? "rounded-br-none"
+//                                     : "rounded-bl-none"
+//                                 }`}
+//                                 style={{
+//                                   backgroundColor:
+//                                     msg.sender === "user"
+//                                       ? theme.green
+//                                       : theme.card,
+//                                   color:
+//                                     msg.sender === "user"
+//                                       ? "#FFFFFF"
+//                                       : theme.textPrimary,
+//                                 }}
+//                               >
+//                                 {msg.sender === "ai" && (
+//                                   <div className="flex items-center gap-2 mb-2">
+//                                     <BsRobot className="text-xs" />
+//                                     <span className="text-xs font-medium">
+//                                       AI Developer Assistant
+//                                     </span>
+//                                   </div>
+//                                 )}
+//                                 <div className="text-sm whitespace-pre-wrap font-mono">
+//                                   {msg.text}
+//                                 </div>
+//                                 <p className="text-xs mt-2 opacity-70 text-right">
+//                                   {msg.timestamp}
+//                                 </p>
+//                               </div>
+//                             </motion.div>
+//                           ))}
+
+//                           {/* Processing Animation */}
+//                           {isProcessing &&
+//                             jobStatus === "processing" &&
+//                             !projectFiles &&
+//                             isPollingActive && (
+//                               <motion.div
+//                                 initial={{ opacity: 0 }}
+//                                 animate={{ opacity: 1 }}
+//                                 exit={{ opacity: 0 }}
+//                                 className="flex justify-center"
+//                               >
+//                                 <ProcessingAnimation />
+//                               </motion.div>
+//                             )}
+
+//                           {/* Error Display for Failed Jobs */}
+//                           {jobStatus === "failed" && jobErrorMessage && (
+//                             <ErrorDisplay
+//                               message={jobErrorMessage}
+//                               details={jobErrorDetails}
+//                             />
+//                           )}
+
+//                           {/* Typing indicator */}
+//                           {isTyping && (
+//                             <motion.div
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               className="flex justify-start"
+//                             >
+//                               <div
+//                                 className="rounded-2xl rounded-bl-none px-4 py-3"
+//                                 style={{ backgroundColor: theme.card }}
+//                               >
+//                                 <div className="flex gap-1">
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.2,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.4,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </motion.div>
+//                           )}
+
+//                           <div ref={messagesEndRef} />
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Fixed Input Area for Messages */}
+//               <div
+//                 className="flex-shrink-0 border-t w-full p-3"
+//                 style={{
+//                   backgroundColor: theme.sidebar,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <div className="max-w-full mx-auto">
+//                   <div className="relative">
+//                     <textarea
+//                       ref={inputRef}
+//                       value={message}
+//                       onChange={(e) => setMessage(e.target.value)}
+//                       onKeyPress={handleKeyPress}
+//                       placeholder="Ask me to build any project..."
+//                       className={`w-full pl-3 placeholder:text-xs pr-24 py-4 border rounded-md text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${
+//                         inputError
+//                           ? "border-red-500 focus:ring-red-500"
+//                           : "focus:ring-[#22C55E]"
+//                       }`}
+//                       style={{
+//                         backgroundColor: theme.inputBg,
+//                         borderColor: inputError ? theme.red : theme.border,
+//                         color: theme.textPrimary,
+//                         minHeight: "70px",
+//                         maxHeight: "160px",
+//                         resize: "none",
+//                       }}
+//                       rows="2"
+//                       onInput={(e) => {
+//                         e.target.style.height = "auto";
+//                         e.target.style.height =
+//                           Math.min(e.target.scrollHeight, 150) + "px";
+//                       }}
+//                       disabled={isProcessing && jobStatus === "processing"}
+//                     />
+//                     <div className="absolute right-2 bottom-3 flex items-center gap-2">
+//                       <button
+//                         onClick={handleSendMessage}
+//                         disabled={isProcessing && jobStatus === "processing"}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+//                         style={{
+//                           backgroundColor:
+//                             isProcessing && jobStatus === "processing"
+//                               ? theme.textSecondary
+//                               : theme.green,
+//                         }}
+//                         title={
+//                           isProcessing
+//                             ? "Currently building a project"
+//                             : "Send message"
+//                         }
+//                       >
+//                         <HiOutlinePaperAirplane className="text-sm" />
+//                       </button>
+//                       <button
+//                         onClick={handleNewChat}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0"
+//                         style={{ backgroundColor: theme.card }}
+//                         title="Start new chat"
+//                       >
+//                         <HiOutlinePlus className="text-sm" />
+//                       </button>
+//                     </div>
+//                   </div>
+//                   {inputError && (
+//                     <p className="text-xs mt-1 text-red-500">{inputError}</p>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Right Column - Workspace Area - Responsive */}
+//             {jobStatus === "completed" && (
+//               <div
+//                 ref={workspaceRef}
+//                 className={`
+//                   lg:w-3/5 
+//                   ${showMobileWorkspace ? "w-full" : "hidden lg:block"}
+//                   overflow-hidden flex flex-col transition-all duration-300
+//                 `}
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 {/* Workspace Header with View Toggles and Fullscreen */}
+//                 <div
+//                   className="px-3 p-1/2 border-b flex items-center justify-between"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     borderColor: theme.border,
+//                   }}
+//                 >
+//                   <div className="flex items-center gap-2">
+//                     <h3
+//                       className="text-xs font-semibold uppercase"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       Project Workspace
+//                     </h3>
+//                     {downloadUrl && (
+//                       <motion.button
+//                         whileHover={{ scale: 1.05 }}
+//                         whileTap={{ scale: 0.95 }}
+//                         onClick={handleDownload}
+//                         className="flex items-center gap-1 px-2 py-1 rounded text-white text-xs"
+//                         style={{ backgroundColor: theme.green }}
+//                       >
+//                         <HiOutlineDownload className="text-xs" />
+//                         ZIP
+//                       </motion.button>
+//                     )}
+//                     <button
+//                       onClick={runDiagnostic}
+//                       className="p-1.5 rounded-full text-xs hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                       title="Run diagnostic"
+//                     >
+//                       <BsWrench className="text-sm" />
+//                     </button>
+//                   </div>
+
+//                   {/* View Toggle Buttons */}
+//                   {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                     <div className="flex items-center gap-2">
+//                       <div
+//                         className="flex items-center gap-1 rounded-lg p-1"
+//                         style={{ backgroundColor: theme.card }}
+//                       >
+//                         <button
+//                           onClick={() => setWorkspaceView("preview")}
+//                           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+//                             workspaceView === "preview"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "preview"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "preview"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Preview View"
+//                         >
+//                           <BsEye className="text-sm inline mr-1" />
+//                           <span className="hidden sm:inline">Preview</span>
+//                         </button>
+//                         <button
+//                           onClick={() => setWorkspaceView("code")}
+//                           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+//                             workspaceView === "code"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "code"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "code"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Code View"
+//                         >
+//                           <BsCodeSquare className="text-sm inline mr-1" />
+//                           <span className="hidden sm:inline">Code</span>
+//                         </button>
+//                       </div>
+
+//                       {/* Fullscreen Button */}
+//                       <button
+//                         onClick={toggleFullscreen}
+//                         className="p-2 rounded-md transition-all hidden sm:inline-block"
+//                         style={{
+//                           backgroundColor: theme.card,
+//                           color: theme.textSecondary,
+//                         }}
+//                         title={
+//                           isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+//                         }
+//                       >
+//                         <HiOutlineArrowsExpand className="text-sm" />
+//                       </button>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* Workspace Content */}
+//                 <div className="flex-1 overflow-hidden">
+//                   {!showSandpack || Object.keys(sandpackFiles).length === 0 ? (
+//                     <div className="h-full flex items-center justify-center flex-col gap-4">
+//                       {jobStatus === "processing" ? (
+//                         <ProcessingAnimation />
+//                       ) : jobStatus === "failed" ? (
+//                         <div className="text-center">
+//                           <BsExclamationTriangle
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.red }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Project generation failed
+//                           </p>
+//                         </div>
+//                       ) : (
+//                         <div className="text-center">
+//                           <HiOutlineCode
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.textSecondary }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Your project will appear here
+//                           </p>
+//                           <p
+//                             className="text-xs mt-2"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build something to get started
+//                           </p>
+//                         </div>
+//                       )}
+//                     </div>
+//                   ) : (
+//                     <div
+//                       className="h-full overflow-hidden"
+//                       style={{ backgroundColor: theme.sandpackBg }}
+//                     >
+//                       <SandpackProvider
+//                         key={jobId || "sandpack-provider"}
+//                         template={getSandpackTemplate()}
+//                         theme={currentTheme === "dark" ? "dark" : "light"}
+//                         files={sandpackFiles}
+//                         customSetup={{
+//                           dependencies: getDependencies(),
+//                           entry: sandpackFiles["/src/index.js"]
+//                             ? "/src/index.js"
+//                             : sandpackFiles["/src/index.jsx"]
+//                               ? "/src/index.jsx"
+//                               : sandpackFiles["/src/main.jsx"]
+//                                 ? "/src/main.jsx"
+//                                 : "/src/index.js",
+//                         }}
+//                         options={{
+//                           externalResources: ["https://cdn.tailwindcss.com"],
+//                           visibleFiles: Object.keys(sandpackFiles),
+//                           activeFile:
+//                             Object.keys(sandpackFiles).find(
+//                               (f) =>
+//                                 f.includes("App.jsx") ||
+//                                 f.includes("App.js") ||
+//                                 f.includes("main.jsx"),
+//                             ) || Object.keys(sandpackFiles)[0],
+//                         }}
+//                       >
+//                         <SandpackLayout className="h-full">
+//                           {workspaceView === "preview" && (
+//                             /* Preview View - Full height preview with console at bottom */
+//                             <div className="flex flex-col h-full w-full">
+//                               {/* Preview (80%) */}
+//                               <div
+//                                 className="h-[80%] flex flex-col"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   PREVIEW
+//                                 </div>
+//                                 <div className="flex-1">
+//                                   <SandpackPreview
+//                                     showOpenInCodeSandbox={false}
+//                                     showRefreshButton={true}
+//                                     className="h-[70vh]"
+//                                   />
+//                                 </div>
+//                               </div>
+
+//                               {/* Console (20%) */}
+//                               <div
+//                                 className="h-[20%] border-t flex flex-col"
+//                                 style={{ borderColor: theme.border }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-1 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   CONSOLE
+//                                 </div>
+//                                 <div className="flex-1 overflow-auto">
+//                                   <SandpackConsole />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+
+//                           {workspaceView === "code" && (
+//                             /* Code View - Full height with resizable file explorer and editor */
+//                             <div className="flex flex-row h-[95vh] w-full">
+//                               {/* FILE EXPLORER - Resizable Panel */}
+//                               <ResizablePanel
+//                                 defaultWidth={25}
+//                                 minWidth={16}
+//                                 maxWidth={50}
+//                                 direction="right"
+//                                 storageKey={EXPLORER_WIDTH_KEY}
+//                               >
+//                                 <div
+//                                   className="h-full border-r flex flex-col"
+//                                   style={{
+//                                     backgroundColor: theme.card,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   <div
+//                                     className="px-3 py-2 text-xs border-b flex justify-between items-center font-semibold"
+//                                     style={{
+//                                       color: theme.textSecondary,
+//                                       borderColor: theme.border,
+//                                     }}
+//                                   >
+//                                     <h4>EXPLORER</h4>
+//                                     {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                                       <div
+//                                         className="px-2 flex justify-center items-center text-[10px]"
+//                                         style={{
+//                                           backgroundColor: theme.card,
+//                                           borderColor: theme.border,
+//                                           color: theme.textSecondary,
+//                                         }}
+//                                       >
+//                                         {Object.keys(sandpackFiles).length} files
+//                                       </div>
+//                                     )}
+//                                   </div>
+//                                   <div className="flex-1 overflow-auto">
+//                                     <SandpackFileExplorer
+//                                       className="text-xs"
+//                                       autoHiddenFiles={false}
+//                                       style={{
+//                                         height: "100%",
+//                                         overflow: "auto",
+//                                       }}
+//                                     />
+//                                   </div>
+//                                 </div>
+//                               </ResizablePanel>
+                              
+//                               {/* EDITOR - Takes remaining width */}
+//                               <div
+//                                 className="flex-1 h-full flex flex-col overflow-hidden"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold flex-shrink-0"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   EDITOR
+//                                 </div>
+//                                 <div className="flex-1 overflow-hidden">
+//                                   <SandpackCodeEditor
+//                                     showTabs
+//                                     showLineNumbers
+//                                     wrapContent={false}
+//                                     closableTabs={true}
+//                                     style={{
+//                                       height: "100%",
+//                                       overflow: "auto",
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+//                         </SandpackLayout>
+//                       </SandpackProvider>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Sidebar Component
+// const SidebarContent = ({
+//   recentChats,
+//   templates,
+//   allTemplates,
+//   onClose,
+//   theme,
+//   hoveredChat,
+//   setHoveredChat,
+//   onNewChat,
+//   onProjectClick,
+//   onTemplateClick,
+//   currentTheme,
+//   toggleTheme,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col">
+//       {/* Header */}
+//       <div
+//         className="p-3 border-b flex-shrink-0"
+//         style={{ borderColor: theme.border }}
+//       >
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center gap-3 min-w-0">
+//             <motion.div
+//               whileHover={{ scale: 1.02 }}
+//               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+//               style={{
+//                 background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//               }}
+//             >
+//               <img
+//                 src="/EVA.png"
+//                 alt="EVA"
+//                 height={60}
+//                 className="rounded-full"
+//               />
+//             </motion.div>
+//             <div className="min-w-0">
+//               <h1
+//                 className="text-sm font-semibold truncate"
+//                 style={{ color: theme.textPrimary }}
+//               >
+//                 EVA AI
+//               </h1>
+//               <p
+//                 className="text-xs truncate"
+//                 style={{ color: theme.textSecondary }}
+//               >
+//                 Full-Stack AI
+//               </p>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             {/* Theme Toggle in Sidebar */}
+//             <motion.button
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//               onClick={toggleTheme}
+//               className="p-2 rounded-full"
+//               style={{ backgroundColor: theme.card, color: theme.textPrimary }}
+//               title={
+//                 currentTheme === "dark"
+//                   ? "Switch to Light Mode"
+//                   : "Switch to Dark Mode"
+//               }
+//             >
+//               {currentTheme === "dark" ? (
+//                 <HiOutlineSun className="text-sm" />
+//               ) : (
+//                 <HiOutlineMoon className="text-sm" />
+//               )}
+//             </motion.button>
+//             {onClose && (
+//               <motion.button
+//                 whileHover={{ rotate: 90 }}
+//                 transition={{ duration: 0.2 }}
+//                 onClick={onClose}
+//                 className="lg:hidden p-2 rounded-full flex-shrink-0"
+//                 style={{ backgroundColor: theme.card }}
+//               >
+//                 <HiOutlineX style={{ color: theme.textPrimary }} />
+//               </motion.button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* New Chat Button */}
+//       <div className="p-4 mx-3 flex-shrink-0">
+//         <motion.button
+//           whileHover={{ scale: 1.02 }}
+//           whileTap={{ scale: 0.98 }}
+//           onClick={onNewChat}
+//           className="w-full py-2.5 px-4 text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
+//           style={{ backgroundColor: theme.green }}
+//         >
+//           <HiOutlinePlus className="text-base" />
+//           <span className="truncate">New Project</span>
+//         </motion.button>
+//       </div>
+
+//       {/* Templates Section */}
+//       <div className="px-3 mb-4">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Quick Templates
+//         </h2>
+//         <div className="grid grid-cols-2 gap-2">
+//           {templates.map((template, index) => (
+//             <motion.button
+//               key={index}
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               className="p-2 rounded-lg text-xs text-white flex items-center justify-center gap-1.5"
+//               style={{ backgroundColor: template.bg }}
+//               onClick={() => onTemplateClick(template.name)}
+//             >
+//               <span className="text-sm">{template.icon}</span>
+//               <span className="truncate">{template.name}</span>
+//             </motion.button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* Recent Projects Section */}
+//       <div className="flex-1 px-3 overflow-y-auto no-scrollbar min-h-72">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Recent Projects
+//         </h2>
+//         <div className="space-y-1 pb-4">
+//           {recentChats.length > 0 ? (
+//             recentChats.map((chat) => (
+//               <motion.div
+//                 key={chat.id}
+//                 whileHover={{ x: 4 }}
+//                 className="flex items-start gap-3 p-3 rounded-xl cursor-pointer group"
+//                 style={{
+//                   backgroundColor:
+//                     hoveredChat === chat.id ? theme.hover : "transparent",
+//                   opacity: chat.status === "processing" ? 0.8 : 1,
+//                 }}
+//                 onMouseEnter={() => setHoveredChat(chat.id)}
+//                 onMouseLeave={() => setHoveredChat(null)}
+//                 onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//               >
+//                 <div
+//                   className="p-2 rounded-full flex-shrink-0"
+//                   style={{ backgroundColor: theme.iconBg }}
+//                 >
+//                   <span style={{ color: chat.color }} className="text-sm">
+//                     {chat.icon}
+//                   </span>
+//                 </div>
+//                 <div className="flex-1 min-w-0">
+//                   <div className="flex items-center justify-between gap-2">
+//                     <h4
+//                       className="text-sm font-medium truncate"
+//                       style={{ color: theme.textPrimary }}
+//                     >
+//                       {chat.title}
+//                     </h4>
+//                     <span
+//                       className="text-xs flex-shrink-0"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       {chat.time}
+//                     </span>
+//                   </div>
+//                   <p
+//                     className="text-xs truncate"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     {chat.preview}
+//                   </p>
+//                   {chat.status === "processing" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.yellow + "20",
+//                         color: theme.yellow,
+//                       }}
+//                     >
+//                       Processing...
+//                     </span>
+//                   )}
+//                   {chat.status === "completed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.green + "20",
+//                         color: theme.green,
+//                       }}
+//                     >
+//                       Completed
+//                     </span>
+//                   )}
+//                   {chat.status === "failed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.red + "20",
+//                         color: theme.red,
+//                       }}
+//                     >
+//                       Failed
+//                     </span>
+//                   )}
+//                 </div>
+//               </motion.div>
+//             ))
+//           ) : (
+//             <div
+//               className="text-center py-8"
+//               style={{ color: theme.textSecondary }}
+//             >
+//               <p className="text-xs">No recent projects</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Collapsed Sidebar Component
+// const CollapsedSidebar = ({
+//   theme,
+//   onNewChat,
+//   recentChats,
+//   onProjectClick,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col items-center py-3">
+//       <motion.div
+//         whileHover={{ scale: 1.1 }}
+//         className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md mb-6 cursor-pointer"
+//         style={{
+//           background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//         }}
+//         onClick={onNewChat}
+//         title="New Project"
+//       >
+//         <HiOutlinePlus className="text-white text-lg" />
+//       </motion.div>
+
+//       <div className="flex-1 w-full px-2">
+//         {recentChats.slice(0, 5).map((chat) => (
+//           <motion.div
+//             key={chat.id}
+//             whileHover={{ scale: 1.05 }}
+//             className="w-full flex justify-center mb-2 cursor-pointer relative"
+//             onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//             title={`${chat.title} - ${chat.status}`}
+//           >
+//             <div
+//               className="p-2 rounded-lg"
+//               style={{ backgroundColor: theme.card }}
+//             >
+//               <span style={{ color: chat.color }} className="text-lg">
+//                 {chat.icon}
+//               </span>
+//             </div>
+//             {chat.status === "processing" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+//             )}
+//             {chat.status === "failed" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+//             )}
+//           </motion.div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Home;
+
+// import React, { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "motion/react";
+// import { useSearchParams } from "react-router-dom";
+// import axios from "axios";
+// import {
+//   SandpackProvider,
+//   SandpackLayout,
+//   SandpackCodeEditor,
+//   SandpackPreview,
+//   SandpackConsole,
+//   SandpackFileExplorer,
+//   useSandpack,
+// } from "@codesandbox/sandpack-react";
+// import {
+//   HiOutlineChat,
+//   HiOutlinePlus,
+//   HiOutlineX,
+//   HiOutlinePaperAirplane,
+//   HiOutlineShoppingCart,
+//   HiOutlineUserGroup,
+//   HiOutlineVideoCamera,
+//   HiOutlinePhotograph,
+//   HiOutlineLocationMarker,
+//   HiOutlineMap,
+//   HiOutlineCode,
+//   HiOutlineDownload,
+//   HiOutlineFolder,
+//   HiOutlineCheckCircle,
+//   HiOutlineRefresh,
+//   HiOutlineFolderOpen,
+//   HiOutlineChevronLeft,
+//   HiOutlineChevronRight,
+//   HiOutlineExclamation,
+//   HiOutlineMenu,
+//   HiOutlineEye,
+//   HiOutlineCog,
+//   HiOutlineArrowsExpand,
+//   HiOutlineSun,
+//   HiOutlineMoon,
+//   HiOutlineSave,
+// } from "react-icons/hi";
+// import {
+//   BsRobot,
+//   BsHourglassSplit,
+//   BsExclamationTriangle,
+//   BsBug,
+//   BsWrench,
+//   BsCodeSquare,
+//   BsEye,
+// } from "react-icons/bs";
+
+// const API_BASE_URL = "http://127.0.0.1:8000";
+
+// // Storage keys
+// const STORAGE_KEY = "ai_projects";
+// const THEME_KEY = "ai_theme";
+// const EXPLORER_WIDTH_KEY = "explorer_width";
+
+
+// // Theme definitions
+// const themes = {
+//   dark: {
+//     bg: "#0B0F0E",
+//     sidebar: "#111413",
+//     card: "#151918",
+//     border: "#1F2A27",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#E5E7EB",
+//     textSecondary: "#9CA3AF",
+//     inputBg: "#1A1F1D",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#1F2A27",
+//     iconBg: "#1A1F1D",
+//     sandpackBg: "#1e1e1e",
+//     blue: "#3B82F6",
+//   },
+//   light: {
+//     bg: "#F9FAFB",
+//     sidebar: "#FFFFFF",
+//     card: "#F3F4F6",
+//     border: "#E5E7EB",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#111827",
+//     textSecondary: "#6B7280",
+//     inputBg: "#FFFFFF",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#F3F4F6",
+//     iconBg: "#F3F4F6",
+//     sandpackBg: "#FFFFFF",
+//     blue: "#3B82F6",
+//   },
+// };
+
+// // Save Button Component
+// const SaveButton = ({ onClick, saveStatus }) => {
+//   return (
+//     <motion.button
+//       whileHover={{ scale: 1.05 }}
+//       whileTap={{ scale: 0.95 }}
+//       onClick={onClick}
+//       className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all"
+//       style={{
+//         backgroundColor: saveStatus === 'saving' ? '#6B7280' : saveStatus === 'saved' ? '#22C55E' : '#3B82F6',
+//         color: 'white',
+//       }}
+//       disabled={saveStatus === 'saving'}
+//       title="Save changes"
+//     >
+//       {saveStatus === 'saving' ? (
+//         <>
+//           <HiOutlineRefresh className="animate-spin text-sm" />
+//           <span className="hidden sm:inline">Saving...</span>
+//         </>
+//       ) : saveStatus === 'saved' ? (
+//         <>
+//           <HiOutlineCheckCircle className="text-sm" />
+//           <span className="hidden sm:inline">Saved</span>
+//         </>
+//       ) : (
+//         <>
+//           <HiOutlineSave className="text-sm" />
+//           <span className="hidden sm:inline">Save</span>
+//         </>
+//       )}
+//     </motion.button>
+//   );
+// };
+
+// // Manual Save Handler Component
+// const ManualSaveHandler = ({ jobId, onSave, setSaveStatus }) => {
+//   const { sandpack } = useSandpack();
+
+//   const handleSave = () => {
+//     if (!jobId) {
+//       console.error("No job ID provided for save");
+//       return;
+//     }
+
+//     console.log("Save button clicked - saving files...", sandpack.files);
+
+//     setSaveStatus("saving");
+
+//     try {
+//       // Convert Sandpack files to original structure
+//       const convertedFiles = Object.entries(sandpack.files).map(([path, file]) => {
+//         let filename = path.startsWith("/") ? path.slice(1) : path;
+
+//         // Add frontend prefix except backend or node_modules
+//         if (!filename.startsWith("backend/") && !filename.includes("node_modules")) {
+//           filename = `frontend/${filename}`;
+//         }
+
+//         return {
+//           filename: filename,
+//           content: file.code,
+//         };
+//       });
+
+//       console.log("Converted files:", convertedFiles);
+
+//       // Get stored projects
+//       const stored = localStorage.getItem(STORAGE_KEY);
+
+//       if (!stored) {
+//         console.error("No projects found in localStorage");
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       const projects = JSON.parse(stored);
+
+//       const projectIndex = projects.findIndex((p) => p.id === jobId);
+
+//       if (projectIndex === -1) {
+//         console.error("Project not found:", jobId);
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       // Update files
+//       projects[projectIndex].files = convertedFiles;
+//       projects[projectIndex].timestamp = new Date().toLocaleString();
+
+//       // Count files
+//       const frontendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("frontend/")
+//       ).length;
+
+//       const backendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("backend/")
+//       ).length;
+
+//       projects[projectIndex].preview = `${convertedFiles.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`;
+
+//       projects[projectIndex].totalFiles = convertedFiles.length;
+//       projects[projectIndex].frontendFiles = frontendFiles;
+//       projects[projectIndex].backendFiles = backendFiles;
+
+//       // Save back
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+
+//       console.log("Project saved successfully");
+
+//       // callback
+//       if (onSave) {
+//         onSave(convertedFiles);
+//       }
+
+//       setSaveStatus("saved");
+
+//       setTimeout(() => {
+//         setSaveStatus("idle");
+//       }, 2000);
+//     } catch (error) {
+//       console.error("Save error:", error);
+//       setSaveStatus("idle");
+//     }
+//   };
+
+//   return { handleSave };
+// };
+// // Wrapper component to use the hook and expose the save function
+// const SaveHandlerWrapper = ({ jobId, onSave, setSaveStatus, onSaveFunctionReady }) => {
+//   const { handleSave } = ManualSaveHandler({ jobId, onSave, setSaveStatus });
+  
+//   useEffect(() => {
+//     console.log("SaveHandlerWrapper: handleSave function created", handleSave);
+//     if (onSaveFunctionReady) {
+//       onSaveFunctionReady(handleSave);
+//     }
+//   }, [handleSave, onSaveFunctionReady, jobId]);
+  
+//   return null;
+// };
+
+// // Resizable Panel Component
+// const ResizablePanel = ({ children, defaultWidth = 25, minWidth = 15, maxWidth = 40, direction = "right", storageKey = "panel_width", theme }) => {
+//   const [width, setWidth] = useState(() => {
+//     const saved = localStorage.getItem(storageKey);
+//     return saved ? parseInt(saved) : defaultWidth;
+//   });
+//   const [isResizing, setIsResizing] = useState(false);
+//   const panelRef = useRef(null);
+
+//   useEffect(() => {
+//     const handleMouseMove = (e) => {
+//       if (!isResizing) return;
+
+//       const container = panelRef.current?.parentElement;
+//       if (!container) return;
+
+//       const containerRect = container.getBoundingClientRect();
+//       let newWidth;
+
+//       if (direction === "right") {
+//         newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+//       } else {
+//         newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
+//       }
+
+//       // Clamp width between min and max
+//       newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+      
+//       setWidth(newWidth);
+//       localStorage.setItem(storageKey, Math.round(newWidth));
+//     };
+
+//     const handleMouseUp = () => {
+//       setIsResizing(false);
+//       document.body.style.cursor = "default";
+//       document.body.style.userSelect = "auto";
+//     };
+
+//     if (isResizing) {
+//       document.addEventListener("mousemove", handleMouseMove);
+//       document.addEventListener("mouseup", handleMouseUp);
+//       document.body.style.cursor = "col-resize";
+//       document.body.style.userSelect = "none";
+//     }
+
+//     return () => {
+//       document.removeEventListener("mousemove", handleMouseMove);
+//       document.removeEventListener("mouseup", handleMouseUp);
+//     };
+//   }, [isResizing, direction, minWidth, maxWidth]);
+
+//   return (
+//     <div
+//       ref={panelRef}
+//       className="relative h-full"
+//       style={{ width: `${width}%` }}
+//     >
+//       {children}
+//       <div
+//         className={`absolute top-0 bottom-0 w-1 cursor-col-resize hover:bg-opacity-50 transition-colors ${
+//           direction === "right" ? "-right-0.5" : "-left-0.5"
+//         } ${isResizing ? "bg-blue-500" : "hover:bg-blue-500"}`}
+//         style={{
+//           backgroundColor: isResizing ? theme?.blue || "#3B82F6" : "transparent",
+//           zIndex: 20,
+//         }}
+//         onMouseDown={(e) => {
+//           e.preventDefault();
+//           setIsResizing(true);
+//         }}
+//       />
+//     </div>
+//   );
+// };
+
+// const Home = () => {
+//   const [searchParams, setSearchParams] = useSearchParams();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [hoveredChat, setHoveredChat] = useState(null);
+//   const [message, setMessage] = useState("");
+//   const [messages, setMessages] = useState([]);
+//   const [showHelp, setShowHelp] = useState(true);
+//   const [isTyping, setIsTyping] = useState(false);
+
+//   // Theme State
+//   const [currentTheme, setCurrentTheme] = useState("dark");
+//   const theme = themes[currentTheme];
+
+//   // API States
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [jobStatus, setJobStatus] = useState(null);
+//   const [jobId, setJobId] = useState(null);
+//   const [projectFiles, setProjectFiles] = useState(null);
+//   const [downloadUrl, setDownloadUrl] = useState(null);
+//   const [recentProjects, setRecentProjects] = useState([]);
+//   const [pollingAttempts, setPollingAttempts] = useState(0);
+//   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+//   const [warningDismissed, setWarningDismissed] = useState(false);
+//   const [inputError, setInputError] = useState("");
+//   const [isPollingActive, setIsPollingActive] = useState(false);
+//   const [jobErrorMessage, setJobErrorMessage] = useState("");
+//   const [jobErrorDetails, setJobErrorDetails] = useState(null);
+//   const [initialLoadDone, setInitialLoadDone] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [showDiagnostic, setShowDiagnostic] = useState(false);
+//   const [diagnosticData, setDiagnosticData] = useState(null);
+//   const [lastSaved, setLastSaved] = useState(null);
+//   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved'
+
+//   // Sandpack Files
+//   const [sandpackFiles, setSandpackFiles] = useState({});
+//   const [showSandpack, setShowSandpack] = useState(false);
+
+//   // Sidebar State
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   // View Toggle State (preview/code)
+//   const [workspaceView, setWorkspaceView] = useState("preview");
+
+//   // Fullscreen State
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+
+//   // Mobile Workspace Toggle
+//   const [showMobileWorkspace, setShowMobileWorkspace] = useState(false);
+
+//   // Save function reference
+//   const saveFunctionRef = useRef(null);
+
+//   const messagesEndRef = useRef(null);
+//   const messagesContainerRef = useRef(null);
+//   const inputRef = useRef(null);
+//   const workspaceRef = useRef(null);
+
+//   // Refs for polling management
+//   const pollingIntervalRef = useRef(null);
+//   const currentJobIdRef = useRef(null);
+//   const isPollingRef = useRef(false);
+//   const abortControllerRef = useRef(null);
+
+//   // All 8 templates available
+//   const allTemplates = [
+//     { name: "Education ERP", icon: <HiOutlineCode />, bg: theme.green },
+//     { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.green },
+//     { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.green },
+//     { name: "Chat App", icon: <HiOutlineChat />, bg: theme.green },
+//     { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.green },
+//     { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.green },
+//     { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.green },
+//     { name: "Travel App", icon: <HiOutlineMap />, bg: theme.green },
+//   ];
+
+//   // Only show 4 templates in sidebar
+//   const sidebarTemplates = allTemplates.slice(0, 4);
+
+//   // Load theme from localStorage on mount
+//   useEffect(() => {
+//     const savedTheme = localStorage.getItem(THEME_KEY);
+//     if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
+//       setCurrentTheme(savedTheme);
+//     }
+//   }, []);
+
+//   // Toggle theme function
+//   const toggleTheme = () => {
+//     const newTheme = currentTheme === "dark" ? "light" : "dark";
+//     setCurrentTheme(newTheme);
+//     localStorage.setItem(THEME_KEY, newTheme);
+//   };
+
+//   // Clean code content from markdown code blocks
+//   const cleanCodeContent = (content) => {
+//     const codeBlockRegex = /```[a-z]*\n([\s\S]*?)```/g;
+//     const match = codeBlockRegex.exec(content);
+
+//     let cleaned = match ? match[1].trim() : content;
+
+//     // Remove Tailwind build directives (for Sandpack preview)
+//     cleaned = cleaned
+//       .replace(/@tailwind base;/g, "")
+//       .replace(/@tailwind components;/g, "")
+//       .replace(/@tailwind utilities;/g, "");
+
+//     return cleaned;
+//   };
+
+//   // Convert API files to Sandpack format with Tailwind support
+//   const convertToSandpackFiles = (files) => {
+//     const sandpackFiles = {};
+
+//     files.forEach((file) => {
+//       // Skip backend files for preview
+//       if (file.filename.startsWith("backend/")) {
+//         return;
+//       }
+
+//       // Handle frontend files
+//       let filename = file.filename;
+//       if (filename.startsWith("frontend/")) {
+//         filename = filename.replace("frontend/", "");
+//       }
+
+//       // Only include relevant frontend files
+//       if (
+//         filename.startsWith("src/") ||
+//         filename === "index.html" ||
+//         filename === "package.json" ||
+//         filename === "vite.config.js" ||
+//         filename === "postcss.config.js" ||
+//         filename === "tailwind.config.js"
+//       ) {
+//         // Clean the content from markdown code blocks
+//         let cleanContent = cleanCodeContent(file.content);
+
+//         // Map the file path correctly
+//         let sandpackPath = filename;
+//         if (sandpackPath === "index.html") {
+//           sandpackPath = "/index.html";
+//         } else if (!sandpackPath.startsWith("/")) {
+//           sandpackPath = "/" + sandpackPath;
+//         }
+
+//         sandpackFiles[sandpackPath] = {
+//           code: cleanContent,
+//         };
+//       }
+//     });
+
+//     // Ensure there's an entry file
+//     if (
+//       !sandpackFiles["/src/index.js"] &&
+//       !sandpackFiles["/src/index.jsx"] &&
+//       !sandpackFiles["/src/main.jsx"]
+//     ) {
+//       sandpackFiles["/src/main.jsx"] = {
+//         code: `import React from 'react'
+// import ReactDOM from 'react-dom/client'
+// import App from './App'
+// import './index.css'
+
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// )`,
+//       };
+//     }
+
+//     // Ensure App.jsx exists
+//     if (!sandpackFiles["/src/App.jsx"] && !sandpackFiles["/src/App.js"]) {
+//       sandpackFiles["/src/App.jsx"] = {
+//         code: `import React from 'react'
+
+// export default function App() {
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+//       <h1 className="text-3xl font-bold text-gray-800">Welcome to Your App</h1>
+//     </div>
+//   )
+// }`,
+//       };
+//     }
+
+//     // Ensure index.css exists with Tailwind directives
+//     if (!sandpackFiles["/src/index.css"]) {
+//       sandpackFiles["/src/index.css"] = {
+//         code: `@tailwind base;
+// @tailwind components;
+// @tailwind utilities;`,
+//       };
+//     }
+
+//     // Ensure tailwind.config.js exists
+//     if (!sandpackFiles["/tailwind.config.js"]) {
+//       sandpackFiles["/tailwind.config.js"] = {
+//         code: `/** @type {import('tailwindcss').Config} */
+// export default {
+//   content: [
+//     "./index.html",
+//     "./src/**/*.{js,ts,jsx,tsx}",
+//   ],
+//   theme: {
+//     extend: {},
+//   },
+//   plugins: [],
+// }`,
+//       };
+//     }
+
+//     // Ensure postcss.config.js exists
+//     if (!sandpackFiles["/postcss.config.js"]) {
+//       sandpackFiles["/postcss.config.js"] = {
+//         code: `export default {
+//   plugins: {
+//     tailwindcss: {},
+//     autoprefixer: {},
+//   },
+// }`,
+//       };
+//     }
+
+//     return sandpackFiles;
+//   };
+
+//   // Convert Sandpack files back to original format
+//   const convertFromSandpackFiles = (sandpackFiles) => {
+//     const files = [];
+    
+//     Object.entries(sandpackFiles).forEach(([path, file]) => {
+//       // Remove leading slash
+//       let filename = path.startsWith('/') ? path.slice(1) : path;
+      
+//       // Add frontend/ prefix for frontend files
+//       if (!filename.startsWith('backend/') && !filename.includes('node_modules')) {
+//         filename = `frontend/${filename}`;
+//       }
+
+//       files.push({
+//         filename: filename,
+//         content: file.code
+//       });
+//     });
+
+//     return files;
+//   };
+
+//   // Auto-scroll to bottom when messages change
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages, jobId, projectFiles]);
+
+//   // Auto-show Sandpack when files are ready
+//   useEffect(() => {
+//     if (
+//       jobStatus === "completed" &&
+//       projectFiles &&
+//       Object.keys(sandpackFiles).length > 0
+//     ) {
+//       setShowSandpack(true);
+//     }
+//   }, [jobStatus, projectFiles, sandpackFiles]);
+
+//   const scrollToBottom = () => {
+//     setTimeout(() => {
+//       if (messagesEndRef.current) {
+//         messagesEndRef.current.scrollIntoView({
+//           behavior: "smooth",
+//           block: "end",
+//         });
+//       }
+//     }, 100);
+//   };
+
+//   // Load recent projects from localStorage on mount
+//   useEffect(() => {
+//     loadRecentProjects();
+//   }, []);
+
+//   // Handle URL parameter on mount and when it changes
+//   useEffect(() => {
+//     const projectId = searchParams.get("project");
+
+//     if (projectId && !isLoading) {
+//       // Clear current state before loading new project
+//       setMessages([]);
+//       setShowHelp(false);
+//       setProjectFiles(null);
+//       setSandpackFiles({});
+//       setShowSandpack(false);
+//       setJobStatus(null);
+//       setJobErrorMessage("");
+//       setJobErrorDetails(null);
+
+//       // Load the project
+//       setTimeout(() => {
+//         loadProject(projectId);
+//       }, 100);
+//     } else if (!projectId && !initialLoadDone) {
+//       setShowHelp(true);
+//       setInitialLoadDone(true);
+//     }
+//   }, [searchParams]);
+
+//   // Cleanup polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       stopPolling();
+//     };
+//   }, []);
+
+//   // Handle fullscreen toggle
+//   const toggleFullscreen = () => {
+//     if (!isFullscreen) {
+//       if (workspaceRef.current.requestFullscreen) {
+//         workspaceRef.current.requestFullscreen();
+//       }
+//     } else {
+//       if (document.exitFullscreen) {
+//         document.exitFullscreen();
+//       }
+//     }
+//     setIsFullscreen(!isFullscreen);
+//   };
+
+//   // Listen for fullscreen change events
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       setIsFullscreen(!!document.fullscreenElement);
+//     };
+
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () => {
+//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//     };
+//   }, []);
+
+//   // Diagnostic function to check localStorage
+//   const runDiagnostic = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       const data = {
+//         exists: !!stored,
+//         raw: stored,
+//         parsed: null,
+//         currentProject: jobId,
+//         projectData: null,
+//       };
+
+//       if (stored) {
+//         try {
+//           data.parsed = JSON.parse(stored);
+//           if (jobId) {
+//             data.projectData = data.parsed.find((p) => p.id === jobId);
+//           }
+//         } catch (e) {
+//           data.parseError = e.message;
+//         }
+//       }
+
+//       setDiagnosticData(data);
+//       setShowDiagnostic(true);
+//     } catch (e) {
+//       console.error("Diagnostic error:", e);
+//     }
+//   };
+
+//   // Fix localStorage data
+//   const fixLocalStorage = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+
+//         // Fix any projects with missing fields
+//         const fixed = projects.map((p) => {
+//           if (!p.messages) p.messages = [];
+//           if (!p.error && p.status === "failed") {
+//             p.error = "Unknown error";
+//             p.errorDetails = { message: "Unknown error" };
+//           }
+//           if (!p.preview) {
+//             p.preview =
+//               p.status === "failed"
+//                 ? "Generation failed"
+//                 : p.status === "processing"
+//                   ? "Processing..."
+//                   : "No preview";
+//           }
+//           if (!p.prompt) p.prompt = "Unknown prompt";
+//           if (!p.totalFiles) p.totalFiles = p.files ? p.files.length : 0;
+//           return p;
+//         });
+
+//         localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+//         setRecentProjects(fixed);
+
+//         // Reload current project if any
+//         if (jobId) {
+//           loadProject(jobId);
+//         }
+//       }
+//     } catch (e) {
+//       console.error("Fix error:", e);
+//     }
+//   };
+
+//   const loadRecentProjects = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         setRecentProjects(projects);
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//   };
+
+//   // Save project to localStorage
+//   const saveProjectToStorage = (id, files, conversation, prompt = "") => {
+//     try {
+//       const packageJson = files.find(
+//         (f) =>
+//           f.filename === "package.json" ||
+//           f.filename === "frontend/package.json",
+//       );
+//       let projectName = "Project";
+//       if (packageJson) {
+//         try {
+//           const parsed = JSON.parse(packageJson.content);
+//           projectName = parsed.name || projectName;
+//         } catch (e) {
+//           console.error("Error parsing package.json", e);
+//         }
+//       }
+
+//       // Count frontend and backend files
+//       const frontendFiles = files.filter(
+//         (f) =>
+//           f.filename.startsWith("frontend/") ||
+//           !f.filename.startsWith("backend/"),
+//       ).length;
+//       const backendFiles = files.filter((f) =>
+//         f.filename.startsWith("backend/"),
+//       ).length;
+
+//       const projectInfo = {
+//         id: id,
+//         title: projectName,
+//         timestamp: new Date().toLocaleString(),
+//         preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//         files: files,
+//         messages: conversation,
+//         prompt:
+//           prompt ||
+//           conversation.find((m) => m.sender === "user")?.text ||
+//           "Project generation",
+//         status: "completed",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: files.length,
+//         frontendFiles: frontendFiles,
+//         backendFiles: backendFiles,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         projectInfo,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving project:", error);
+//       return [];
+//     }
+//   };
+
+//   // Save pending job to localStorage
+//   const savePendingJob = (id, prompt) => {
+//     try {
+//       const pendingProject = {
+//         id: id,
+//         title: "Processing...",
+//         timestamp: new Date().toLocaleString(),
+//         preview: `Building: "${prompt.substring(0, 50)}${prompt.length > 50 ? "..." : ""}"`,
+//         files: null,
+//         messages: [],
+//         prompt: prompt,
+//         status: "processing",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: 0,
+//         frontendFiles: 0,
+//         backendFiles: 0,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         pendingProject,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving pending job:", error);
+//       return [];
+//     }
+//   };
+
+//   // Update project status in localStorage
+//   const updateProjectStatus = (
+//     id,
+//     status,
+//     files = null,
+//     messages = [],
+//     errorDetails = null,
+//     prompt = "",
+//   ) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = existingProjects.map((project) => {
+//         if (project.id === id) {
+//           if (status === "completed" && files) {
+//             const packageJson = files.find(
+//               (f) =>
+//                 f.filename === "package.json" ||
+//                 f.filename === "frontend/package.json",
+//             );
+//             let projectName = "Project";
+//             if (packageJson) {
+//               try {
+//                 const parsed = JSON.parse(packageJson.content);
+//                 projectName = parsed.name || projectName;
+//               } catch (e) {
+//                 console.error("Error parsing package.json", e);
+//               }
+//             }
+
+//             // Count frontend and backend files
+//             const frontendFiles = files.filter(
+//               (f) =>
+//                 f.filename.startsWith("frontend/") ||
+//                 !f.filename.startsWith("backend/"),
+//             ).length;
+//             const backendFiles = files.filter((f) =>
+//               f.filename.startsWith("backend/"),
+//             ).length;
+
+//             return {
+//               ...project,
+//               title: projectName,
+//               status: "completed",
+//               files: files,
+//               messages: messages,
+//               preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//               error: null,
+//               errorDetails: null,
+//               prompt: prompt || project.prompt,
+//               totalFiles: files.length,
+//               frontendFiles: frontendFiles,
+//               backendFiles: backendFiles,
+//             };
+//           } else if (status === "failed") {
+//             return {
+//               ...project,
+//               status: "failed",
+//               title: "Failed Project",
+//               preview: "Generation failed",
+//               files: null,
+//               messages: messages,
+//               error: errorDetails?.message || "Unknown error",
+//               errorDetails: errorDetails,
+//               prompt: prompt || project.prompt,
+//             };
+//           } else {
+//             return {
+//               ...project,
+//               status: status,
+//               messages: messages,
+//             };
+//           }
+//         }
+//         return project;
+//       });
+
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error updating project status:", error);
+//       return [];
+//     }
+//   };
+
+//   // Get project by ID from localStorage
+//   const getProjectById = (id) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         const project = projects.find((p) => p.id === id);
+//         return project;
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//     return null;
+//   };
+
+//   // Stop polling function
+//   const stopPolling = () => {
+//     if (pollingIntervalRef.current) {
+//       clearInterval(pollingIntervalRef.current);
+//       pollingIntervalRef.current = null;
+//     }
+
+//     if (abortControllerRef.current) {
+//       abortControllerRef.current.abort();
+//       abortControllerRef.current = null;
+//     }
+
+//     isPollingRef.current = false;
+//     setIsPollingActive(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//   };
+
+//   // Check if response is for current job
+//   const isResponseForCurrentJob = (id) => {
+//     return id === currentJobIdRef.current;
+//   };
+
+//   // Poll status function
+//   const pollStatus = async (id) => {
+//     if (!isPollingRef.current || !isResponseForCurrentJob(id)) {
+//       return;
+//     }
+
+//     try {
+//       setPollingAttempts((prev) => prev + 1);
+
+//       const response = await axios.get(`${API_BASE_URL}/status/${id}`, {
+//         timeout: 10000,
+//         signal: abortControllerRef.current?.signal,
+//       });
+
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (response.data.status === "completed") {
+//         stopPolling();
+
+//         const resultResponse = await axios.get(`${API_BASE_URL}/result/${id}`, {
+//           signal: abortControllerRef.current?.signal,
+//         });
+
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         setProjectFiles(resultResponse.data.files);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(resultResponse.data.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsProcessing(false);
+
+//         const packageJson = resultResponse.data.files.find(
+//           (f) =>
+//             f.filename === "package.json" ||
+//             f.filename === "frontend/package.json",
+//         );
+//         let projectName = "Project";
+//         if (packageJson) {
+//           try {
+//             const parsed = JSON.parse(packageJson.content);
+//             projectName = parsed.name || projectName;
+//           } catch (e) {
+//             console.error("Error parsing package.json", e);
+//           }
+//         }
+
+//         // Count frontend and backend files
+//         const frontendFiles = resultResponse.data.files.filter(
+//           (f) =>
+//             f.filename.startsWith("frontend/") ||
+//             !f.filename.startsWith("backend/"),
+//         ).length;
+//         const backendFiles = resultResponse.data.files.filter((f) =>
+//           f.filename.startsWith("backend/"),
+//         ).length;
+
+//         const successMessage = {
+//           id: Date.now(),
+//           text: `✅ **Project Generated Successfully!**
+          
+// I've created a complete ${projectName} project with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, successMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt from messages
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         saveProjectToStorage(
+//           id,
+//           resultResponse.data.files,
+//           allMessages,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (response.data.status === "failed") {
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+
+//         // Extract error message from response
+//         const errorMsg =
+//           response.data.error?.message ||
+//           "Unknown error occurred during project generation";
+//         const errorDetails = response.data.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         // Add detailed error message to chat
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Generation Failed**
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Possible reasons:**
+// - The AI couldn't generate valid code for your request
+// - The request contained invalid syntax or requirements
+// - There was a server-side processing error
+// - The prompt was too complex or ambiguous
+
+// **Suggestions:**
+// - Try a simpler and more specific request
+// - Check for any syntax errors in your prompt
+// - Try one of the template projects first
+// - Make sure your request includes specific features
+
+// Click "New Project" to try again.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           errorDetails,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (
+//         response.data.status === "processing" ||
+//         response.data.status === "running"
+//       ) {
+//         setJobStatus("processing");
+//         updateProjectStatus(id, "processing");
+//       }
+
+//       if (
+//         isResponseForCurrentJob(id) &&
+//         pollingAttempts >= 60 &&
+//         !showTimeoutWarning &&
+//         !warningDismissed
+//       ) {
+//         setShowTimeoutWarning(true);
+//       }
+//     } catch (error) {
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (
+//         axios.isCancel(error) ||
+//         error.name === "AbortError" ||
+//         error.code === "ERR_CANCELED"
+//       ) {
+//         return;
+//       }
+
+//       console.error("Status check error:", error);
+
+//       // Handle network errors
+//       if (pollingAttempts > 10) {
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+//         setJobErrorMessage(error.message);
+//         setJobErrorDetails({ type: "network_error", message: error.message });
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Connection Error**
+
+// Unable to reach the server. Please check:
+
+// - The backend server is running at ${API_BASE_URL}
+// - Your internet connection
+// - No firewall blocking the connection
+
+// **Error details:** ${error.message}
+
+// **Technical Details:**
+// \`\`\`
+// Type: Network Error
+// Code: ${error.code || "N/A"}
+// Status: ${error.response?.status || "N/A"}
+// \`\`\`
+
+// **Solutions:**
+// 1. Start the backend server with: \`uvicorn main:app --reload\`
+// 2. Check if the server is running on port 8000
+// 3. Disable any firewall temporarily
+// 4. Try refreshing the page`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           { type: "network_error", message: error.message },
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       }
+//     }
+//   };
+
+//   // Start continuous polling
+//   const startPolling = (id) => {
+//     stopPolling();
+
+//     currentJobIdRef.current = id;
+//     setJobId(id);
+//     setJobStatus("processing");
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     isPollingRef.current = true;
+//     setIsPollingActive(true);
+
+//     abortControllerRef.current = new AbortController();
+
+//     pollStatus(id);
+
+//     pollingIntervalRef.current = setInterval(() => {
+//       if (isPollingRef.current && isResponseForCurrentJob(id)) {
+//         pollStatus(id);
+//       }
+//     }, 2000);
+//   };
+
+//   // Load project from localStorage or API
+//   const loadProject = async (id) => {
+//     // Prevent multiple loads
+//     if (!id || id === "null" || id === "undefined") {
+//       setShowHelp(true);
+//       setIsLoading(false);
+//       setIsProcessing(false);
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     stopPolling();
+
+//     setJobId(id);
+//     setIsProcessing(false);
+//     setShowHelp(false);
+//     setJobStatus("loading");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowSandpack(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     currentJobIdRef.current = id;
+
+//     try {
+//       // FIRST: Check API for current status
+//       let apiStatus = null;
+//       let apiError = null;
+
+//       try {
+//         const statusResponse = await axios.get(`${API_BASE_URL}/status/${id}`);
+//         apiStatus = statusResponse.data;
+//       } catch (apiErr) {
+//         apiError = apiErr;
+//       }
+
+//       // SECOND: Check localStorage
+//       const project = getProjectById(id);
+
+//       // PRIORITY 1: If API says completed, use API data
+//       if (apiStatus && apiStatus.status === "completed") {
+//         try {
+//           const resultResponse = await axios.get(
+//             `${API_BASE_URL}/result/${id}`,
+//           );
+//           setProjectFiles(resultResponse.data.files);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(
+//             resultResponse.data.files,
+//           );
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+
+//           const packageJson = resultResponse.data.files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           // Count frontend and backend files
+//           const frontendFiles = resultResponse.data.files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = resultResponse.data.files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([successMessage]);
+
+//           // Get prompt from localStorage if available
+//           const userPrompt = project?.prompt || "";
+//           saveProjectToStorage(
+//             id,
+//             resultResponse.data.files,
+//             [successMessage],
+//             userPrompt,
+//           );
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } catch (resultErr) {
+//           // Fall through to other options
+//         }
+//       }
+
+//       // PRIORITY 2: If API says processing
+//       if (
+//         apiStatus &&
+//         (apiStatus.status === "processing" || apiStatus.status === "running")
+//       ) {
+//         setJobStatus("processing");
+//         setIsProcessing(true);
+//         setIsLoading(false);
+
+//         // Use messages from localStorage if available
+//         if (project && project.messages) {
+//           setMessages(project.messages);
+//         } else {
+//           const processingMessage = {
+//             id: Date.now(),
+//             text: `🔄 **Project is still processing...**
+
+// Job ID: ${id}
+
+// The project is still being built. This may take a few moments.
+
+// I'll update you when it's ready!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+//           setMessages([processingMessage]);
+//         }
+
+//         startPolling(id);
+//         return;
+//       }
+
+//       // PRIORITY 3: If API says failed
+//       if (apiStatus && apiStatus.status === "failed") {
+//         setJobStatus("failed");
+
+//         const errorMsg =
+//           apiStatus.error?.message || "Project generation failed";
+//         const errorDetails = apiStatus.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Failed**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The request might have contained invalid syntax
+// - There was a server-side processing error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         setMessages([errorMessage]);
+
+//         // Update localStorage with failed status
+//         if (project) {
+//           updateProjectStatus(
+//             id,
+//             "failed",
+//             null,
+//             [errorMessage],
+//             errorDetails,
+//             project.prompt,
+//           );
+//         } else {
+//           // Create new failed project in localStorage
+//           const failedProject = {
+//             id: id,
+//             title: "Failed Project",
+//             timestamp: new Date().toLocaleString(),
+//             preview: "Generation failed",
+//             files: null,
+//             messages: [errorMessage],
+//             prompt: "Unknown",
+//             status: "failed",
+//             createdAt: new Date().toISOString(),
+//             error: errorMsg,
+//             errorDetails: errorDetails,
+//             totalFiles: 0,
+//             frontendFiles: 0,
+//             backendFiles: 0,
+//           };
+
+//           const stored = localStorage.getItem(STORAGE_KEY);
+//           let existingProjects = [];
+//           if (stored) {
+//             try {
+//               existingProjects = JSON.parse(stored);
+//             } catch (e) {
+//               console.error("Error parsing stored projects", e);
+//             }
+//           }
+
+//           const updated = [
+//             failedProject,
+//             ...existingProjects.filter((p) => p.id !== id),
+//           ].slice(0, 20);
+//           localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//           setRecentProjects(updated);
+//         }
+
+//         setIsLoading(false);
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // PRIORITY 4: Use localStorage data if API is not available
+//       if (project) {
+//         if (project.files) {
+//           // Completed project from localStorage
+//           setProjectFiles(project.files);
+//           setMessages(project.messages || []);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(project.files);
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } else if (project.status === "processing") {
+//           // Processing project from localStorage
+//           setMessages(project.messages || []);
+//           setJobStatus("processing");
+//           setIsProcessing(true);
+//           setIsLoading(false);
+//           startPolling(id);
+//           return;
+//         } else if (project.status === "failed") {
+//           // Failed project from localStorage
+//           setJobStatus("failed");
+
+//           const errorMsg = project.error || "This project failed to generate";
+//           const errorDetails = project.errorDetails || { message: errorMsg };
+
+//           setJobErrorMessage(errorMsg);
+//           setJobErrorDetails(errorDetails);
+
+//           const errorMessage = {
+//             id: Date.now(),
+//             text: `❌ **Project Failed to Load**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The project might have had syntax errors
+// - The server might have encountered an error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([errorMessage]);
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         }
+//       }
+
+//       // PRIORITY 5: No data found anywhere
+//       setJobStatus("failed");
+//       setJobErrorMessage("Project not found");
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Project Not Found**
+
+// No project found with ID: ${id}
+
+// The project may have expired or been deleted.
+
+// **Troubleshooting:**
+// - Check if the backend server is running at ${API_BASE_URL}
+// - The project ID might be incorrect
+// - Try creating a new project
+
+// Click "New Project" to start a new one.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     } catch (error) {
+//       console.error("Error loading project:", error);
+//       setJobStatus("failed");
+//       setJobErrorMessage(error.message);
+//       setJobErrorDetails({ type: "load_error", message: error.message });
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Error Loading Project**
+
+// Could not load the project. The project may have expired or been deleted.
+
+// **Error details:** ${error.message}
+
+// **Possible reasons:**
+// - The project ID is invalid
+// - The project has been deleted from the server
+// - The server is not responding
+
+// **Solutions:**
+// - Check if the backend server is running
+// - Try creating a new project
+// - Clear your browser cache and try again`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleBuildRequest = async (prompt) => {
+//     if (!prompt || prompt.trim().length < 3) {
+//       setInputError("Please enter a valid request (minimum 3 characters)");
+//       return;
+//     }
+
+//     setInputError("");
+//     setIsProcessing(true);
+//     setJobStatus("processing");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setShowSandpack(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     try {
+//       const buildResponse = await axios.post(`${API_BASE_URL}/build`, null, {
+//         params: { prompt },
+//         timeout: 30000,
+//       });
+
+//       const { job_id } = buildResponse.data;
+
+//       if (!job_id) {
+//         throw new Error("No job ID returned from server");
+//       }
+
+//       savePendingJob(job_id, prompt);
+//       setSearchParams({ project: job_id });
+
+//       const processingMessage = {
+//         id: Date.now(),
+//         text: `🔄 **Processing your request...**\n\n**Job ID:** ${job_id}\n**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"\n**Status:** Building your project...\n\nThis may take 30-60 seconds depending on complexity.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, processingMessage]);
+//       scrollToBottom();
+
+//       startPolling(job_id);
+//     } catch (error) {
+//       console.error("Build request failed:", error);
+
+//       let errorMessage = "Failed to start project generation.";
+//       let errorDetails = {};
+
+//       if (error.code === "ECONNABORTED") {
+//         errorMessage = "Request timeout. The server took too long to respond.";
+//         errorDetails = { type: "timeout", code: "ECONNABORTED" };
+//       } else if (error.response) {
+//         errorMessage = `Server error: ${error.response.status} - ${error.response.data?.detail || error.response.statusText}`;
+//         errorDetails = {
+//           type: "server_error",
+//           status: error.response.status,
+//           data: error.response.data,
+//         };
+//       } else if (error.request) {
+//         errorMessage =
+//           "Cannot connect to server. Please check if the backend is running.";
+//         errorDetails = { type: "connection_error", message: error.message };
+//       } else {
+//         errorMessage = error.message;
+//         errorDetails = { type: "unknown_error", message: error.message };
+//       }
+
+//       const errorMsg = {
+//         id: Date.now(),
+//         text: `❌ **Build Request Failed**
+
+// **Error:** ${errorMessage}
+
+// **Technical Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Troubleshooting:**
+// 1. Make sure the backend server is running at ${API_BASE_URL}
+// 2. Check if the server is accessible (try opening ${API_BASE_URL}/docs in browser)
+// 3. Verify there are no CORS issues
+// 4. Try again with a simpler request
+
+// Click "New Project" to try again.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, errorMsg]);
+//       setIsProcessing(false);
+//       setJobStatus("error");
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleSendMessage = () => {
+//     if (message.trim() && !isProcessing) {
+//       setInputError("");
+
+//       const userMessageObj = {
+//         id: Date.now(),
+//         text: message,
+//         sender: "user",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, userMessageObj]);
+//       scrollToBottom();
+
+//       const lowercaseMsg = message.toLowerCase();
+
+//       const isProjectRequest =
+//         lowercaseMsg.includes("create") ||
+//         lowercaseMsg.includes("build") ||
+//         lowercaseMsg.includes("make") ||
+//         lowercaseMsg.includes("generate") ||
+//         lowercaseMsg.includes("develop") ||
+//         lowercaseMsg.includes("website") ||
+//         lowercaseMsg.includes("app") ||
+//         lowercaseMsg.includes("application");
+
+//       const matchedTemplate = allTemplates.find((t) =>
+//         lowercaseMsg.includes(t.name.toLowerCase()),
+//       );
+
+//       if (isProjectRequest || matchedTemplate) {
+//         setIsTyping(true);
+//         setShowHelp(false);
+
+//         const currentMessage = message;
+//         setMessage("");
+
+//         setTimeout(() => {
+//           setIsTyping(false);
+
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: `🔄 **Starting project generation...**\n\nI'll create a complete ${matchedTemplate ? matchedTemplate.name : "custom"} project for you. This will take a few moments. Please wait...`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           scrollToBottom();
+//           handleBuildRequest(currentMessage);
+//         }, 1000);
+//       } else {
+//         setMessage("");
+//         setShowHelp(false);
+//         setIsTyping(true);
+
+//         setTimeout(() => {
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: "I can help you build complete projects! Try asking me to create something specific like:\n\n• 'Create a modern education ERP website'\n• 'Build an e-commerce platform'\n• 'Make a social media dashboard'\n• 'Generate a chat application'\n\nWhat would you like me to build for you today?",
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           setIsTyping(false);
+//           scrollToBottom();
+//         }, 1500);
+//       }
+//     }
+//   };
+
+//   const handleKeyPress = (e) => {
+//     if (e.key === "Enter" && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSendMessage();
+//     }
+//   };
+
+//   const handleNewChat = () => {
+//     stopPolling();
+
+//     setMessages([]);
+//     setShowHelp(true);
+//     setMessage("");
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobId(null);
+//     setJobStatus(null);
+//     setDownloadUrl(null);
+//     setIsProcessing(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setInputError("");
+//     setIsPollingActive(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     currentJobIdRef.current = null;
+
+//     setSearchParams({});
+
+//     scrollToBottom();
+//   };
+
+//   const handleTemplateClick = (templateName) => {
+//     const templateMsg = {
+//       id: Date.now(),
+//       text: `I want to build a ${templateName} application`,
+//       sender: "user",
+//       timestamp: new Date().toLocaleTimeString([], {
+//         hour: "2-digit",
+//         minute: "2-digit",
+//       }),
+//     };
+//     setMessages([templateMsg]);
+//     setShowHelp(false);
+//     scrollToBottom();
+
+//     let prompt = "";
+
+//     switch (templateName) {
+//       case "Education ERP":
+//         prompt =
+//           "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard.";
+//         break;
+//       case "E-commerce":
+//         prompt =
+//           "Build a full E-commerce website with product catalog, shopping cart, and user authentication.";
+//         break;
+//       case "Social Media":
+//         prompt =
+//           "Create a Social Media platform with user profiles, posts, likes, and comments.";
+//         break;
+//       case "Chat App":
+//         prompt =
+//           "Build a Real-time Chat Application with private messaging and group chats.";
+//         break;
+//       case "Video App":
+//         prompt =
+//           "Create a Video Streaming Platform with video upload, video player, playlists, and subscriptions.";
+//         break;
+//       case "Music App":
+//         prompt =
+//           "Build a Music Streaming App with audio playback, playlists, and album browsing.";
+//         break;
+//       case "Food App":
+//         prompt =
+//           "Create a Food Delivery App with restaurant listings, menu browsing, and order tracking.";
+//         break;
+//       case "Travel App":
+//         prompt =
+//           "Build a Travel Booking Platform with property listings, search filters, and booking calendar.";
+//         break;
+//       default:
+//         prompt = `Create a complete ${templateName} application with modern UI and responsive design.`;
+//     }
+
+//     handleBuildRequest(prompt);
+//   };
+
+//   const handleDownload = () => {
+//     if (downloadUrl) {
+//       window.open(downloadUrl, "_blank");
+//     }
+//   };
+
+//   // Handle project click from sidebar
+//   const handleProjectClick = (jobId) => {
+//     // Clear current state before loading new project
+//     setMessages([]);
+//     setShowHelp(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobStatus(null);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     // Set the URL parameter
+//     setSearchParams({ project: jobId });
+//   };
+
+//   // Handle manual save
+//   const handleManualSave = () => {
+//     console.log("Manual save triggered, saveFunctionRef.current:", saveFunctionRef.current);
+//     if (saveFunctionRef.current) {
+//       saveFunctionRef.current();
+//     } else {
+//       console.error("Save function not available yet - check if Sandpack is loaded");
+//     }
+//   };
+
+//   // Handle file save from ManualSaveHandler component
+// const handleFileSave = (files, activeFile) => {
+//   console.log("Files saved successfully:", files.length);
+
+//   setLastSaved(new Date());
+
+//   setProjectFiles(files);
+
+//   const updatedSandpackFiles = convertToSandpackFiles(files);
+//   setSandpackFiles(updatedSandpackFiles);
+
+//   loadRecentProjects();
+
+//   // restore active tab
+//   if (activeFile) {
+//     setTimeout(() => {
+//       sandpack.setActiveFile(activeFile);
+//     }, 0);
+//   }
+// };
+//   // Callback to receive the save function from the handler
+//   const handleSaveFunctionReady = (saveFn) => {
+//     console.log("Save function ready and stored in ref");
+//     saveFunctionRef.current = saveFn;
+//   };
+
+//   // Debug effect to check if jobId exists
+//   useEffect(() => {
+//     console.log("Current jobId:", jobId, "jobStatus:", jobStatus);
+//   }, [jobId, jobStatus]);
+
+//   // Loading animation component
+//   const ProcessingAnimation = () => {
+//     const [dots, setDots] = useState("");
+
+//     useEffect(() => {
+//       const interval = setInterval(() => {
+//         setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+//       }, 500);
+//       return () => clearInterval(interval);
+//     }, []);
+
+//     return (
+//       <div className="flex flex-col items-center justify-center p-8">
+//         <div className="relative">
+//           <motion.div
+//             animate={{ rotate: 360 }}
+//             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+//             className="w-16 h-16 border-4 border-t-transparent rounded-full"
+//             style={{ borderColor: theme.green, borderTopColor: "transparent" }}
+//           />
+//           <div className="absolute inset-0 flex items-center justify-center">
+//             <BsRobot className="text-xl" style={{ color: theme.green }} />
+//           </div>
+//         </div>
+//         <p
+//           className="mt-4 text-sm font-medium"
+//           style={{ color: theme.textPrimary }}
+//         >
+//           Building your project{dots}
+//         </p>
+//         {pollingAttempts > 0 && (
+//           <p className="mt-1 text-xs" style={{ color: theme.textSecondary }}>
+//             Elapsed: {Math.floor(pollingAttempts * 2)} seconds
+//           </p>
+//         )}
+//       </div>
+//     );
+//   };
+
+//   // Enhanced Error Display Component
+//   const ErrorDisplay = ({ message, details }) => {
+//     const [showDetails, setShowDetails] = useState(false);
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.red + "40",
+//           backgroundColor: theme.red + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.red + "20" }}
+//           >
+//             <BsExclamationTriangle
+//               className="text-2xl"
+//               style={{ color: theme.red }}
+//             />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.red }}
+//             >
+//               Project Generation Failed
+//             </h3>
+//             <div className="space-y-3">
+//               <div
+//                 className="p-3 rounded-lg"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderLeft: `4px solid ${theme.red}`,
+//                 }}
+//               >
+//                 <p
+//                   className="text-sm font-mono"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   {message || "Unknown error occurred"}
+//                 </p>
+//               </div>
+
+//               {details && (
+//                 <div>
+//                   <button
+//                     onClick={() => setShowDetails(!showDetails)}
+//                     className="flex items-center gap-2 text-xs mb-2"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <BsBug className="text-xs" />
+//                     {showDetails
+//                       ? "Hide technical details"
+//                       : "Show technical details"}
+//                   </button>
+
+//                   {showDetails && (
+//                     <pre
+//                       className="p-3 rounded-lg text-xs overflow-auto max-h-40"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       {JSON.stringify(details, null, 2)}
+//                     </pre>
+//                   )}
+//                 </div>
+//               )}
+
+//               <div className="mt-4">
+//                 <h4
+//                   className="text-sm font-semibold mb-2"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   Common Solutions:
+//                 </h4>
+//                 <ul className="space-y-2">
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>Try a simpler or more specific request</span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Check if your request has valid syntax and clear
+//                       requirements
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Try again with a different project type from the templates
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Make sure the backend server is running properly
+//                     </span>
+//                   </li>
+//                 </ul>
+//               </div>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={handleNewChat}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <HiOutlinePlus className="text-base" />
+//                   New Project
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => window.location.reload()}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineRefresh className="text-base" />
+//                   Refresh Page
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Diagnostic Display Component
+//   const DiagnosticDisplay = ({ data, onClose, onFix }) => {
+//     if (!data) return null;
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.yellow + "40",
+//           backgroundColor: theme.yellow + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.yellow + "20" }}
+//           >
+//             <BsWrench className="text-2xl" style={{ color: theme.yellow }} />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.yellow }}
+//             >
+//               Diagnostic Information
+//             </h3>
+//             <div className="space-y-3">
+//               <pre
+//                 className="p-3 rounded-lg text-xs overflow-auto max-h-96"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   color: theme.textSecondary,
+//                 }}
+//               >
+//                 {JSON.stringify(data, null, 2)}
+//               </pre>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onFix}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <BsWrench className="text-base" />
+//                   Fix localStorage
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onClose}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineX className="text-base" />
+//                   Close
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Get template for Sandpack
+//   const getSandpackTemplate = () => {
+//     // Check if it's a React project
+//     if (
+//       sandpackFiles["/src/App.jsx"] ||
+//       sandpackFiles["/src/App.js"] ||
+//       sandpackFiles["/src/main.jsx"]
+//     ) {
+//       return "react";
+//     }
+//     return "react"; // Default to react
+//   };
+
+//   // Get dependencies from package.json and ensure Tailwind is included
+//   const getDependencies = () => {
+//     const packageJsonFile = projectFiles?.find(
+//       (f) =>
+//         f.filename === "package.json" || f.filename === "frontend/package.json",
+//     );
+//     let dependencies = {};
+
+//     if (packageJsonFile) {
+//       try {
+//         const cleanContent = cleanCodeContent(packageJsonFile.content);
+//         const packageJson = JSON.parse(cleanContent);
+//         dependencies = packageJson.dependencies || {};
+//       } catch (e) {
+//         console.error("Error parsing package.json", e);
+//       }
+//     }
+
+//     // Ensure Tailwind dependencies are present
+//     return {
+//       ...dependencies,
+//       react: dependencies.react || "^18.2.0",
+//       "react-dom": dependencies["react-dom"] || "^18.2.0",
+//       "react-router-dom": dependencies["react-router-dom"] || "^6.3.0",
+//     };
+//   };
+
+//   // Prepare recent chats for sidebar with enhanced information
+//   const recentChats = recentProjects.map((project) => {
+//     let icon, color, title;
+
+//     if (project.status === "processing") {
+//       icon = <HiOutlineRefresh className="animate-spin" />;
+//       color = theme.yellow;
+//       title = project.title || "Processing...";
+//     } else if (project.status === "failed") {
+//       icon = <HiOutlineExclamation />;
+//       color = theme.red;
+//       title = "Failed Project";
+//     } else if (project.status === "completed") {
+//       icon = <HiOutlineCheckCircle />;
+//       color = theme.green;
+//       title = project.title || "Completed Project";
+//     } else {
+//       icon = <HiOutlineFolder />;
+//       color = theme.textPrimary;
+//       title = project.title || "Project";
+//     }
+
+//     // Create preview text without "frontend" word
+//     let previewText = "";
+//     if (project.status === "completed" && project.totalFiles) {
+//       previewText = `${project.totalFiles} files total (${project.frontendFiles || 0} frontend, ${project.backendFiles || 0} backend)`;
+//     } else if (project.prompt) {
+//       previewText =
+//         project.prompt.substring(0, 50) +
+//         (project.prompt.length > 50 ? "..." : "");
+//     } else {
+//       previewText = project.preview || "No preview";
+//     }
+
+//     return {
+//       id: project.id,
+//       title: title,
+//       preview: previewText,
+//       time: project.timestamp,
+//       icon: icon,
+//       color: color,
+//       jobId: project.id,
+//       status: project.status,
+//       prompt: project.prompt,
+//       error: project.error,
+//       totalFiles: project.totalFiles || 0,
+//       frontendFiles: project.frontendFiles || 0,
+//       backendFiles: project.backendFiles || 0,
+//     };
+//   });
+
+//   return (
+//     <div
+//       className="h-screen w-full overflow-hidden transition-colors duration-300"
+//       style={{ backgroundColor: theme.bg }}
+//     >
+//       {/* Mobile Menu Overlay */}
+//       <AnimatePresence>
+//         {isMobileMenuOpen && (
+//           <motion.div
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             exit={{ opacity: 0 }}
+//             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+//             onClick={() => setIsMobileMenuOpen(false)}
+//           />
+//         )}
+//       </AnimatePresence>
+
+//       {/* Mobile Sidebar */}
+//       <motion.aside
+//         initial={{ x: "-100%" }}
+//         animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
+//         transition={{ type: "tween", duration: 0.3 }}
+//         className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-xl overflow-y-auto"
+//         style={{ backgroundColor: theme.sidebar }}
+//       >
+//         <SidebarContent
+//           recentChats={recentChats}
+//           templates={sidebarTemplates}
+//           allTemplates={allTemplates}
+//           onClose={() => setIsMobileMenuOpen(false)}
+//           theme={theme}
+//           hoveredChat={hoveredChat}
+//           setHoveredChat={setHoveredChat}
+//           onNewChat={handleNewChat}
+//           onProjectClick={handleProjectClick}
+//           onTemplateClick={handleTemplateClick}
+//           currentTheme={currentTheme}
+//           toggleTheme={toggleTheme}
+//         />
+//       </motion.aside>
+
+//       {/* Desktop Layout */}
+//       <div className="flex h-full w-full">
+//         {/* Desktop Sidebar with Collapse Toggle */}
+//         <motion.aside
+//           animate={{ width: sidebarCollapsed ? 80 : 288 }}
+//           className="hidden lg:block h-full border-r relative transition-all duration-300"
+//           style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+//         >
+//           <button
+//             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+//             className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg"
+//             style={{
+//               backgroundColor: theme.card,
+//               borderColor: theme.border,
+//               color: theme.textPrimary,
+//             }}
+//           >
+//             {sidebarCollapsed ? (
+//               <HiOutlineChevronRight />
+//             ) : (
+//               <HiOutlineChevronLeft />
+//             )}
+//           </button>
+
+//           {sidebarCollapsed ? (
+//             <CollapsedSidebar
+//               theme={theme}
+//               onNewChat={handleNewChat}
+//               recentChats={recentChats}
+//               onProjectClick={handleProjectClick}
+//             />
+//           ) : (
+//             <SidebarContent
+//               recentChats={recentChats}
+//               templates={sidebarTemplates}
+//               allTemplates={allTemplates}
+//               theme={theme}
+//               hoveredChat={hoveredChat}
+//               setHoveredChat={setHoveredChat}
+//               onNewChat={handleNewChat}
+//               onProjectClick={handleProjectClick}
+//               onTemplateClick={handleTemplateClick}
+//               currentTheme={currentTheme}
+//               toggleTheme={toggleTheme}
+//             />
+//           )}
+//         </motion.aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 h-full flex flex-col w-full min-w-0">
+//           {/* Fixed Header */}
+//           <div
+//             className="flex-shrink-0 border-b w-full"
+//             style={{
+//               backgroundColor: theme.sidebar,
+//               borderColor: theme.border,
+//             }}
+//           >
+//             <div className="flex items-center justify-between px-4 py-3">
+//               <div className="flex items-center gap-3">
+//                 <button
+//                   onClick={() => setIsMobileMenuOpen(true)}
+//                   className="lg:hidden p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineMenu className="text-lg" />
+//                 </button>
+//                 <h2
+//                   className="text-sm font-medium hidden sm:block"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   AI Developer Assistant
+//                 </h2>
+//               </div>
+
+//               <div className="flex items-center gap-2">
+//                 {/* Theme Toggle Button */}
+//                 <motion.button
+//                   whileHover={{ scale: 1.05 }}
+//                   whileTap={{ scale: 0.95 }}
+//                   onClick={toggleTheme}
+//                   className="p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                   title={
+//                     currentTheme === "dark"
+//                       ? "Switch to Light Mode"
+//                       : "Switch to Dark Mode"
+//                   }
+//                 >
+//                   {currentTheme === "dark" ? (
+//                     <HiOutlineSun className="text-lg" />
+//                   ) : (
+//                     <HiOutlineMoon className="text-lg" />
+//                   )}
+//                 </motion.button>
+
+//                 {/* Mobile Workspace Toggle Button */}
+//                 {jobStatus === "completed" && (
+//                   <button
+//                     onClick={() => setShowMobileWorkspace(!showMobileWorkspace)}
+//                     className="lg:hidden p-2 rounded-full"
+//                     style={{
+//                       backgroundColor: theme.card,
+//                       color: showMobileWorkspace ? theme.green : theme.textPrimary,
+//                     }}
+//                     title={showMobileWorkspace ? "Show Chat" : "Show Workspace"}
+//                   >
+//                     {showMobileWorkspace ? (
+//                       <HiOutlineChat className="text-lg" />
+//                     ) : (
+//                       <HiOutlineCode className="text-lg" />
+//                     )}
+//                   </button>
+//                 )}
+
+//                 {jobId && (
+//                   <>
+//                     <span
+//                       className="text-xs px-2 py-1 rounded-full hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       Job: {jobId.substring(0, 8)}...
+//                     </span>
+//                     {jobStatus === "processing" && isPollingActive && (
+//                       <div className="flex items-center gap-1">
+//                         <motion.div
+//                           animate={{ rotate: 360 }}
+//                           transition={{
+//                             duration: 2,
+//                             repeat: Infinity,
+//                             ease: "linear",
+//                           }}
+//                         >
+//                           <HiOutlineRefresh
+//                             className="text-lg"
+//                             style={{ color: theme.green }}
+//                           />
+//                         </motion.div>
+//                         {pollingAttempts > 0 && (
+//                           <span
+//                             className="text-xs hidden sm:inline"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             {Math.floor(pollingAttempts * 2)}s
+//                           </span>
+//                         )}
+//                       </div>
+//                     )}
+//                     {jobStatus === "completed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.green + "20",
+//                           color: theme.green,
+//                         }}
+//                       >
+//                         <HiOutlineCheckCircle className="text-xs" />
+//                         Completed
+//                       </span>
+//                     )}
+//                     {jobStatus === "failed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.red + "20",
+//                           color: theme.red,
+//                         }}
+//                       >
+//                         <HiOutlineExclamation className="text-xs" />
+//                         Failed
+//                       </span>
+//                     )}
+//                   </>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Two Column Layout - Responsive */}
+//           <div className="flex-1 flex overflow-hidden">
+//             {/* Left Column - Messages Area */}
+//             <div
+//               className={`
+//                 ${jobStatus === "completed" ? "lg:w-2/5" : "w-full"} 
+//                 ${jobStatus === "completed" && showMobileWorkspace ? "hidden lg:flex" : "flex"}
+//                 border-r overflow-hidden flex-col transition-all duration-300
+//               `}
+//               style={{ borderColor: theme.border }}
+//             >
+//               <div
+//                 className="p-3 border-b"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <h3
+//                   className="text-xs font-semibold uppercase"
+//                   style={{ color: theme.textSecondary }}
+//                 >
+//                   AI Conversation
+//                 </h3>
+//               </div>
+//               <div
+//                 ref={messagesContainerRef}
+//                 className="flex-1 overflow-y-auto"
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 <div className="p-6">
+//                   <div className="max-w-full mx-auto">
+//                     {/* Timeout Warning Banner */}
+//                     <AnimatePresence>
+//                       {showTimeoutWarning &&
+//                         jobStatus === "processing" &&
+//                         !warningDismissed && (
+//                           <motion.div
+//                             initial={{ opacity: 0, y: -20 }}
+//                             animate={{ opacity: 1, y: 0 }}
+//                             exit={{ opacity: 0, y: -20 }}
+//                             className="mb-4 p-4 rounded-lg border"
+//                             style={{
+//                               backgroundColor: theme.yellow + "20",
+//                               borderColor: theme.yellow,
+//                             }}
+//                           >
+//                             <div className="flex items-start gap-3">
+//                               <BsHourglassSplit
+//                                 className="text-xl flex-shrink-0 animate-pulse"
+//                                 style={{ color: theme.yellow }}
+//                               />
+//                               <div className="flex-1">
+//                                 <h4
+//                                   className="text-sm font-semibold"
+//                                   style={{ color: theme.yellow }}
+//                                 >
+//                                   Taking longer than expected
+//                                 </h4>
+//                                 <p
+//                                   className="text-xs mt-1"
+//                                   style={{ color: theme.textSecondary }}
+//                                 >
+//                                   Your project is still being built. Complex
+//                                   projects can take 2-5 minutes.
+//                                 </p>
+//                                 <div className="flex gap-2 mt-3">
+//                                   <button
+//                                     onClick={() => {
+//                                       setWarningDismissed(true);
+//                                       setShowTimeoutWarning(false);
+//                                     }}
+//                                     className="text-xs px-3 py-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: "transparent",
+//                                       color: theme.textSecondary,
+//                                       border: `1px solid ${theme.border}`,
+//                                     }}
+//                                   >
+//                                     Dismiss
+//                                   </button>
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           </motion.div>
+//                         )}
+//                     </AnimatePresence>
+
+//                     {/* Diagnostic Display */}
+//                     {showDiagnostic && diagnosticData && (
+//                       <DiagnosticDisplay
+//                         data={diagnosticData}
+//                         onClose={() => setShowDiagnostic(false)}
+//                         onFix={fixLocalStorage}
+//                       />
+//                     )}
+
+//                     <AnimatePresence mode="wait">
+//                       {showHelp && messages.length === 0 ? (
+//                         /* Help Section */
+//                         <motion.div
+//                           key="help"
+//                           initial={{ opacity: 0, y: 10 }}
+//                           animate={{ opacity: 1, y: 0 }}
+//                           exit={{ opacity: 0, y: -10 }}
+//                           transition={{ duration: 0.2 }}
+//                         >
+//                           <h2
+//                             className="text-lg sm:text-xl font-semibold mb-2"
+//                             style={{ color: theme.textPrimary }}
+//                           >
+//                             What would you like to build today?
+//                           </h2>
+//                           <p
+//                             className="text-sm mb-6"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build complete projects and get a VS
+//                             Code-like environment!
+//                           </p>
+
+//                           {/* Project Templates - Show all 8 templates in help section */}
+//                           <div className="mb-8">
+//                             <h3
+//                               className="text-sm font-semibold mb-2"
+//                               style={{ color: theme.textPrimary }}
+//                             >
+//                               Popular Projects
+//                             </h3>
+//                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+//                               {allTemplates.map((template, index) => (
+//                                 <motion.button
+//                                   key={index}
+//                                   whileHover={{ scale: 1.02 }}
+//                                   whileTap={{ scale: 0.98 }}
+//                                   className="text-white p-3 rounded-xl flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-all"
+//                                   style={{ backgroundColor: template.bg }}
+//                                   onClick={() =>
+//                                     handleTemplateClick(template.name)
+//                                   }
+//                                 >
+//                                   <span className="text-xl">
+//                                     {template.icon}
+//                                   </span>
+//                                   <span className="text-xs font-medium text-center">
+//                                     {template.name}
+//                                   </span>
+//                                 </motion.button>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </motion.div>
+//                       ) : (
+//                         /* Messages */
+//                         <motion.div
+//                           key="messages"
+//                           initial={{ opacity: 0 }}
+//                           animate={{ opacity: 1 }}
+//                           exit={{ opacity: 0 }}
+//                         >
+//                           {messages.map((msg, index) => (
+//                             <motion.div
+//                               key={msg.id}
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               transition={{
+//                                 duration: 0.2,
+//                                 delay: index * 0.05,
+//                               }}
+//                               className={`mb-4 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+//                             >
+//                               <div
+//                                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+//                                   msg.sender === "user"
+//                                     ? "rounded-br-none"
+//                                     : "rounded-bl-none"
+//                                 }`}
+//                                 style={{
+//                                   backgroundColor:
+//                                     msg.sender === "user"
+//                                       ? theme.green
+//                                       : theme.card,
+//                                   color:
+//                                     msg.sender === "user"
+//                                       ? "#FFFFFF"
+//                                       : theme.textPrimary,
+//                                 }}
+//                               >
+//                                 {msg.sender === "ai" && (
+//                                   <div className="flex items-center gap-2 mb-2">
+//                                     <BsRobot className="text-xs" />
+//                                     <span className="text-xs font-medium">
+//                                       AI Developer Assistant
+//                                     </span>
+//                                   </div>
+//                                 )}
+//                                 <div className="text-sm whitespace-pre-wrap font-mono">
+//                                   {msg.text}
+//                                 </div>
+//                                 <p className="text-xs mt-2 opacity-70 text-right">
+//                                   {msg.timestamp}
+//                                 </p>
+//                               </div>
+//                             </motion.div>
+//                           ))}
+
+//                           {/* Processing Animation */}
+//                           {isProcessing &&
+//                             jobStatus === "processing" &&
+//                             !projectFiles &&
+//                             isPollingActive && (
+//                               <motion.div
+//                                 initial={{ opacity: 0 }}
+//                                 animate={{ opacity: 1 }}
+//                                 exit={{ opacity: 0 }}
+//                                 className="flex justify-center"
+//                               >
+//                                 <ProcessingAnimation />
+//                               </motion.div>
+//                             )}
+
+//                           {/* Error Display for Failed Jobs */}
+//                           {jobStatus === "failed" && jobErrorMessage && (
+//                             <ErrorDisplay
+//                               message={jobErrorMessage}
+//                               details={jobErrorDetails}
+//                             />
+//                           )}
+
+//                           {/* Typing indicator */}
+//                           {isTyping && (
+//                             <motion.div
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               className="flex justify-start"
+//                             >
+//                               <div
+//                                 className="rounded-2xl rounded-bl-none px-4 py-3"
+//                                 style={{ backgroundColor: theme.card }}
+//                               >
+//                                 <div className="flex gap-1">
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.2,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.4,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </motion.div>
+//                           )}
+
+//                           <div ref={messagesEndRef} />
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Fixed Input Area for Messages */}
+//               <div
+//                 className="flex-shrink-0 border-t w-full p-3"
+//                 style={{
+//                   backgroundColor: theme.sidebar,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <div className="max-w-full mx-auto">
+//                   <div className="relative">
+//                     <textarea
+//                       ref={inputRef}
+//                       value={message}
+//                       onChange={(e) => setMessage(e.target.value)}
+//                       onKeyPress={handleKeyPress}
+//                       placeholder="Ask me to build any project..."
+//                       className={`w-full pl-3 placeholder:text-xs pr-24 py-4 border rounded-md text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${
+//                         inputError
+//                           ? "border-red-500 focus:ring-red-500"
+//                           : "focus:ring-[#22C55E]"
+//                       }`}
+//                       style={{
+//                         backgroundColor: theme.inputBg,
+//                         borderColor: inputError ? theme.red : theme.border,
+//                         color: theme.textPrimary,
+//                         minHeight: "70px",
+//                         maxHeight: "160px",
+//                         resize: "none",
+//                       }}
+//                       rows="2"
+//                       onInput={(e) => {
+//                         e.target.style.height = "auto";
+//                         e.target.style.height =
+//                           Math.min(e.target.scrollHeight, 150) + "px";
+//                       }}
+//                       disabled={isProcessing && jobStatus === "processing"}
+//                     />
+//                     <div className="absolute right-2 bottom-3 flex items-center gap-2">
+//                       <button
+//                         onClick={handleSendMessage}
+//                         disabled={isProcessing && jobStatus === "processing"}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+//                         style={{
+//                           backgroundColor:
+//                             isProcessing && jobStatus === "processing"
+//                               ? theme.textSecondary
+//                               : theme.green,
+//                         }}
+//                         title={
+//                           isProcessing
+//                             ? "Currently building a project"
+//                             : "Send message"
+//                         }
+//                       >
+//                         <HiOutlinePaperAirplane className="text-sm" />
+//                       </button>
+//                       <button
+//                         onClick={handleNewChat}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0"
+//                         style={{ backgroundColor: theme.card }}
+//                         title="Start new chat"
+//                       >
+//                         <HiOutlinePlus className="text-sm" />
+//                       </button>
+//                     </div>
+//                   </div>
+//                   {inputError && (
+//                     <p className="text-xs mt-1 text-red-500">{inputError}</p>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Right Column - Workspace Area - Responsive */}
+//             {jobStatus === "completed" && (
+//               <div
+//                 ref={workspaceRef}
+//                 className={`
+//                   lg:w-3/5 
+//                   ${showMobileWorkspace ? "w-full" : "hidden lg:block"}
+//                   overflow-hidden flex flex-col transition-all duration-300
+//                 `}
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 {/* Workspace Header with View Toggles and Fullscreen */}
+//                 <div
+//                   className="px-3 p-1/2 border-b flex items-center justify-between"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     borderColor: theme.border,
+//                   }}
+//                 >
+//                   <div className="flex items-center gap-2">
+//                     <h3
+//                       className="sm:text-xs whitespace-nowrap text-[10px] font-semibold uppercase"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       Project Workspace
+//                     </h3>
+//                     {downloadUrl && (
+//                       <motion.button
+//                         whileHover={{ scale: 1.05 }}
+//                         whileTap={{ scale: 0.95 }}
+//                         onClick={handleDownload}
+//                         className="flex items-center gap-1 px-2 sm:py-1 rounded text-white text-xs"
+//                         style={{ backgroundColor: theme.green }}
+//                       >
+//                         <HiOutlineDownload className="text-xs" />
+//                       zip
+//                       </motion.button>
+//                     )}
+//                     <button
+//                       onClick={runDiagnostic}
+//                       className="p-1.5 rounded-full text-xs hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                       title="Run diagnostic"
+//                     >
+//                       <BsWrench className="text-sm" />
+//                     </button>
+
+//                     {/* Manual Save Button - Now in the workspace header */}
+//                     {jobId && jobStatus === "completed" && (
+//                       <SaveButton 
+//                         onClick={handleManualSave} 
+//                         saveStatus={saveStatus}
+//                       />
+//                     )}
+//                   </div>
+
+//                   {/* View Toggle Buttons */}
+//                   {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                     <div className="flex items-center gap-2">
+//                       <div
+//                         className="flex items-center gap-1 rounded-lg p-1"
+//                         style={{ backgroundColor: theme.card }}
+//                       >
+//                         <button
+//                           onClick={() => setWorkspaceView("preview")}
+//                           className={`px-3 sm:py-1 rounded-md text-xs font-medium transition-all ${
+//                             workspaceView === "preview"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "preview"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "preview"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Preview View"
+//                         >
+//                           <BsEye className="text-sm inline mr-1 mb-1" />
+//                           <span className="hidden sm:inline">Preview</span>
+//                         </button>
+//                         <button
+//                           onClick={() => setWorkspaceView("code")}
+//                           className={`px-3 py-1 rounded-md text-xs flex justify-center items-center font-medium transition-all ${
+//                             workspaceView === "code"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "code"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "code"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Code View"
+//                         >
+//                           <BsCodeSquare className="text-sm inline mr-1" />
+//                           <span className="hidden sm:inline">Code</span>
+//                         </button>
+//                       </div>
+
+//                       {/* Fullscreen Button */}
+//                       <button
+//                         onClick={toggleFullscreen}
+//                         className="p-2 rounded-md transition-all hidden sm:inline-block"
+//                         style={{
+//                           backgroundColor: theme.card,
+//                           color: theme.textSecondary,
+//                         }}
+//                         title={
+//                           isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+//                         }
+//                       >
+//                         <HiOutlineArrowsExpand className="text-sm" />
+//                       </button>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* Workspace Content */}
+//                 <div className="flex-1 overflow-hidden">
+//                   {!showSandpack || Object.keys(sandpackFiles).length === 0 ? (
+//                     <div className="h-full flex items-center justify-center flex-col gap-4">
+//                       {jobStatus === "processing" ? (
+//                         <ProcessingAnimation />
+//                       ) : jobStatus === "failed" ? (
+//                         <div className="text-center">
+//                           <BsExclamationTriangle
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.red }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Project generation failed
+//                           </p>
+//                         </div>
+//                       ) : (
+//                         <div className="text-center">
+//                           <HiOutlineCode
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.textSecondary }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Your project will appear here
+//                           </p>
+//                           <p
+//                             className="text-xs mt-2"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build something to get started
+//                           </p>
+//                         </div>
+//                       )}
+//                     </div>
+//                   ) : (
+//                     <div
+//                       className="h-full overflow-hidden"
+//                       style={{ backgroundColor: theme.sandpackBg }}
+//                     >
+//                       <SandpackProvider
+//                         key={jobId || "sandpack-provider"}
+//                         template={getSandpackTemplate()}
+//                         theme={currentTheme === "dark" ? "dark" : "light"}
+//                         files={sandpackFiles}
+//                         customSetup={{
+//                           dependencies: getDependencies(),
+//                           entry: sandpackFiles["/src/index.js"]
+//                             ? "/src/index.js"
+//                             : sandpackFiles["/src/index.jsx"]
+//                               ? "/src/index.jsx"
+//                               : sandpackFiles["/src/main.jsx"]
+//                                 ? "/src/main.jsx"
+//                                 : "/src/index.js",
+//                         }}
+//                         options={{
+//                           externalResources: ["https://cdn.tailwindcss.com"],
+//                           visibleFiles: Object.keys(sandpackFiles),
+//                           activeFile:
+//                             Object.keys(sandpackFiles).find(
+//                               (f) =>
+//                                 f.includes("App.jsx") ||
+//                                 f.includes("App.js") ||
+//                                 f.includes("main.jsx"),
+//                             ) || Object.keys(sandpackFiles)[0],
+//                         }}
+//                       >
+//                         {/* Save handler wrapper - properly inside SandpackProvider */}
+//                         <SaveHandlerWrapper 
+//                           jobId={jobId} 
+//                           onSave={handleFileSave} 
+//                           setSaveStatus={setSaveStatus}
+//                           onSaveFunctionReady={handleSaveFunctionReady}
+//                         />
+                        
+//                         <SandpackLayout className="h-full">
+//                           {workspaceView === "preview" && (
+//                             /* Preview View - Full height preview with console at bottom */
+//                             <div className="flex flex-col h-full w-full">
+//                               {/* Preview (80%) */}
+//                               <div
+//                                 className="h-[80%] flex flex-col"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   PREVIEW
+//                                 </div>
+//                                 <div className="flex-1">
+//                                   <SandpackPreview
+//                                     showOpenInCodeSandbox={false}
+//                                     showRefreshButton={true}
+//                                     className="h-[70vh]"
+//                                   />
+//                                 </div>
+//                               </div>
+
+//                               {/* Console (20%) */}
+//                               <div
+//                                 className="h-[20%] border-t flex flex-col"
+//                                 style={{ borderColor: theme.border }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-1 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   CONSOLE
+//                                 </div>
+//                                 <div className="flex-1 overflow-auto">
+//                                   <SandpackConsole />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+
+//                           {workspaceView === "code" && (
+//                             /* Code View - Full height with resizable file explorer and editor */
+//                             <div className="flex flex-row h-[95vh] w-full">
+//                               {/* FILE EXPLORER - Resizable Panel */}
+//                               <ResizablePanel
+//                                 defaultWidth={25}
+//                                 minWidth={17}
+//                                 maxWidth={50}
+//                                 direction="right"
+//                                 storageKey={EXPLORER_WIDTH_KEY}
+//                                 theme={theme}
+//                               >
+//                                 <div
+//                                   className="h-full border-r flex flex-col"
+//                                   style={{
+//                                     backgroundColor: theme.card,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   <div
+//                                     className="px-3 py-2 text-xs border-b flex justify-between items-center font-semibold"
+//                                     style={{
+//                                       color: theme.textSecondary,
+//                                       borderColor: theme.border,
+//                                     }}
+//                                   >
+//                                     <h4>EXPLORER</h4>
+//                                     {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                                       <div
+//                                         className="px-2 flex justify-center items-center text-[10px]"
+//                                         style={{
+//                                           backgroundColor: theme.card,
+//                                           borderColor: theme.border,
+//                                           color: theme.textSecondary,
+//                                         }}
+//                                       >
+//                                         {Object.keys(sandpackFiles).length} files
+//                                       </div>
+//                                     )}
+//                                   </div>
+//                                   <div className="flex-1 overflow-auto">
+//                                     <SandpackFileExplorer
+//                                       className="text-xs"
+//                                       autoHiddenFiles={false}
+//                                       style={{
+//                                         height: "100%",
+//                                         overflow: "auto",
+//                                       }}
+//                                     />
+//                                   </div>
+//                                 </div>
+//                               </ResizablePanel>
+                              
+//                               {/* EDITOR - Takes remaining width */}
+//                               <div
+//                                 className="flex-1 h-full flex flex-col overflow-hidden"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold flex-shrink-0"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   EDITOR
+//                                 </div>
+//                                 <div className="flex-1 overflow-hidden">
+//                                   <SandpackCodeEditor
+//                                     showTabs
+//                                     showLineNumbers
+//                                     wrapContent={false}
+//                                     closableTabs={true}
+//                                     style={{
+//                                       height: "100%",
+//                                       overflow: "auto",
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+//                         </SandpackLayout>
+//                       </SandpackProvider>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Sidebar Component
+// const SidebarContent = ({
+//   recentChats,
+//   templates,
+//   allTemplates,
+//   onClose,
+//   theme,
+//   hoveredChat,
+//   setHoveredChat,
+//   onNewChat,
+//   onProjectClick,
+//   onTemplateClick,
+//   currentTheme,
+//   toggleTheme,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col">
+//       {/* Header */}
+//       <div
+//         className="p-3 border-b flex-shrink-0"
+//         style={{ borderColor: theme.border }}
+//       >
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center gap-3 min-w-0">
+//             <motion.div
+//               whileHover={{ scale: 1.02 }}
+//               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+//               style={{
+//                 background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//               }}
+//             >
+//               <img
+//                 src="/EVA.png"
+//                 alt="EVA"
+//                 height={60}
+//                 className="rounded-full"
+//               />
+//             </motion.div>
+//             <div className="min-w-0">
+//               <h1
+//                 className="text-sm font-semibold truncate"
+//                 style={{ color: theme.textPrimary }}
+//               >
+//                 EVA AI
+//               </h1>
+//               <p
+//                 className="text-xs truncate"
+//                 style={{ color: theme.textSecondary }}
+//               >
+//                 Full-Stack AI
+//               </p>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             {/* Theme Toggle in Sidebar */}
+//             <motion.button
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//               onClick={toggleTheme}
+//               className="p-2 rounded-full"
+//               style={{ backgroundColor: theme.card, color: theme.textPrimary }}
+//               title={
+//                 currentTheme === "dark"
+//                   ? "Switch to Light Mode"
+//                   : "Switch to Dark Mode"
+//               }
+//             >
+//               {currentTheme === "dark" ? (
+//                 <HiOutlineSun className="text-sm" />
+//               ) : (
+//                 <HiOutlineMoon className="text-sm" />
+//               )}
+//             </motion.button>
+//             {onClose && (
+//               <motion.button
+//                 whileHover={{ rotate: 90 }}
+//                 transition={{ duration: 0.2 }}
+//                 onClick={onClose}
+//                 className="lg:hidden p-2 rounded-full flex-shrink-0"
+//                 style={{ backgroundColor: theme.card }}
+//               >
+//                 <HiOutlineX style={{ color: theme.textPrimary }} />
+//               </motion.button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* New Chat Button */}
+//       <div className="p-4 mx-3 flex-shrink-0">
+//         <motion.button
+//           whileHover={{ scale: 1.02 }}
+//           whileTap={{ scale: 0.98 }}
+//           onClick={onNewChat}
+//           className="w-full py-2.5 px-4 text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
+//           style={{ backgroundColor: theme.green }}
+//         >
+//           <HiOutlinePlus className="text-base" />
+//           <span className="truncate">New Project</span>
+//         </motion.button>
+//       </div>
+
+//       {/* Templates Section */}
+//       <div className="px-3 mb-4">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Quick Templates
+//         </h2>
+//         <div className="grid grid-cols-2 gap-2">
+//           {templates.map((template, index) => (
+//             <motion.button
+//               key={index}
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               className="p-2 rounded-lg text-xs text-white flex items-center justify-center gap-1.5"
+//               style={{ backgroundColor: template.bg }}
+//               onClick={() => onTemplateClick(template.name)}
+//             >
+//               <span className="text-sm">{template.icon}</span>
+//               <span className="truncate">{template.name}</span>
+//             </motion.button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* Recent Projects Section */}
+//       <div className="flex-1 px-3 overflow-y-auto no-scrollbar min-h-72">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Recent Projects
+//         </h2>
+//         <div className="space-y-1 pb-4">
+//           {recentChats.length > 0 ? (
+//             recentChats.map((chat) => (
+//               <motion.div
+//                 key={chat.id}
+//                 whileHover={{ x: 4 }}
+//                 className="flex items-start gap-3 p-3 rounded-xl cursor-pointer group"
+//                 style={{
+//                   backgroundColor:
+//                     hoveredChat === chat.id ? theme.hover : "transparent",
+//                   opacity: chat.status === "processing" ? 0.8 : 1,
+//                 }}
+//                 onMouseEnter={() => setHoveredChat(chat.id)}
+//                 onMouseLeave={() => setHoveredChat(null)}
+//                 onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//               >
+//                 <div
+//                   className="p-2 rounded-full flex-shrink-0"
+//                   style={{ backgroundColor: theme.iconBg }}
+//                 >
+//                   <span style={{ color: chat.color }} className="text-sm">
+//                     {chat.icon}
+//                   </span>
+//                 </div>
+//                 <div className="flex-1 min-w-0">
+//                   <div className="flex items-center justify-between gap-2">
+//                     <h4
+//                       className="text-sm font-medium truncate"
+//                       style={{ color: theme.textPrimary }}
+//                     >
+//                       {chat.title}
+//                     </h4>
+//                     <span
+//                       className="text-xs flex-shrink-0"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       {chat.time}
+//                     </span>
+//                   </div>
+//                   <p
+//                     className="text-xs truncate"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     {chat.preview}
+//                   </p>
+//                   {chat.status === "processing" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.yellow + "20",
+//                         color: theme.yellow,
+//                       }}
+//                     >
+//                       Processing...
+//                     </span>
+//                   )}
+//                   {chat.status === "completed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.green + "20",
+//                         color: theme.green,
+//                       }}
+//                     >
+//                       Completed
+//                     </span>
+//                   )}
+//                   {chat.status === "failed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.red + "20",
+//                         color: theme.red,
+//                       }}
+//                     >
+//                       Failed
+//                     </span>
+//                   )}
+//                 </div>
+//               </motion.div>
+//             ))
+//           ) : (
+//             <div
+//               className="text-center py-8"
+//               style={{ color: theme.textSecondary }}
+//             >
+//               <p className="text-xs">No recent projects</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Collapsed Sidebar Component
+// const CollapsedSidebar = ({
+//   theme,
+//   onNewChat,
+//   recentChats,
+//   onProjectClick,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col items-center py-3">
+//       <motion.div
+//         whileHover={{ scale: 1.1 }}
+//         className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md mb-6 cursor-pointer"
+//         style={{
+//           background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//         }}
+//         onClick={onNewChat}
+//         title="New Project"
+//       >
+//         <HiOutlinePlus className="text-white text-lg" />
+//       </motion.div>
+
+//       <div className="flex-1 w-full px-2">
+//         {recentChats.slice(0, 5).map((chat) => (
+//           <motion.div
+//             key={chat.id}
+//             whileHover={{ scale: 1.05 }}
+//             className="w-full flex justify-center mb-2 cursor-pointer relative"
+//             onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//             title={`${chat.title} - ${chat.status}`}
+//           >
+//             <div
+//               className="p-2 rounded-lg"
+//               style={{ backgroundColor: theme.card }}
+//             >
+//               <span style={{ color: chat.color }} className="text-lg">
+//                 {chat.icon}
+//               </span>
+//             </div>
+//             {chat.status === "processing" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+//             )}
+//             {chat.status === "failed" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+//             )}
+//           </motion.div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Home;
+
+
+
+
+
+
+
+
+
+
+////save functionality ai solution
+// import React, { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "motion/react";
+// import { useSearchParams } from "react-router-dom";
+// import axios from "axios";
+// import {
+//   SandpackProvider,
+//   SandpackLayout,
+//   SandpackCodeEditor,
+//   SandpackPreview,
+//   SandpackConsole,
+//   SandpackFileExplorer,
+//   useSandpack,
+// } from "@codesandbox/sandpack-react";
+// import {
+//   HiOutlineChat,
+//   HiOutlinePlus,
+//   HiOutlineX,
+//   HiOutlinePaperAirplane,
+//   HiOutlineShoppingCart,
+//   HiOutlineUserGroup,
+//   HiOutlineVideoCamera,
+//   HiOutlinePhotograph,
+//   HiOutlineLocationMarker,
+//   HiOutlineMap,
+//   HiOutlineCode,
+//   HiOutlineDownload,
+//   HiOutlineFolder,
+//   HiOutlineCheckCircle,
+//   HiOutlineRefresh,
+//   HiOutlineFolderOpen,
+//   HiOutlineChevronLeft,
+//   HiOutlineChevronRight,
+//   HiOutlineExclamation,
+//   HiOutlineMenu,
+//   HiOutlineEye,
+//   HiOutlineCog,
+//   HiOutlineArrowsExpand,
+//   HiOutlineSun,
+//   HiOutlineMoon,
+//   HiOutlineSave,
+// } from "react-icons/hi";
+// import {
+//   BsRobot,
+//   BsHourglassSplit,
+//   BsExclamationTriangle,
+//   BsBug,
+//   BsWrench,
+//   BsCodeSquare,
+//   BsEye,
+// } from "react-icons/bs";
+
+// const API_BASE_URL = "http://127.0.0.1:8000";
+
+// // Storage keys
+// const STORAGE_KEY = "ai_projects";
+// const THEME_KEY = "ai_theme";
+// const EXPLORER_WIDTH_KEY = "explorer_width";
+
+
+// // Theme definitions
+// const themes = {
+//   dark: {
+//     bg: "#0B0F0E",
+//     sidebar: "#111413",
+//     card: "#151918",
+//     border: "#1F2A27",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#E5E7EB",
+//     textSecondary: "#9CA3AF",
+//     inputBg: "#1A1F1D",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#1F2A27",
+//     iconBg: "#1A1F1D",
+//     sandpackBg: "#1e1e1e",
+//     blue: "#3B82F6",
+//   },
+//   light: {
+//     bg: "#F9FAFB",
+//     sidebar: "#FFFFFF",
+//     card: "#F3F4F6",
+//     border: "#E5E7EB",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#111827",
+//     textSecondary: "#6B7280",
+//     inputBg: "#FFFFFF",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#F3F4F6",
+//     iconBg: "#F3F4F6",
+//     sandpackBg: "#FFFFFF",
+//     blue: "#3B82F6",
+//   },
+// };
+
+// // Save Button Component
+// const SaveButton = ({ onClick, saveStatus }) => {
+//   return (
+//     <motion.button
+//       whileHover={{ scale: 1.05 }}
+//       whileTap={{ scale: 0.95 }}
+//       onClick={onClick}
+//       className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all"
+//       style={{
+//         backgroundColor: saveStatus === 'saving' ? '#6B7280' : saveStatus === 'saved' ? '#22C55E' : '#3B82F6',
+//         color: 'white',
+//       }}
+//       disabled={saveStatus === 'saving'}
+//       title="Save changes"
+//     >
+//       {saveStatus === 'saving' ? (
+//         <>
+//           <HiOutlineRefresh className="animate-spin text-sm" />
+//           <span className="hidden sm:inline">Saving...</span>
+//         </>
+//       ) : saveStatus === 'saved' ? (
+//         <>
+//           <HiOutlineCheckCircle className="text-sm" />
+//           <span className="hidden sm:inline">Saved</span>
+//         </>
+//       ) : (
+//         <>
+//           <HiOutlineSave className="text-sm" />
+//           <span className="hidden sm:inline">Save</span>
+//         </>
+//       )}
+//     </motion.button>
+//   );
+// };
+
+// // Manual Save Handler Component
+// const ManualSaveHandler = ({ jobId, onSave, setSaveStatus }) => {
+//   const { sandpack } = useSandpack();
+
+//   const handleSave = () => {
+//     if (!jobId) {
+//       console.error("No job ID provided for save");
+//       return;
+//     }
+
+//     console.log("Save button clicked - saving files...", sandpack.files);
+
+//     setSaveStatus("saving");
+
+//     try {
+//       // Convert Sandpack files to original structure
+//       const convertedFiles = Object.entries(sandpack.files).map(([path, file]) => {
+//         let filename = path.startsWith("/") ? path.slice(1) : path;
+
+//         // Add frontend prefix except backend or node_modules
+//         if (!filename.startsWith("backend/") && !filename.includes("node_modules")) {
+//           filename = `frontend/${filename}`;
+//         }
+
+//         return {
+//           filename: filename,
+//           content: file.code,
+//         };
+//       });
+
+//       console.log("Converted files:", convertedFiles);
+
+//       // Get stored projects
+//       const stored = localStorage.getItem(STORAGE_KEY);
+
+//       if (!stored) {
+//         console.error("No projects found in localStorage");
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       const projects = JSON.parse(stored);
+
+//       const projectIndex = projects.findIndex((p) => p.id === jobId);
+
+//       if (projectIndex === -1) {
+//         console.error("Project not found:", jobId);
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       // Update files
+//       projects[projectIndex].files = convertedFiles;
+//       projects[projectIndex].timestamp = new Date().toLocaleString();
+
+//       // Count files
+//       const frontendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("frontend/")
+//       ).length;
+
+//       const backendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("backend/")
+//       ).length;
+
+//       projects[projectIndex].preview = `${convertedFiles.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`;
+
+//       projects[projectIndex].totalFiles = convertedFiles.length;
+//       projects[projectIndex].frontendFiles = frontendFiles;
+//       projects[projectIndex].backendFiles = backendFiles;
+
+//       // Save back
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+
+//       console.log("Project saved successfully");
+
+//       // callback
+//       if (onSave) {
+//         onSave(convertedFiles);
+//       }
+
+//       setSaveStatus("saved");
+
+//       setTimeout(() => {
+//         setSaveStatus("idle");
+//       }, 2000);
+//     } catch (error) {
+//       console.error("Save error:", error);
+//       setSaveStatus("idle");
+//     }
+//   };
+
+//   return { handleSave };
+// };
+// // Wrapper component to use the hook and expose the save function
+// const SaveHandlerWrapper = ({ jobId, onSave, setSaveStatus, onSaveFunctionReady }) => {
+//   const { handleSave } = ManualSaveHandler({ jobId, onSave, setSaveStatus });
+  
+//   useEffect(() => {
+//     console.log("SaveHandlerWrapper: handleSave function created", handleSave);
+//     if (onSaveFunctionReady) {
+//       onSaveFunctionReady(handleSave);
+//     }
+//   }, [handleSave, onSaveFunctionReady, jobId]);
+  
+//   return null;
+// };
+
+// // Resizable Panel Component
+// const ResizablePanel = ({ children, defaultWidth = 25, minWidth = 15, maxWidth = 40, direction = "right", storageKey = "panel_width", theme }) => {
+//   const [width, setWidth] = useState(() => {
+//     const saved = localStorage.getItem(storageKey);
+//     return saved ? parseInt(saved) : defaultWidth;
+//   });
+//   const [isResizing, setIsResizing] = useState(false);
+//   const panelRef = useRef(null);
+
+//   useEffect(() => {
+//     const handleMouseMove = (e) => {
+//       if (!isResizing) return;
+
+//       const container = panelRef.current?.parentElement;
+//       if (!container) return;
+
+//       const containerRect = container.getBoundingClientRect();
+//       let newWidth;
+
+//       if (direction === "right") {
+//         newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+//       } else {
+//         newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
+//       }
+
+//       // Clamp width between min and max
+//       newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+      
+//       setWidth(newWidth);
+//       localStorage.setItem(storageKey, Math.round(newWidth));
+//     };
+
+//     const handleMouseUp = () => {
+//       setIsResizing(false);
+//       document.body.style.cursor = "default";
+//       document.body.style.userSelect = "auto";
+//     };
+
+//     if (isResizing) {
+//       document.addEventListener("mousemove", handleMouseMove);
+//       document.addEventListener("mouseup", handleMouseUp);
+//       document.body.style.cursor = "col-resize";
+//       document.body.style.userSelect = "none";
+//     }
+
+//     return () => {
+//       document.removeEventListener("mousemove", handleMouseMove);
+//       document.removeEventListener("mouseup", handleMouseUp);
+//     };
+//   }, [isResizing, direction, minWidth, maxWidth]);
+
+//   return (
+//     <div
+//       ref={panelRef}
+//       className="relative h-full"
+//       style={{ width: `${width}%` }}
+//     >
+//       {children}
+//       <div
+//         className={`absolute top-0 bottom-0 w-1 cursor-col-resize hover:bg-opacity-50 transition-colors ${
+//           direction === "right" ? "-right-0.5" : "-left-0.5"
+//         } ${isResizing ? "bg-blue-500" : "hover:bg-blue-500"}`}
+//         style={{
+//           backgroundColor: isResizing ? theme?.blue || "#3B82F6" : "transparent",
+//           zIndex: 20,
+//         }}
+//         onMouseDown={(e) => {
+//           e.preventDefault();
+//           setIsResizing(true);
+//         }}
+//       />
+//     </div>
+//   );
+// };
+
+// const Home = () => {
+//   const [searchParams, setSearchParams] = useSearchParams();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [hoveredChat, setHoveredChat] = useState(null);
+//   const [message, setMessage] = useState("");
+//   const [messages, setMessages] = useState([]);
+//   const [showHelp, setShowHelp] = useState(true);
+//   const [isTyping, setIsTyping] = useState(false);
+
+//   // Theme State
+//   const [currentTheme, setCurrentTheme] = useState("dark");
+//   const theme = themes[currentTheme];
+
+//   // API States
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [jobStatus, setJobStatus] = useState(null);
+//   const [jobId, setJobId] = useState(null);
+//   const [projectFiles, setProjectFiles] = useState(null);
+//   const [downloadUrl, setDownloadUrl] = useState(null);
+//   const [recentProjects, setRecentProjects] = useState([]);
+//   const [pollingAttempts, setPollingAttempts] = useState(0);
+//   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+//   const [warningDismissed, setWarningDismissed] = useState(false);
+//   const [inputError, setInputError] = useState("");
+//   const [isPollingActive, setIsPollingActive] = useState(false);
+//   const [jobErrorMessage, setJobErrorMessage] = useState("");
+//   const [jobErrorDetails, setJobErrorDetails] = useState(null);
+//   const [initialLoadDone, setInitialLoadDone] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [showDiagnostic, setShowDiagnostic] = useState(false);
+//   const [diagnosticData, setDiagnosticData] = useState(null);
+//   const [lastSaved, setLastSaved] = useState(null);
+//   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved'
+
+//   // Sandpack Files
+//   const [sandpackFiles, setSandpackFiles] = useState({});
+//   const [showSandpack, setShowSandpack] = useState(false);
+
+//   // Sidebar State
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   // View Toggle State (preview/code)
+//   const [workspaceView, setWorkspaceView] = useState("preview");
+
+//   // Fullscreen State
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+
+//   // Mobile Workspace Toggle
+//   const [showMobileWorkspace, setShowMobileWorkspace] = useState(false);
+
+//   // Save function reference
+//   const saveFunctionRef = useRef(null);
+
+//   const messagesEndRef = useRef(null);
+//   const messagesContainerRef = useRef(null);
+//   const inputRef = useRef(null);
+//   const workspaceRef = useRef(null);
+
+//   // Refs for polling management
+//   const pollingIntervalRef = useRef(null);
+//   const currentJobIdRef = useRef(null);
+//   const isPollingRef = useRef(false);
+//   const abortControllerRef = useRef(null);
+
+//   // All 8 templates available
+//   const allTemplates = [
+//     { name: "Education ERP", icon: <HiOutlineCode />, bg: theme.green },
+//     { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.green },
+//     { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.green },
+//     { name: "Chat App", icon: <HiOutlineChat />, bg: theme.green },
+//     { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.green },
+//     { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.green },
+//     { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.green },
+//     { name: "Travel App", icon: <HiOutlineMap />, bg: theme.green },
+//   ];
+
+//   // Only show 4 templates in sidebar
+//   const sidebarTemplates = allTemplates.slice(0, 4);
+
+//   // Load theme from localStorage on mount
+//   useEffect(() => {
+//     const savedTheme = localStorage.getItem(THEME_KEY);
+//     if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
+//       setCurrentTheme(savedTheme);
+//     }
+//   }, []);
+
+//   // Toggle theme function
+//   const toggleTheme = () => {
+//     const newTheme = currentTheme === "dark" ? "light" : "dark";
+//     setCurrentTheme(newTheme);
+//     localStorage.setItem(THEME_KEY, newTheme);
+//   };
+
+//   // Clean code content from markdown code blocks
+//   const cleanCodeContent = (content) => {
+//     const codeBlockRegex = /```[a-z]*\n([\s\S]*?)```/g;
+//     const match = codeBlockRegex.exec(content);
+
+//     let cleaned = match ? match[1].trim() : content;
+
+//     // Remove Tailwind build directives (for Sandpack preview)
+//     cleaned = cleaned
+//       .replace(/@tailwind base;/g, "")
+//       .replace(/@tailwind components;/g, "")
+//       .replace(/@tailwind utilities;/g, "");
+
+//     return cleaned;
+//   };
+
+//   // Convert API files to Sandpack format with Tailwind support
+//   const convertToSandpackFiles = (files) => {
+//     const sandpackFiles = {};
+
+//     files.forEach((file) => {
+//       // Skip backend files for preview
+//       if (file.filename.startsWith("backend/")) {
+//         return;
+//       }
+
+//       // Handle frontend files
+//       let filename = file.filename;
+//       if (filename.startsWith("frontend/")) {
+//         filename = filename.replace("frontend/", "");
+//       }
+
+//       // Only include relevant frontend files
+//       if (
+//         filename.startsWith("src/") ||
+//         filename === "index.html" ||
+//         filename === "package.json" ||
+//         filename === "vite.config.js" ||
+//         filename === "postcss.config.js" ||
+//         filename === "tailwind.config.js"
+//       ) {
+//         // Clean the content from markdown code blocks
+//         let cleanContent = cleanCodeContent(file.content);
+
+//         // Map the file path correctly
+//         let sandpackPath = filename;
+//         if (sandpackPath === "index.html") {
+//           sandpackPath = "/index.html";
+//         } else if (!sandpackPath.startsWith("/")) {
+//           sandpackPath = "/" + sandpackPath;
+//         }
+
+//         sandpackFiles[sandpackPath] = {
+//           code: cleanContent,
+//         };
+//       }
+//     });
+
+//     // Ensure there's an entry file
+//     if (
+//       !sandpackFiles["/src/index.js"] &&
+//       !sandpackFiles["/src/index.jsx"] &&
+//       !sandpackFiles["/src/main.jsx"]
+//     ) {
+//       sandpackFiles["/src/main.jsx"] = {
+//         code: `import React from 'react'
+// import ReactDOM from 'react-dom/client'
+// import App from './App'
+// import './index.css'
+
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// )`,
+//       };
+//     }
+
+//     // Ensure App.jsx exists
+//     if (!sandpackFiles["/src/App.jsx"] && !sandpackFiles["/src/App.js"]) {
+//       sandpackFiles["/src/App.jsx"] = {
+//         code: `import React from 'react'
+
+// export default function App() {
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+//       <h1 className="text-3xl font-bold text-gray-800">Welcome to Your App</h1>
+//     </div>
+//   )
+// }`,
+//       };
+//     }
+
+//     // Ensure index.css exists with Tailwind directives
+//     if (!sandpackFiles["/src/index.css"]) {
+//       sandpackFiles["/src/index.css"] = {
+//         code: `@tailwind base;
+// @tailwind components;
+// @tailwind utilities;`,
+//       };
+//     }
+
+//     // Ensure tailwind.config.js exists
+//     if (!sandpackFiles["/tailwind.config.js"]) {
+//       sandpackFiles["/tailwind.config.js"] = {
+//         code: `/** @type {import('tailwindcss').Config} */
+// export default {
+//   content: [
+//     "./index.html",
+//     "./src/**/*.{js,ts,jsx,tsx}",
+//   ],
+//   theme: {
+//     extend: {},
+//   },
+//   plugins: [],
+// }`,
+//       };
+//     }
+
+//     // Ensure postcss.config.js exists
+//     if (!sandpackFiles["/postcss.config.js"]) {
+//       sandpackFiles["/postcss.config.js"] = {
+//         code: `export default {
+//   plugins: {
+//     tailwindcss: {},
+//     autoprefixer: {},
+//   },
+// }`,
+//       };
+//     }
+
+//     return sandpackFiles;
+//   };
+
+//   // Convert Sandpack files back to original format
+//   const convertFromSandpackFiles = (sandpackFiles) => {
+//     const files = [];
+    
+//     Object.entries(sandpackFiles).forEach(([path, file]) => {
+//       // Remove leading slash
+//       let filename = path.startsWith('/') ? path.slice(1) : path;
+      
+//       // Add frontend/ prefix for frontend files
+//       if (!filename.startsWith('backend/') && !filename.includes('node_modules')) {
+//         filename = `frontend/${filename}`;
+//       }
+
+//       files.push({
+//         filename: filename,
+//         content: file.code
+//       });
+//     });
+
+//     return files;
+//   };
+
+//   // Auto-scroll to bottom when messages change
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages, jobId, projectFiles]);
+
+//   // Auto-show Sandpack when files are ready
+//   useEffect(() => {
+//     if (
+//       jobStatus === "completed" &&
+//       projectFiles &&
+//       Object.keys(sandpackFiles).length > 0
+//     ) {
+//       setShowSandpack(true);
+//     }
+//   }, [jobStatus, projectFiles, sandpackFiles]);
+
+//   const scrollToBottom = () => {
+//     setTimeout(() => {
+//       if (messagesEndRef.current) {
+//         messagesEndRef.current.scrollIntoView({
+//           behavior: "smooth",
+//           block: "end",
+//         });
+//       }
+//     }, 100);
+//   };
+
+//   // Load recent projects from localStorage on mount
+//   useEffect(() => {
+//     loadRecentProjects();
+//   }, []);
+
+//   // Handle URL parameter on mount and when it changes
+//   useEffect(() => {
+//     const projectId = searchParams.get("project");
+
+//     if (projectId && !isLoading) {
+//       // Clear current state before loading new project
+//       setMessages([]);
+//       setShowHelp(false);
+//       setProjectFiles(null);
+//       setSandpackFiles({});
+//       setShowSandpack(false);
+//       setJobStatus(null);
+//       setJobErrorMessage("");
+//       setJobErrorDetails(null);
+
+//       // Load the project
+//       setTimeout(() => {
+//         loadProject(projectId);
+//       }, 100);
+//     } else if (!projectId && !initialLoadDone) {
+//       setShowHelp(true);
+//       setInitialLoadDone(true);
+//     }
+//   }, [searchParams]);
+
+//   // Cleanup polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       stopPolling();
+//     };
+//   }, []);
+
+//   // Handle fullscreen toggle
+//   const toggleFullscreen = () => {
+//     if (!isFullscreen) {
+//       if (workspaceRef.current.requestFullscreen) {
+//         workspaceRef.current.requestFullscreen();
+//       }
+//     } else {
+//       if (document.exitFullscreen) {
+//         document.exitFullscreen();
+//       }
+//     }
+//     setIsFullscreen(!isFullscreen);
+//   };
+
+//   // Listen for fullscreen change events
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       setIsFullscreen(!!document.fullscreenElement);
+//     };
+
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () => {
+//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//     };
+//   }, []);
+
+//   // Diagnostic function to check localStorage
+//   const runDiagnostic = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       const data = {
+//         exists: !!stored,
+//         raw: stored,
+//         parsed: null,
+//         currentProject: jobId,
+//         projectData: null,
+//       };
+
+//       if (stored) {
+//         try {
+//           data.parsed = JSON.parse(stored);
+//           if (jobId) {
+//             data.projectData = data.parsed.find((p) => p.id === jobId);
+//           }
+//         } catch (e) {
+//           data.parseError = e.message;
+//         }
+//       }
+
+//       setDiagnosticData(data);
+//       setShowDiagnostic(true);
+//     } catch (e) {
+//       console.error("Diagnostic error:", e);
+//     }
+//   };
+
+//   // Fix localStorage data
+//   const fixLocalStorage = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+
+//         // Fix any projects with missing fields
+//         const fixed = projects.map((p) => {
+//           if (!p.messages) p.messages = [];
+//           if (!p.error && p.status === "failed") {
+//             p.error = "Unknown error";
+//             p.errorDetails = { message: "Unknown error" };
+//           }
+//           if (!p.preview) {
+//             p.preview =
+//               p.status === "failed"
+//                 ? "Generation failed"
+//                 : p.status === "processing"
+//                   ? "Processing..."
+//                   : "No preview";
+//           }
+//           if (!p.prompt) p.prompt = "Unknown prompt";
+//           if (!p.totalFiles) p.totalFiles = p.files ? p.files.length : 0;
+//           return p;
+//         });
+
+//         localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+//         setRecentProjects(fixed);
+
+//         // Reload current project if any
+//         if (jobId) {
+//           loadProject(jobId);
+//         }
+//       }
+//     } catch (e) {
+//       console.error("Fix error:", e);
+//     }
+//   };
+
+//   const loadRecentProjects = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         setRecentProjects(projects);
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//   };
+
+//   // Save project to localStorage
+//   const saveProjectToStorage = (id, files, conversation, prompt = "") => {
+//     try {
+//       const packageJson = files.find(
+//         (f) =>
+//           f.filename === "package.json" ||
+//           f.filename === "frontend/package.json",
+//       );
+//       let projectName = "Project";
+//       if (packageJson) {
+//         try {
+//           const parsed = JSON.parse(packageJson.content);
+//           projectName = parsed.name || projectName;
+//         } catch (e) {
+//           console.error("Error parsing package.json", e);
+//         }
+//       }
+
+//       // Count frontend and backend files
+//       const frontendFiles = files.filter(
+//         (f) =>
+//           f.filename.startsWith("frontend/") ||
+//           !f.filename.startsWith("backend/"),
+//       ).length;
+//       const backendFiles = files.filter((f) =>
+//         f.filename.startsWith("backend/"),
+//       ).length;
+
+//       const projectInfo = {
+//         id: id,
+//         title: projectName,
+//         timestamp: new Date().toLocaleString(),
+//         preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//         files: files,
+//         messages: conversation,
+//         prompt:
+//           prompt ||
+//           conversation.find((m) => m.sender === "user")?.text ||
+//           "Project generation",
+//         status: "completed",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: files.length,
+//         frontendFiles: frontendFiles,
+//         backendFiles: backendFiles,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         projectInfo,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving project:", error);
+//       return [];
+//     }
+//   };
+
+//   // Save pending job to localStorage
+//   const savePendingJob = (id, prompt) => {
+//     try {
+//       const pendingProject = {
+//         id: id,
+//         title: "Processing...",
+//         timestamp: new Date().toLocaleString(),
+//         preview: `Building: "${prompt.substring(0, 50)}${prompt.length > 50 ? "..." : ""}"`,
+//         files: null,
+//         messages: [],
+//         prompt: prompt,
+//         status: "processing",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: 0,
+//         frontendFiles: 0,
+//         backendFiles: 0,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         pendingProject,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving pending job:", error);
+//       return [];
+//     }
+//   };
+
+//   // Update project status in localStorage
+//   const updateProjectStatus = (
+//     id,
+//     status,
+//     files = null,
+//     messages = [],
+//     errorDetails = null,
+//     prompt = "",
+//   ) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = existingProjects.map((project) => {
+//         if (project.id === id) {
+//           if (status === "completed" && files) {
+//             const packageJson = files.find(
+//               (f) =>
+//                 f.filename === "package.json" ||
+//                 f.filename === "frontend/package.json",
+//             );
+//             let projectName = "Project";
+//             if (packageJson) {
+//               try {
+//                 const parsed = JSON.parse(packageJson.content);
+//                 projectName = parsed.name || projectName;
+//               } catch (e) {
+//                 console.error("Error parsing package.json", e);
+//               }
+//             }
+
+//             // Count frontend and backend files
+//             const frontendFiles = files.filter(
+//               (f) =>
+//                 f.filename.startsWith("frontend/") ||
+//                 !f.filename.startsWith("backend/"),
+//             ).length;
+//             const backendFiles = files.filter((f) =>
+//               f.filename.startsWith("backend/"),
+//             ).length;
+
+//             return {
+//               ...project,
+//               title: projectName,
+//               status: "completed",
+//               files: files,
+//               messages: messages,
+//               preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//               error: null,
+//               errorDetails: null,
+//               prompt: prompt || project.prompt,
+//               totalFiles: files.length,
+//               frontendFiles: frontendFiles,
+//               backendFiles: backendFiles,
+//             };
+//           } else if (status === "failed") {
+//             return {
+//               ...project,
+//               status: "failed",
+//               title: "Failed Project",
+//               preview: "Generation failed",
+//               files: null,
+//               messages: messages,
+//               error: errorDetails?.message || "Unknown error",
+//               errorDetails: errorDetails,
+//               prompt: prompt || project.prompt,
+//             };
+//           } else {
+//             return {
+//               ...project,
+//               status: status,
+//               messages: messages,
+//             };
+//           }
+//         }
+//         return project;
+//       });
+
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error updating project status:", error);
+//       return [];
+//     }
+//   };
+
+//   // Get project by ID from localStorage
+//   const getProjectById = (id) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         const project = projects.find((p) => p.id === id);
+//         return project;
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//     return null;
+//   };
+
+//   // Stop polling function
+//   const stopPolling = () => {
+//     if (pollingIntervalRef.current) {
+//       clearInterval(pollingIntervalRef.current);
+//       pollingIntervalRef.current = null;
+//     }
+
+//     if (abortControllerRef.current) {
+//       abortControllerRef.current.abort();
+//       abortControllerRef.current = null;
+//     }
+
+//     isPollingRef.current = false;
+//     setIsPollingActive(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//   };
+
+//   // Check if response is for current job
+//   const isResponseForCurrentJob = (id) => {
+//     return id === currentJobIdRef.current;
+//   };
+
+//   // Poll status function
+//   const pollStatus = async (id) => {
+//     if (!isPollingRef.current || !isResponseForCurrentJob(id)) {
+//       return;
+//     }
+
+//     try {
+//       setPollingAttempts((prev) => prev + 1);
+
+//       const response = await axios.get(`${API_BASE_URL}/status/${id}`, {
+//         timeout: 10000,
+//         signal: abortControllerRef.current?.signal,
+//       });
+
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (response.data.status === "completed") {
+//         stopPolling();
+
+//         const resultResponse = await axios.get(`${API_BASE_URL}/result/${id}`, {
+//           signal: abortControllerRef.current?.signal,
+//         });
+
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         setProjectFiles(resultResponse.data.files);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(resultResponse.data.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsProcessing(false);
+
+//         const packageJson = resultResponse.data.files.find(
+//           (f) =>
+//             f.filename === "package.json" ||
+//             f.filename === "frontend/package.json",
+//         );
+//         let projectName = "Project";
+//         if (packageJson) {
+//           try {
+//             const parsed = JSON.parse(packageJson.content);
+//             projectName = parsed.name || projectName;
+//           } catch (e) {
+//             console.error("Error parsing package.json", e);
+//           }
+//         }
+
+//         // Count frontend and backend files
+//         const frontendFiles = resultResponse.data.files.filter(
+//           (f) =>
+//             f.filename.startsWith("frontend/") ||
+//             !f.filename.startsWith("backend/"),
+//         ).length;
+//         const backendFiles = resultResponse.data.files.filter((f) =>
+//           f.filename.startsWith("backend/"),
+//         ).length;
+
+//         const successMessage = {
+//           id: Date.now(),
+//           text: `✅ **Project Generated Successfully!**
+          
+// I've created a complete ${projectName} project with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, successMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt from messages
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         saveProjectToStorage(
+//           id,
+//           resultResponse.data.files,
+//           allMessages,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (response.data.status === "failed") {
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+
+//         // Extract error message from response
+//         const errorMsg =
+//           response.data.error?.message ||
+//           "Unknown error occurred during project generation";
+//         const errorDetails = response.data.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         // Add detailed error message to chat
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Generation Failed**
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Possible reasons:**
+// - The AI couldn't generate valid code for your request
+// - The request contained invalid syntax or requirements
+// - There was a server-side processing error
+// - The prompt was too complex or ambiguous
+
+// **Suggestions:**
+// - Try a simpler and more specific request
+// - Check for any syntax errors in your prompt
+// - Try one of the template projects first
+// - Make sure your request includes specific features
+
+// Click "New Project" to try again.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           errorDetails,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (
+//         response.data.status === "processing" ||
+//         response.data.status === "running"
+//       ) {
+//         setJobStatus("processing");
+//         updateProjectStatus(id, "processing");
+//       }
+
+//       if (
+//         isResponseForCurrentJob(id) &&
+//         pollingAttempts >= 60 &&
+//         !showTimeoutWarning &&
+//         !warningDismissed
+//       ) {
+//         setShowTimeoutWarning(true);
+//       }
+//     } catch (error) {
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (
+//         axios.isCancel(error) ||
+//         error.name === "AbortError" ||
+//         error.code === "ERR_CANCELED"
+//       ) {
+//         return;
+//       }
+
+//       console.error("Status check error:", error);
+
+//       // Handle network errors
+//       if (pollingAttempts > 10) {
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+//         setJobErrorMessage(error.message);
+//         setJobErrorDetails({ type: "network_error", message: error.message });
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Connection Error**
+
+// Unable to reach the server. Please check:
+
+// - The backend server is running at ${API_BASE_URL}
+// - Your internet connection
+// - No firewall blocking the connection
+
+// **Error details:** ${error.message}
+
+// **Technical Details:**
+// \`\`\`
+// Type: Network Error
+// Code: ${error.code || "N/A"}
+// Status: ${error.response?.status || "N/A"}
+// \`\`\`
+
+// **Solutions:**
+// 1. Start the backend server with: \`uvicorn main:app --reload\`
+// 2. Check if the server is running on port 8000
+// 3. Disable any firewall temporarily
+// 4. Try refreshing the page`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           { type: "network_error", message: error.message },
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       }
+//     }
+//   };
+
+//   // Start continuous polling
+//   const startPolling = (id) => {
+//     stopPolling();
+
+//     currentJobIdRef.current = id;
+//     setJobId(id);
+//     setJobStatus("processing");
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     isPollingRef.current = true;
+//     setIsPollingActive(true);
+
+//     abortControllerRef.current = new AbortController();
+
+//     pollStatus(id);
+
+//     pollingIntervalRef.current = setInterval(() => {
+//       if (isPollingRef.current && isResponseForCurrentJob(id)) {
+//         pollStatus(id);
+//       }
+//     }, 2000);
+//   };
+
+//   // Load project from localStorage or API - FIXED VERSION
+//   const loadProject = async (id) => {
+//     // Prevent multiple loads
+//     if (!id || id === "null" || id === "undefined") {
+//       setShowHelp(true);
+//       setIsLoading(false);
+//       setIsProcessing(false);
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     stopPolling();
+
+//     setJobId(id);
+//     setIsProcessing(false);
+//     setShowHelp(false);
+//     setJobStatus("loading");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowSandpack(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     currentJobIdRef.current = id;
+
+//     try {
+//       // STEP 1: Check localStorage FIRST for existing project with files
+//       const project = getProjectById(id);
+      
+//       // If project exists in localStorage and has files, use it immediately
+//       if (project && project.files && project.files.length > 0) {
+//         console.log("Project found in localStorage with files, loading from cache");
+        
+//         // Load from localStorage
+//         setProjectFiles(project.files);
+//         setMessages(project.messages || []);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(project.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsLoading(false);
+        
+//         // Add a success message if no messages exist
+//         if (!project.messages || project.messages.length === 0) {
+//           const packageJson = project.files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           const frontendFiles = project.files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = project.files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${project.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${project.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+          
+//           setMessages([successMessage]);
+          
+//           // Update the project with the message
+//           updateProjectStatus(
+//             id,
+//             "completed",
+//             project.files,
+//             [successMessage],
+//             null,
+//             project.prompt || ""
+//           );
+//         }
+        
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // STEP 2: If no files in localStorage, check API
+//       console.log("No files in localStorage, checking API for project", id);
+      
+//       // Check API for current status
+//       let apiStatus = null;
+//       let apiError = null;
+
+//       try {
+//         const statusResponse = await axios.get(`${API_BASE_URL}/status/${id}`);
+//         apiStatus = statusResponse.data;
+//       } catch (apiErr) {
+//         apiError = apiErr;
+//       }
+
+//       // PRIORITY 1: If API says completed, use API data
+//       if (apiStatus && apiStatus.status === "completed") {
+//         try {
+//           const resultResponse = await axios.get(
+//             `${API_BASE_URL}/result/${id}`,
+//           );
+          
+//           const files = resultResponse.data.files;
+//           setProjectFiles(files);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(files);
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+
+//           const packageJson = files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           // Count frontend and backend files
+//           const frontendFiles = files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([successMessage]);
+
+//           // Get prompt from localStorage if available
+//           const userPrompt = project?.prompt || "";
+//           saveProjectToStorage(
+//             id,
+//             files,
+//             [successMessage],
+//             userPrompt,
+//           );
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } catch (resultErr) {
+//           // Fall through to other options
+//           console.error("Error fetching result from API:", resultErr);
+//         }
+//       }
+
+//       // PRIORITY 2: If API says processing
+//       if (
+//         apiStatus &&
+//         (apiStatus.status === "processing" || apiStatus.status === "running")
+//       ) {
+//         setJobStatus("processing");
+//         setIsProcessing(true);
+//         setIsLoading(false);
+
+//         // Use messages from localStorage if available
+//         if (project && project.messages) {
+//           setMessages(project.messages);
+//         } else {
+//           const processingMessage = {
+//             id: Date.now(),
+//             text: `🔄 **Project is still processing...**
+
+// Job ID: ${id}
+
+// The project is still being built. This may take a few moments.
+
+// I'll update you when it's ready!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+//           setMessages([processingMessage]);
+//         }
+
+//         startPolling(id);
+//         return;
+//       }
+
+//       // PRIORITY 3: If API says failed
+//       if (apiStatus && apiStatus.status === "failed") {
+//         setJobStatus("failed");
+
+//         const errorMsg =
+//           apiStatus.error?.message || "Project generation failed";
+//         const errorDetails = apiStatus.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Failed**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The request might have contained invalid syntax
+// - There was a server-side processing error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         setMessages([errorMessage]);
+
+//         // Update localStorage with failed status
+//         if (project) {
+//           updateProjectStatus(
+//             id,
+//             "failed",
+//             null,
+//             [errorMessage],
+//             errorDetails,
+//             project.prompt,
+//           );
+//         } else {
+//           // Create new failed project in localStorage
+//           const failedProject = {
+//             id: id,
+//             title: "Failed Project",
+//             timestamp: new Date().toLocaleString(),
+//             preview: "Generation failed",
+//             files: null,
+//             messages: [errorMessage],
+//             prompt: "Unknown",
+//             status: "failed",
+//             createdAt: new Date().toISOString(),
+//             error: errorMsg,
+//             errorDetails: errorDetails,
+//             totalFiles: 0,
+//             frontendFiles: 0,
+//             backendFiles: 0,
+//           };
+
+//           const stored = localStorage.getItem(STORAGE_KEY);
+//           let existingProjects = [];
+//           if (stored) {
+//             try {
+//               existingProjects = JSON.parse(stored);
+//             } catch (e) {
+//               console.error("Error parsing stored projects", e);
+//             }
+//           }
+
+//           const updated = [
+//             failedProject,
+//             ...existingProjects.filter((p) => p.id !== id),
+//           ].slice(0, 20);
+//           localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//           setRecentProjects(updated);
+//         }
+
+//         setIsLoading(false);
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // PRIORITY 4: No data found anywhere
+//       setJobStatus("failed");
+//       setJobErrorMessage("Project not found");
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Project Not Found**
+
+// No project found with ID: ${id}
+
+// The project may have expired or been deleted.
+
+// **Troubleshooting:**
+// - Check if the backend server is running at ${API_BASE_URL}
+// - The project ID might be incorrect
+// - Try creating a new project
+
+// Click "New Project" to start a new one.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     } catch (error) {
+//       console.error("Error loading project:", error);
+//       setJobStatus("failed");
+//       setJobErrorMessage(error.message);
+//       setJobErrorDetails({ type: "load_error", message: error.message });
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Error Loading Project**
+
+// Could not load the project. The project may have expired or been deleted.
+
+// **Error details:** ${error.message}
+
+// **Possible reasons:**
+// - The project ID is invalid
+// - The project has been deleted from the server
+// - The server is not responding
+
+// **Solutions:**
+// - Check if the backend server is running
+// - Try creating a new project
+// - Clear your browser cache and try again`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleBuildRequest = async (prompt) => {
+//     if (!prompt || prompt.trim().length < 3) {
+//       setInputError("Please enter a valid request (minimum 3 characters)");
+//       return;
+//     }
+
+//     setInputError("");
+//     setIsProcessing(true);
+//     setJobStatus("processing");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setShowSandpack(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     try {
+//       const buildResponse = await axios.post(`${API_BASE_URL}/build`, null, {
+//         params: { prompt },
+//         timeout: 30000,
+//       });
+
+//       const { job_id } = buildResponse.data;
+
+//       if (!job_id) {
+//         throw new Error("No job ID returned from server");
+//       }
+
+//       savePendingJob(job_id, prompt);
+//       setSearchParams({ project: job_id });
+
+//       const processingMessage = {
+//         id: Date.now(),
+//         text: `🔄 **Processing your request...**\n\n**Job ID:** ${job_id}\n**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"\n**Status:** Building your project...\n\nThis may take 30-60 seconds depending on complexity.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, processingMessage]);
+//       scrollToBottom();
+
+//       startPolling(job_id);
+//     } catch (error) {
+//       console.error("Build request failed:", error);
+
+//       let errorMessage = "Failed to start project generation.";
+//       let errorDetails = {};
+
+//       if (error.code === "ECONNABORTED") {
+//         errorMessage = "Request timeout. The server took too long to respond.";
+//         errorDetails = { type: "timeout", code: "ECONNABORTED" };
+//       } else if (error.response) {
+//         errorMessage = `Server error: ${error.response.status} - ${error.response.data?.detail || error.response.statusText}`;
+//         errorDetails = {
+//           type: "server_error",
+//           status: error.response.status,
+//           data: error.response.data,
+//         };
+//       } else if (error.request) {
+//         errorMessage =
+//           "Cannot connect to server. Please check if the backend is running.";
+//         errorDetails = { type: "connection_error", message: error.message };
+//       } else {
+//         errorMessage = error.message;
+//         errorDetails = { type: "unknown_error", message: error.message };
+//       }
+
+//       const errorMsg = {
+//         id: Date.now(),
+//         text: `❌ **Build Request Failed**
+
+// **Error:** ${errorMessage}
+
+// **Technical Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Troubleshooting:**
+// 1. Make sure the backend server is running at ${API_BASE_URL}
+// 2. Check if the server is accessible (try opening ${API_BASE_URL}/docs in browser)
+// 3. Verify there are no CORS issues
+// 4. Try again with a simpler request
+
+// Click "New Project" to try again.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, errorMsg]);
+//       setIsProcessing(false);
+//       setJobStatus("error");
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleSendMessage = () => {
+//     if (message.trim() && !isProcessing) {
+//       setInputError("");
+
+//       const userMessageObj = {
+//         id: Date.now(),
+//         text: message,
+//         sender: "user",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, userMessageObj]);
+//       scrollToBottom();
+
+//       const lowercaseMsg = message.toLowerCase();
+
+//       const isProjectRequest =
+//         lowercaseMsg.includes("create") ||
+//         lowercaseMsg.includes("build") ||
+//         lowercaseMsg.includes("make") ||
+//         lowercaseMsg.includes("generate") ||
+//         lowercaseMsg.includes("develop") ||
+//         lowercaseMsg.includes("website") ||
+//         lowercaseMsg.includes("app") ||
+//         lowercaseMsg.includes("application");
+
+//       const matchedTemplate = allTemplates.find((t) =>
+//         lowercaseMsg.includes(t.name.toLowerCase()),
+//       );
+
+//       if (isProjectRequest || matchedTemplate) {
+//         setIsTyping(true);
+//         setShowHelp(false);
+
+//         const currentMessage = message;
+//         setMessage("");
+
+//         setTimeout(() => {
+//           setIsTyping(false);
+
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: `🔄 **Starting project generation...**\n\nI'll create a complete ${matchedTemplate ? matchedTemplate.name : "custom"} project for you. This will take a few moments. Please wait...`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           scrollToBottom();
+//           handleBuildRequest(currentMessage);
+//         }, 1000);
+//       } else {
+//         setMessage("");
+//         setShowHelp(false);
+//         setIsTyping(true);
+
+//         setTimeout(() => {
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: "I can help you build complete projects! Try asking me to create something specific like:\n\n• 'Create a modern education ERP website'\n• 'Build an e-commerce platform'\n• 'Make a social media dashboard'\n• 'Generate a chat application'\n\nWhat would you like me to build for you today?",
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           setIsTyping(false);
+//           scrollToBottom();
+//         }, 1500);
+//       }
+//     }
+//   };
+
+//   const handleKeyPress = (e) => {
+//     if (e.key === "Enter" && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSendMessage();
+//     }
+//   };
+
+//   const handleNewChat = () => {
+//     stopPolling();
+
+//     setMessages([]);
+//     setShowHelp(true);
+//     setMessage("");
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobId(null);
+//     setJobStatus(null);
+//     setDownloadUrl(null);
+//     setIsProcessing(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setInputError("");
+//     setIsPollingActive(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     currentJobIdRef.current = null;
+
+//     setSearchParams({});
+
+//     scrollToBottom();
+//   };
+
+//   const handleTemplateClick = (templateName) => {
+//     const templateMsg = {
+//       id: Date.now(),
+//       text: `I want to build a ${templateName} application`,
+//       sender: "user",
+//       timestamp: new Date().toLocaleTimeString([], {
+//         hour: "2-digit",
+//         minute: "2-digit",
+//       }),
+//     };
+//     setMessages([templateMsg]);
+//     setShowHelp(false);
+//     scrollToBottom();
+
+//     let prompt = "";
+
+//     switch (templateName) {
+//       case "Education ERP":
+//         prompt =
+//           "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard.";
+//         break;
+//       case "E-commerce":
+//         prompt =
+//           "Build a full E-commerce website with product catalog, shopping cart, and user authentication.";
+//         break;
+//       case "Social Media":
+//         prompt =
+//           "Create a Social Media platform with user profiles, posts, likes, and comments.";
+//         break;
+//       case "Chat App":
+//         prompt =
+//           "Build a Real-time Chat Application with private messaging and group chats.";
+//         break;
+//       case "Video App":
+//         prompt =
+//           "Create a Video Streaming Platform with video upload, video player, playlists, and subscriptions.";
+//         break;
+//       case "Music App":
+//         prompt =
+//           "Build a Music Streaming App with audio playback, playlists, and album browsing.";
+//         break;
+//       case "Food App":
+//         prompt =
+//           "Create a Food Delivery App with restaurant listings, menu browsing, and order tracking.";
+//         break;
+//       case "Travel App":
+//         prompt =
+//           "Build a Travel Booking Platform with property listings, search filters, and booking calendar.";
+//         break;
+//       default:
+//         prompt = `Create a complete ${templateName} application with modern UI and responsive design.`;
+//     }
+
+//     handleBuildRequest(prompt);
+//   };
+
+//   const handleDownload = () => {
+//     if (downloadUrl) {
+//       window.open(downloadUrl, "_blank");
+//     }
+//   };
+
+//   // Handle project click from sidebar
+//   const handleProjectClick = (jobId) => {
+//     // Clear current state before loading new project
+//     setMessages([]);
+//     setShowHelp(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobStatus(null);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     // Set the URL parameter
+//     setSearchParams({ project: jobId });
+//   };
+
+//   // Handle manual save
+//   const handleManualSave = () => {
+//     console.log("Manual save triggered, saveFunctionRef.current:", saveFunctionRef.current);
+//     if (saveFunctionRef.current) {
+//       saveFunctionRef.current();
+//     } else {
+//       console.error("Save function not available yet - check if Sandpack is loaded");
+//     }
+//   };
+
+//   // Handle file save from ManualSaveHandler component
+// const handleFileSave = (files, activeFile) => {
+//   console.log("Files saved successfully:", files.length);
+
+//   setLastSaved(new Date());
+
+//   setProjectFiles(files);
+
+//   const updatedSandpackFiles = convertToSandpackFiles(files);
+//   setSandpackFiles(updatedSandpackFiles);
+
+//   loadRecentProjects();
+
+//   // restore active tab
+//   if (activeFile) {
+//     setTimeout(() => {
+//       sandpack.setActiveFile(activeFile);
+//     }, 0);
+//   }
+// };
+//   // Callback to receive the save function from the handler
+//   const handleSaveFunctionReady = (saveFn) => {
+//     console.log("Save function ready and stored in ref");
+//     saveFunctionRef.current = saveFn;
+//   };
+
+//   // Debug effect to check if jobId exists
+//   useEffect(() => {
+//     console.log("Current jobId:", jobId, "jobStatus:", jobStatus);
+//   }, [jobId, jobStatus]);
+
+//   // Loading animation component
+//   const ProcessingAnimation = () => {
+//     const [dots, setDots] = useState("");
+
+//     useEffect(() => {
+//       const interval = setInterval(() => {
+//         setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+//       }, 500);
+//       return () => clearInterval(interval);
+//     }, []);
+
+//     return (
+//       <div className="flex flex-col items-center justify-center p-8">
+//         <div className="relative">
+//           <motion.div
+//             animate={{ rotate: 360 }}
+//             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+//             className="w-16 h-16 border-4 border-t-transparent rounded-full"
+//             style={{ borderColor: theme.green, borderTopColor: "transparent" }}
+//           />
+//           <div className="absolute inset-0 flex items-center justify-center">
+//             <BsRobot className="text-xl" style={{ color: theme.green }} />
+//           </div>
+//         </div>
+//         <p
+//           className="mt-4 text-sm font-medium"
+//           style={{ color: theme.textPrimary }}
+//         >
+//           Building your project{dots}
+//         </p>
+//         {pollingAttempts > 0 && (
+//           <p className="mt-1 text-xs" style={{ color: theme.textSecondary }}>
+//             Elapsed: {Math.floor(pollingAttempts * 2)} seconds
+//           </p>
+//         )}
+//       </div>
+//     );
+//   };
+
+//   // Enhanced Error Display Component
+//   const ErrorDisplay = ({ message, details }) => {
+//     const [showDetails, setShowDetails] = useState(false);
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.red + "40",
+//           backgroundColor: theme.red + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.red + "20" }}
+//           >
+//             <BsExclamationTriangle
+//               className="text-2xl"
+//               style={{ color: theme.red }}
+//             />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.red }}
+//             >
+//               Project Generation Failed
+//             </h3>
+//             <div className="space-y-3">
+//               <div
+//                 className="p-3 rounded-lg"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderLeft: `4px solid ${theme.red}`,
+//                 }}
+//               >
+//                 <p
+//                   className="text-sm font-mono"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   {message || "Unknown error occurred"}
+//                 </p>
+//               </div>
+
+//               {details && (
+//                 <div>
+//                   <button
+//                     onClick={() => setShowDetails(!showDetails)}
+//                     className="flex items-center gap-2 text-xs mb-2"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <BsBug className="text-xs" />
+//                     {showDetails
+//                       ? "Hide technical details"
+//                       : "Show technical details"}
+//                   </button>
+
+//                   {showDetails && (
+//                     <pre
+//                       className="p-3 rounded-lg text-xs overflow-auto max-h-40"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       {JSON.stringify(details, null, 2)}
+//                     </pre>
+//                   )}
+//                 </div>
+//               )}
+
+//               <div className="mt-4">
+//                 <h4
+//                   className="text-sm font-semibold mb-2"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   Common Solutions:
+//                 </h4>
+//                 <ul className="space-y-2">
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>Try a simpler or more specific request</span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Check if your request has valid syntax and clear
+//                       requirements
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Try again with a different project type from the templates
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Make sure the backend server is running properly
+//                     </span>
+//                   </li>
+//                 </ul>
+//               </div>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={handleNewChat}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <HiOutlinePlus className="text-base" />
+//                   New Project
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => window.location.reload()}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineRefresh className="text-base" />
+//                   Refresh Page
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Diagnostic Display Component
+//   const DiagnosticDisplay = ({ data, onClose, onFix }) => {
+//     if (!data) return null;
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.yellow + "40",
+//           backgroundColor: theme.yellow + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.yellow + "20" }}
+//           >
+//             <BsWrench className="text-2xl" style={{ color: theme.yellow }} />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.yellow }}
+//             >
+//               Diagnostic Information
+//             </h3>
+//             <div className="space-y-3">
+//               <pre
+//                 className="p-3 rounded-lg text-xs overflow-auto max-h-96"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   color: theme.textSecondary,
+//                 }}
+//               >
+//                 {JSON.stringify(data, null, 2)}
+//               </pre>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onFix}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <BsWrench className="text-base" />
+//                   Fix localStorage
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onClose}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineX className="text-base" />
+//                   Close
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Get template for Sandpack
+//   const getSandpackTemplate = () => {
+//     // Check if it's a React project
+//     if (
+//       sandpackFiles["/src/App.jsx"] ||
+//       sandpackFiles["/src/App.js"] ||
+//       sandpackFiles["/src/main.jsx"]
+//     ) {
+//       return "react";
+//     }
+//     return "react"; // Default to react
+//   };
+
+//   // Get dependencies from package.json and ensure Tailwind is included
+//   const getDependencies = () => {
+//     const packageJsonFile = projectFiles?.find(
+//       (f) =>
+//         f.filename === "package.json" || f.filename === "frontend/package.json",
+//     );
+//     let dependencies = {};
+
+//     if (packageJsonFile) {
+//       try {
+//         const cleanContent = cleanCodeContent(packageJsonFile.content);
+//         const packageJson = JSON.parse(cleanContent);
+//         dependencies = packageJson.dependencies || {};
+//       } catch (e) {
+//         console.error("Error parsing package.json", e);
+//       }
+//     }
+
+//     // Ensure Tailwind dependencies are present
+//     return {
+//       ...dependencies,
+//       react: dependencies.react || "^18.2.0",
+//       "react-dom": dependencies["react-dom"] || "^18.2.0",
+//       "react-router-dom": dependencies["react-router-dom"] || "^6.3.0",
+//     };
+//   };
+
+//   // Prepare recent chats for sidebar with enhanced information
+//   const recentChats = recentProjects.map((project) => {
+//     let icon, color, title;
+
+//     if (project.status === "processing") {
+//       icon = <HiOutlineRefresh className="animate-spin" />;
+//       color = theme.yellow;
+//       title = project.title || "Processing...";
+//     } else if (project.status === "failed") {
+//       icon = <HiOutlineExclamation />;
+//       color = theme.red;
+//       title = "Failed Project";
+//     } else if (project.status === "completed") {
+//       icon = <HiOutlineCheckCircle />;
+//       color = theme.green;
+//       title = project.title || "Completed Project";
+//     } else {
+//       icon = <HiOutlineFolder />;
+//       color = theme.textPrimary;
+//       title = project.title || "Project";
+//     }
+
+//     // Create preview text without "frontend" word
+//     let previewText = "";
+//     if (project.status === "completed" && project.totalFiles) {
+//       previewText = `${project.totalFiles} files total (${project.frontendFiles || 0} frontend, ${project.backendFiles || 0} backend)`;
+//     } else if (project.prompt) {
+//       previewText =
+//         project.prompt.substring(0, 50) +
+//         (project.prompt.length > 50 ? "..." : "");
+//     } else {
+//       previewText = project.preview || "No preview";
+//     }
+
+//     return {
+//       id: project.id,
+//       title: title,
+//       preview: previewText,
+//       time: project.timestamp,
+//       icon: icon,
+//       color: color,
+//       jobId: project.id,
+//       status: project.status,
+//       prompt: project.prompt,
+//       error: project.error,
+//       totalFiles: project.totalFiles || 0,
+//       frontendFiles: project.frontendFiles || 0,
+//       backendFiles: project.backendFiles || 0,
+//     };
+//   });
+
+//   return (
+//     <div
+//       className="h-screen w-full overflow-hidden transition-colors duration-300"
+//       style={{ backgroundColor: theme.bg }}
+//     >
+//       {/* Mobile Menu Overlay */}
+//       <AnimatePresence>
+//         {isMobileMenuOpen && (
+//           <motion.div
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             exit={{ opacity: 0 }}
+//             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+//             onClick={() => setIsMobileMenuOpen(false)}
+//           />
+//         )}
+//       </AnimatePresence>
+
+//       {/* Mobile Sidebar */}
+//       <motion.aside
+//         initial={{ x: "-100%" }}
+//         animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
+//         transition={{ type: "tween", duration: 0.3 }}
+//         className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-xl overflow-y-auto"
+//         style={{ backgroundColor: theme.sidebar }}
+//       >
+//         <SidebarContent
+//           recentChats={recentChats}
+//           templates={sidebarTemplates}
+//           allTemplates={allTemplates}
+//           onClose={() => setIsMobileMenuOpen(false)}
+//           theme={theme}
+//           hoveredChat={hoveredChat}
+//           setHoveredChat={setHoveredChat}
+//           onNewChat={handleNewChat}
+//           onProjectClick={handleProjectClick}
+//           onTemplateClick={handleTemplateClick}
+//           currentTheme={currentTheme}
+//           toggleTheme={toggleTheme}
+//         />
+//       </motion.aside>
+
+//       {/* Desktop Layout */}
+//       <div className="flex h-full w-full">
+//         {/* Desktop Sidebar with Collapse Toggle */}
+//         <motion.aside
+//           animate={{ width: sidebarCollapsed ? 80 : 288 }}
+//           className="hidden lg:block h-full border-r relative transition-all duration-300"
+//           style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+//         >
+//           <button
+//             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+//             className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg"
+//             style={{
+//               backgroundColor: theme.card,
+//               borderColor: theme.border,
+//               color: theme.textPrimary,
+//             }}
+//           >
+//             {sidebarCollapsed ? (
+//               <HiOutlineChevronRight />
+//             ) : (
+//               <HiOutlineChevronLeft />
+//             )}
+//           </button>
+
+//           {sidebarCollapsed ? (
+//             <CollapsedSidebar
+//               theme={theme}
+//               onNewChat={handleNewChat}
+//               recentChats={recentChats}
+//               onProjectClick={handleProjectClick}
+//             />
+//           ) : (
+//             <SidebarContent
+//               recentChats={recentChats}
+//               templates={sidebarTemplates}
+//               allTemplates={allTemplates}
+//               theme={theme}
+//               hoveredChat={hoveredChat}
+//               setHoveredChat={setHoveredChat}
+//               onNewChat={handleNewChat}
+//               onProjectClick={handleProjectClick}
+//               onTemplateClick={handleTemplateClick}
+//               currentTheme={currentTheme}
+//               toggleTheme={toggleTheme}
+//             />
+//           )}
+//         </motion.aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 h-full flex flex-col w-full min-w-0">
+//           {/* Fixed Header */}
+//           <div
+//             className="flex-shrink-0 border-b w-full"
+//             style={{
+//               backgroundColor: theme.sidebar,
+//               borderColor: theme.border,
+//             }}
+//           >
+//             <div className="flex items-center justify-between px-4 py-3">
+//               <div className="flex items-center gap-3">
+//                 <button
+//                   onClick={() => setIsMobileMenuOpen(true)}
+//                   className="lg:hidden p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineMenu className="text-lg" />
+//                 </button>
+//                 <h2
+//                   className="text-sm font-medium hidden sm:block"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   AI Developer Assistant
+//                 </h2>
+//               </div>
+
+//               <div className="flex items-center gap-2">
+//                 {/* Theme Toggle Button */}
+//                 <motion.button
+//                   whileHover={{ scale: 1.05 }}
+//                   whileTap={{ scale: 0.95 }}
+//                   onClick={toggleTheme}
+//                   className="p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                   title={
+//                     currentTheme === "dark"
+//                       ? "Switch to Light Mode"
+//                       : "Switch to Dark Mode"
+//                   }
+//                 >
+//                   {currentTheme === "dark" ? (
+//                     <HiOutlineSun className="text-lg" />
+//                   ) : (
+//                     <HiOutlineMoon className="text-lg" />
+//                   )}
+//                 </motion.button>
+
+//                 {/* Mobile Workspace Toggle Button */}
+//                 {jobStatus === "completed" && (
+//                   <button
+//                     onClick={() => setShowMobileWorkspace(!showMobileWorkspace)}
+//                     className="lg:hidden p-2 rounded-full"
+//                     style={{
+//                       backgroundColor: theme.card,
+//                       color: showMobileWorkspace ? theme.green : theme.textPrimary,
+//                     }}
+//                     title={showMobileWorkspace ? "Show Chat" : "Show Workspace"}
+//                   >
+//                     {showMobileWorkspace ? (
+//                       <HiOutlineChat className="text-lg" />
+//                     ) : (
+//                       <HiOutlineCode className="text-lg" />
+//                     )}
+//                   </button>
+//                 )}
+
+//                 {jobId && (
+//                   <>
+//                     <span
+//                       className="text-xs px-2 py-1 rounded-full hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       Job: {jobId.substring(0, 8)}...
+//                     </span>
+//                     {jobStatus === "processing" && isPollingActive && (
+//                       <div className="flex items-center gap-1">
+//                         <motion.div
+//                           animate={{ rotate: 360 }}
+//                           transition={{
+//                             duration: 2,
+//                             repeat: Infinity,
+//                             ease: "linear",
+//                           }}
+//                         >
+//                           <HiOutlineRefresh
+//                             className="text-lg"
+//                             style={{ color: theme.green }}
+//                           />
+//                         </motion.div>
+//                         {pollingAttempts > 0 && (
+//                           <span
+//                             className="text-xs hidden sm:inline"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             {Math.floor(pollingAttempts * 2)}s
+//                           </span>
+//                         )}
+//                       </div>
+//                     )}
+//                     {jobStatus === "completed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.green + "20",
+//                           color: theme.green,
+//                         }}
+//                       >
+//                         <HiOutlineCheckCircle className="text-xs" />
+//                         Completed
+//                       </span>
+//                     )}
+//                     {jobStatus === "failed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.red + "20",
+//                           color: theme.red,
+//                         }}
+//                       >
+//                         <HiOutlineExclamation className="text-xs" />
+//                         Failed
+//                       </span>
+//                     )}
+//                   </>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Two Column Layout - Responsive */}
+//           <div className="flex-1 flex overflow-hidden">
+//             {/* Left Column - Messages Area */}
+//             <div
+//               className={`
+//                 ${jobStatus === "completed" ? "lg:w-2/5" : "w-full"} 
+//                 ${jobStatus === "completed" && showMobileWorkspace ? "hidden lg:flex" : "flex"}
+//                 border-r overflow-hidden flex-col transition-all duration-300
+//               `}
+//               style={{ borderColor: theme.border }}
+//             >
+//               <div
+//                 className="p-3 border-b"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <h3
+//                   className="text-xs font-semibold uppercase"
+//                   style={{ color: theme.textSecondary }}
+//                 >
+//                   AI Conversation
+//                 </h3>
+//               </div>
+//               <div
+//                 ref={messagesContainerRef}
+//                 className="flex-1 overflow-y-auto"
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 <div className="p-6">
+//                   <div className="max-w-full mx-auto">
+//                     {/* Timeout Warning Banner */}
+//                     <AnimatePresence>
+//                       {showTimeoutWarning &&
+//                         jobStatus === "processing" &&
+//                         !warningDismissed && (
+//                           <motion.div
+//                             initial={{ opacity: 0, y: -20 }}
+//                             animate={{ opacity: 1, y: 0 }}
+//                             exit={{ opacity: 0, y: -20 }}
+//                             className="mb-4 p-4 rounded-lg border"
+//                             style={{
+//                               backgroundColor: theme.yellow + "20",
+//                               borderColor: theme.yellow,
+//                             }}
+//                           >
+//                             <div className="flex items-start gap-3">
+//                               <BsHourglassSplit
+//                                 className="text-xl flex-shrink-0 animate-pulse"
+//                                 style={{ color: theme.yellow }}
+//                               />
+//                               <div className="flex-1">
+//                                 <h4
+//                                   className="text-sm font-semibold"
+//                                   style={{ color: theme.yellow }}
+//                                 >
+//                                   Taking longer than expected
+//                                 </h4>
+//                                 <p
+//                                   className="text-xs mt-1"
+//                                   style={{ color: theme.textSecondary }}
+//                                 >
+//                                   Your project is still being built. Complex
+//                                   projects can take 2-5 minutes.
+//                                 </p>
+//                                 <div className="flex gap-2 mt-3">
+//                                   <button
+//                                     onClick={() => {
+//                                       setWarningDismissed(true);
+//                                       setShowTimeoutWarning(false);
+//                                     }}
+//                                     className="text-xs px-3 py-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: "transparent",
+//                                       color: theme.textSecondary,
+//                                       border: `1px solid ${theme.border}`,
+//                                     }}
+//                                   >
+//                                     Dismiss
+//                                   </button>
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           </motion.div>
+//                         )}
+//                     </AnimatePresence>
+
+//                     {/* Diagnostic Display */}
+//                     {showDiagnostic && diagnosticData && (
+//                       <DiagnosticDisplay
+//                         data={diagnosticData}
+//                         onClose={() => setShowDiagnostic(false)}
+//                         onFix={fixLocalStorage}
+//                       />
+//                     )}
+
+//                     <AnimatePresence mode="wait">
+//                       {showHelp && messages.length === 0 ? (
+//                         /* Help Section */
+//                         <motion.div
+//                           key="help"
+//                           initial={{ opacity: 0, y: 10 }}
+//                           animate={{ opacity: 1, y: 0 }}
+//                           exit={{ opacity: 0, y: -10 }}
+//                           transition={{ duration: 0.2 }}
+//                         >
+//                           <h2
+//                             className="text-lg sm:text-xl font-semibold mb-2"
+//                             style={{ color: theme.textPrimary }}
+//                           >
+//                             What would you like to build today?
+//                           </h2>
+//                           <p
+//                             className="text-sm mb-6"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build complete projects and get a VS
+//                             Code-like environment!
+//                           </p>
+
+//                           {/* Project Templates - Show all 8 templates in help section */}
+//                           <div className="mb-8">
+//                             <h3
+//                               className="text-sm font-semibold mb-2"
+//                               style={{ color: theme.textPrimary }}
+//                             >
+//                               Popular Projects
+//                             </h3>
+//                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+//                               {allTemplates.map((template, index) => (
+//                                 <motion.button
+//                                   key={index}
+//                                   whileHover={{ scale: 1.02 }}
+//                                   whileTap={{ scale: 0.98 }}
+//                                   className="text-white p-3 rounded-xl flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-all"
+//                                   style={{ backgroundColor: template.bg }}
+//                                   onClick={() =>
+//                                     handleTemplateClick(template.name)
+//                                   }
+//                                 >
+//                                   <span className="text-xl">
+//                                     {template.icon}
+//                                   </span>
+//                                   <span className="text-xs font-medium text-center">
+//                                     {template.name}
+//                                   </span>
+//                                 </motion.button>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </motion.div>
+//                       ) : (
+//                         /* Messages */
+//                         <motion.div
+//                           key="messages"
+//                           initial={{ opacity: 0 }}
+//                           animate={{ opacity: 1 }}
+//                           exit={{ opacity: 0 }}
+//                         >
+//                           {messages.map((msg, index) => (
+//                             <motion.div
+//                               key={msg.id}
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               transition={{
+//                                 duration: 0.2,
+//                                 delay: index * 0.05,
+//                               }}
+//                               className={`mb-4 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+//                             >
+//                               <div
+//                                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+//                                   msg.sender === "user"
+//                                     ? "rounded-br-none"
+//                                     : "rounded-bl-none"
+//                                 }`}
+//                                 style={{
+//                                   backgroundColor:
+//                                     msg.sender === "user"
+//                                       ? theme.green
+//                                       : theme.card,
+//                                   color:
+//                                     msg.sender === "user"
+//                                       ? "#FFFFFF"
+//                                       : theme.textPrimary,
+//                                 }}
+//                               >
+//                                 {msg.sender === "ai" && (
+//                                   <div className="flex items-center gap-2 mb-2">
+//                                     <BsRobot className="text-xs" />
+//                                     <span className="text-xs font-medium">
+//                                       AI Developer Assistant
+//                                     </span>
+//                                   </div>
+//                                 )}
+//                                 <div className="text-sm whitespace-pre-wrap font-mono">
+//                                   {msg.text}
+//                                 </div>
+//                                 <p className="text-xs mt-2 opacity-70 text-right">
+//                                   {msg.timestamp}
+//                                 </p>
+//                               </div>
+//                             </motion.div>
+//                           ))}
+
+//                           {/* Processing Animation */}
+//                           {isProcessing &&
+//                             jobStatus === "processing" &&
+//                             !projectFiles &&
+//                             isPollingActive && (
+//                               <motion.div
+//                                 initial={{ opacity: 0 }}
+//                                 animate={{ opacity: 1 }}
+//                                 exit={{ opacity: 0 }}
+//                                 className="flex justify-center"
+//                               >
+//                                 <ProcessingAnimation />
+//                               </motion.div>
+//                             )}
+
+//                           {/* Error Display for Failed Jobs */}
+//                           {jobStatus === "failed" && jobErrorMessage && (
+//                             <ErrorDisplay
+//                               message={jobErrorMessage}
+//                               details={jobErrorDetails}
+//                             />
+//                           )}
+
+//                           {/* Typing indicator */}
+//                           {isTyping && (
+//                             <motion.div
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               className="flex justify-start"
+//                             >
+//                               <div
+//                                 className="rounded-2xl rounded-bl-none px-4 py-3"
+//                                 style={{ backgroundColor: theme.card }}
+//                               >
+//                                 <div className="flex gap-1">
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.2,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.4,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </motion.div>
+//                           )}
+
+//                           <div ref={messagesEndRef} />
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Fixed Input Area for Messages */}
+//               <div
+//                 className="flex-shrink-0 border-t w-full p-3"
+//                 style={{
+//                   backgroundColor: theme.sidebar,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <div className="max-w-full mx-auto">
+//                   <div className="relative">
+//                     <textarea
+//                       ref={inputRef}
+//                       value={message}
+//                       onChange={(e) => setMessage(e.target.value)}
+//                       onKeyPress={handleKeyPress}
+//                       placeholder="Ask me to build any project..."
+//                       className={`w-full pl-3 placeholder:text-xs pr-24 py-4 border rounded-md text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${
+//                         inputError
+//                           ? "border-red-500 focus:ring-red-500"
+//                           : "focus:ring-[#22C55E]"
+//                       }`}
+//                       style={{
+//                         backgroundColor: theme.inputBg,
+//                         borderColor: inputError ? theme.red : theme.border,
+//                         color: theme.textPrimary,
+//                         minHeight: "70px",
+//                         maxHeight: "160px",
+//                         resize: "none",
+//                       }}
+//                       rows="2"
+//                       onInput={(e) => {
+//                         e.target.style.height = "auto";
+//                         e.target.style.height =
+//                           Math.min(e.target.scrollHeight, 150) + "px";
+//                       }}
+//                       disabled={isProcessing && jobStatus === "processing"}
+//                     />
+//                     <div className="absolute right-2 bottom-3 flex items-center gap-2">
+//                       <button
+//                         onClick={handleSendMessage}
+//                         disabled={isProcessing && jobStatus === "processing"}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+//                         style={{
+//                           backgroundColor:
+//                             isProcessing && jobStatus === "processing"
+//                               ? theme.textSecondary
+//                               : theme.green,
+//                         }}
+//                         title={
+//                           isProcessing
+//                             ? "Currently building a project"
+//                             : "Send message"
+//                         }
+//                       >
+//                         <HiOutlinePaperAirplane className="text-sm" />
+//                       </button>
+//                       <button
+//                         onClick={handleNewChat}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0"
+//                         style={{ backgroundColor: theme.card }}
+//                         title="Start new chat"
+//                       >
+//                         <HiOutlinePlus className="text-sm" />
+//                       </button>
+//                     </div>
+//                   </div>
+//                   {inputError && (
+//                     <p className="text-xs mt-1 text-red-500">{inputError}</p>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Right Column - Workspace Area - Responsive */}
+//             {jobStatus === "completed" && (
+//               <div
+//                 ref={workspaceRef}
+//                 className={`
+//                   lg:w-3/5 
+//                   ${showMobileWorkspace ? "w-full" : "hidden lg:block"}
+//                   overflow-hidden flex flex-col transition-all duration-300
+//                 `}
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 {/* Workspace Header with View Toggles and Fullscreen */}
+//                 <div
+//                   className="px-3 p-1/2 border-b flex items-center justify-between"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     borderColor: theme.border,
+//                   }}
+//                 >
+//                   <div className="flex items-center gap-2">
+//                     <h3
+//                       className="sm:text-xs whitespace-nowrap text-[10px] font-semibold uppercase"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       Project Workspace
+//                     </h3>
+//                     {downloadUrl && (
+//                       <motion.button
+//                         whileHover={{ scale: 1.05 }}
+//                         whileTap={{ scale: 0.95 }}
+//                         onClick={handleDownload}
+//                         className="flex items-center gap-1 px-2 sm:py-1 rounded text-white text-xs"
+//                         style={{ backgroundColor: theme.green }}
+//                       >
+//                         <HiOutlineDownload className="text-xs" />
+//                       zip
+//                       </motion.button>
+//                     )}
+//                     <button
+//                       onClick={runDiagnostic}
+//                       className="p-1.5 rounded-full text-xs hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                       title="Run diagnostic"
+//                     >
+//                       <BsWrench className="text-sm" />
+//                     </button>
+
+//                     {/* Manual Save Button - Now in the workspace header */}
+//                     {jobId && jobStatus === "completed" && (
+//                       <SaveButton 
+//                         onClick={handleManualSave} 
+//                         saveStatus={saveStatus}
+//                       />
+//                     )}
+//                   </div>
+
+//                   {/* View Toggle Buttons */}
+//                   {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                     <div className="flex items-center gap-2">
+//                       <div
+//                         className="flex items-center gap-1 rounded-lg p-1"
+//                         style={{ backgroundColor: theme.card }}
+//                       >
+//                         <button
+//                           onClick={() => setWorkspaceView("preview")}
+//                           className={`px-3 sm:py-1 rounded-md text-xs font-medium transition-all ${
+//                             workspaceView === "preview"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "preview"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "preview"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Preview View"
+//                         >
+//                           <BsEye className="text-sm inline mr-1 mb-1" />
+//                           <span className="hidden sm:inline">Preview</span>
+//                         </button>
+//                         <button
+//                           onClick={() => setWorkspaceView("code")}
+//                           className={`px-3 py-1 rounded-md text-xs flex justify-center items-center font-medium transition-all ${
+//                             workspaceView === "code"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "code"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "code"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Code View"
+//                         >
+//                           <BsCodeSquare className="text-sm inline mr-1" />
+//                           <span className="hidden sm:inline">Code</span>
+//                         </button>
+//                       </div>
+
+//                       {/* Fullscreen Button */}
+//                       <button
+//                         onClick={toggleFullscreen}
+//                         className="p-2 rounded-md transition-all hidden sm:inline-block"
+//                         style={{
+//                           backgroundColor: theme.card,
+//                           color: theme.textSecondary,
+//                         }}
+//                         title={
+//                           isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+//                         }
+//                       >
+//                         <HiOutlineArrowsExpand className="text-sm" />
+//                       </button>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* Workspace Content */}
+//                 <div className="flex-1 overflow-hidden">
+//                   {!showSandpack || Object.keys(sandpackFiles).length === 0 ? (
+//                     <div className="h-full flex items-center justify-center flex-col gap-4">
+//                       {jobStatus === "processing" ? (
+//                         <ProcessingAnimation />
+//                       ) : jobStatus === "failed" ? (
+//                         <div className="text-center">
+//                           <BsExclamationTriangle
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.red }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Project generation failed
+//                           </p>
+//                         </div>
+//                       ) : (
+//                         <div className="text-center">
+//                           <HiOutlineCode
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.textSecondary }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Your project will appear here
+//                           </p>
+//                           <p
+//                             className="text-xs mt-2"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build something to get started
+//                           </p>
+//                         </div>
+//                       )}
+//                     </div>
+//                   ) : (
+//                     <div
+//                       className="h-full overflow-hidden"
+//                       style={{ backgroundColor: theme.sandpackBg }}
+//                     >
+//                       <SandpackProvider
+//                         key={jobId || "sandpack-provider"}
+//                         template={getSandpackTemplate()}
+//                         theme={currentTheme === "dark" ? "dark" : "light"}
+//                         files={sandpackFiles}
+//                         customSetup={{
+//                           dependencies: getDependencies(),
+//                           entry: sandpackFiles["/src/index.js"]
+//                             ? "/src/index.js"
+//                             : sandpackFiles["/src/index.jsx"]
+//                               ? "/src/index.jsx"
+//                               : sandpackFiles["/src/main.jsx"]
+//                                 ? "/src/main.jsx"
+//                                 : "/src/index.js",
+//                         }}
+//                         options={{
+//                           externalResources: ["https://cdn.tailwindcss.com"],
+//                           visibleFiles: Object.keys(sandpackFiles),
+//                           activeFile:
+//                             Object.keys(sandpackFiles).find(
+//                               (f) =>
+//                                 f.includes("App.jsx") ||
+//                                 f.includes("App.js") ||
+//                                 f.includes("main.jsx"),
+//                             ) || Object.keys(sandpackFiles)[0],
+//                         }}
+//                       >
+//                         {/* Save handler wrapper - properly inside SandpackProvider */}
+//                         <SaveHandlerWrapper 
+//                           jobId={jobId} 
+//                           onSave={handleFileSave} 
+//                           setSaveStatus={setSaveStatus}
+//                           onSaveFunctionReady={handleSaveFunctionReady}
+//                         />
+                        
+//                         <SandpackLayout className="h-full">
+//                           {workspaceView === "preview" && (
+//                             /* Preview View - Full height preview with console at bottom */
+//                             <div className="flex flex-col h-full w-full">
+//                               {/* Preview (80%) */}
+//                               <div
+//                                 className="h-[80%] flex flex-col"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   PREVIEW
+//                                 </div>
+//                                 <div className="flex-1">
+//                                   <SandpackPreview
+//                                     showOpenInCodeSandbox={false}
+//                                     showRefreshButton={true}
+//                                     className="h-[70vh]"
+//                                   />
+//                                 </div>
+//                               </div>
+
+//                               {/* Console (20%) */}
+//                               <div
+//                                 className="h-[20%] border-t flex flex-col"
+//                                 style={{ borderColor: theme.border }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-1 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   CONSOLE
+//                                 </div>
+//                                 <div className="flex-1 overflow-auto">
+//                                   <SandpackConsole />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+
+//                           {workspaceView === "code" && (
+//                             /* Code View - Full height with resizable file explorer and editor */
+//                             <div className="flex flex-row h-[95vh] w-full">
+//                               {/* FILE EXPLORER - Resizable Panel */}
+//                               <ResizablePanel
+//                                 defaultWidth={25}
+//                                 minWidth={17}
+//                                 maxWidth={50}
+//                                 direction="right"
+//                                 storageKey={EXPLORER_WIDTH_KEY}
+//                                 theme={theme}
+//                               >
+//                                 <div
+//                                   className="h-full border-r flex flex-col"
+//                                   style={{
+//                                     backgroundColor: theme.card,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   <div
+//                                     className="px-3 py-2 text-xs border-b flex justify-between items-center font-semibold"
+//                                     style={{
+//                                       color: theme.textSecondary,
+//                                       borderColor: theme.border,
+//                                     }}
+//                                   >
+//                                     <h4>EXPLORER</h4>
+//                                     {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                                       <div
+//                                         className="px-2 flex justify-center items-center text-[10px]"
+//                                         style={{
+//                                           backgroundColor: theme.card,
+//                                           borderColor: theme.border,
+//                                           color: theme.textSecondary,
+//                                         }}
+//                                       >
+//                                         {Object.keys(sandpackFiles).length} files
+//                                       </div>
+//                                     )}
+//                                   </div>
+//                                   <div className="flex-1 overflow-auto">
+//                                     <SandpackFileExplorer
+//                                       className="text-xs"
+//                                       autoHiddenFiles={false}
+//                                       style={{
+//                                         height: "100%",
+//                                         overflow: "auto",
+//                                       }}
+//                                     />
+//                                   </div>
+//                                 </div>
+//                               </ResizablePanel>
+                              
+//                               {/* EDITOR - Takes remaining width */}
+//                               <div
+//                                 className="flex-1 h-full flex flex-col overflow-hidden"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold flex-shrink-0"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   EDITOR
+//                                 </div>
+//                                 <div className="flex-1 overflow-hidden">
+//                                   <SandpackCodeEditor
+//                                     showTabs
+//                                     showLineNumbers
+//                                     wrapContent={false}
+//                                     closableTabs={true}
+//                                     style={{
+//                                       height: "100%",
+//                                       overflow: "auto",
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+//                         </SandpackLayout>
+//                       </SandpackProvider>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Sidebar Component
+// const SidebarContent = ({
+//   recentChats,
+//   templates,
+//   allTemplates,
+//   onClose,
+//   theme,
+//   hoveredChat,
+//   setHoveredChat,
+//   onNewChat,
+//   onProjectClick,
+//   onTemplateClick,
+//   currentTheme,
+//   toggleTheme,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col">
+//       {/* Header */}
+//       <div
+//         className="p-3 border-b flex-shrink-0"
+//         style={{ borderColor: theme.border }}
+//       >
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center gap-3 min-w-0">
+//             <motion.div
+//               whileHover={{ scale: 1.02 }}
+//               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+//               style={{
+//                 background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//               }}
+//             >
+//               <img
+//                 src="/EVA.png"
+//                 alt="EVA"
+//                 height={60}
+//                 className="rounded-full"
+//               />
+//             </motion.div>
+//             <div className="min-w-0">
+//               <h1
+//                 className="text-sm font-semibold truncate"
+//                 style={{ color: theme.textPrimary }}
+//               >
+//                 EVA AI
+//               </h1>
+//               <p
+//                 className="text-xs truncate"
+//                 style={{ color: theme.textSecondary }}
+//               >
+//                 Full-Stack AI
+//               </p>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             {/* Theme Toggle in Sidebar */}
+//             <motion.button
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//               onClick={toggleTheme}
+//               className="p-2 rounded-full"
+//               style={{ backgroundColor: theme.card, color: theme.textPrimary }}
+//               title={
+//                 currentTheme === "dark"
+//                   ? "Switch to Light Mode"
+//                   : "Switch to Dark Mode"
+//               }
+//             >
+//               {currentTheme === "dark" ? (
+//                 <HiOutlineSun className="text-sm" />
+//               ) : (
+//                 <HiOutlineMoon className="text-sm" />
+//               )}
+//             </motion.button>
+//             {onClose && (
+//               <motion.button
+//                 whileHover={{ rotate: 90 }}
+//                 transition={{ duration: 0.2 }}
+//                 onClick={onClose}
+//                 className="lg:hidden p-2 rounded-full flex-shrink-0"
+//                 style={{ backgroundColor: theme.card }}
+//               >
+//                 <HiOutlineX style={{ color: theme.textPrimary }} />
+//               </motion.button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* New Chat Button */}
+//       <div className="p-4 mx-3 flex-shrink-0">
+//         <motion.button
+//           whileHover={{ scale: 1.02 }}
+//           whileTap={{ scale: 0.98 }}
+//           onClick={onNewChat}
+//           className="w-full py-2.5 px-4 text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
+//           style={{ backgroundColor: theme.green }}
+//         >
+//           <HiOutlinePlus className="text-base" />
+//           <span className="truncate">New Project</span>
+//         </motion.button>
+//       </div>
+
+//       {/* Templates Section */}
+//       <div className="px-3 mb-4">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Quick Templates
+//         </h2>
+//         <div className="grid grid-cols-2 gap-2">
+//           {templates.map((template, index) => (
+//             <motion.button
+//               key={index}
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               className="p-2 rounded-lg text-xs text-white flex items-center justify-center gap-1.5"
+//               style={{ backgroundColor: template.bg }}
+//               onClick={() => onTemplateClick(template.name)}
+//             >
+//               <span className="text-sm">{template.icon}</span>
+//               <span className="truncate">{template.name}</span>
+//             </motion.button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* Recent Projects Section */}
+//       <div className="flex-1 px-3 overflow-y-auto no-scrollbar min-h-72">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Recent Projects
+//         </h2>
+//         <div className="space-y-1 pb-4">
+//           {recentChats.length > 0 ? (
+//             recentChats.map((chat) => (
+//               <motion.div
+//                 key={chat.id}
+//                 whileHover={{ x: 4 }}
+//                 className="flex items-start gap-3 p-3 rounded-xl cursor-pointer group"
+//                 style={{
+//                   backgroundColor:
+//                     hoveredChat === chat.id ? theme.hover : "transparent",
+//                   opacity: chat.status === "processing" ? 0.8 : 1,
+//                 }}
+//                 onMouseEnter={() => setHoveredChat(chat.id)}
+//                 onMouseLeave={() => setHoveredChat(null)}
+//                 onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//               >
+//                 <div
+//                   className="p-2 rounded-full flex-shrink-0"
+//                   style={{ backgroundColor: theme.iconBg }}
+//                 >
+//                   <span style={{ color: chat.color }} className="text-sm">
+//                     {chat.icon}
+//                   </span>
+//                 </div>
+//                 <div className="flex-1 min-w-0">
+//                   <div className="flex items-center justify-between gap-2">
+//                     <h4
+//                       className="text-sm font-medium truncate"
+//                       style={{ color: theme.textPrimary }}
+//                     >
+//                       {chat.title}
+//                     </h4>
+//                     <span
+//                       className="text-xs flex-shrink-0"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       {chat.time}
+//                     </span>
+//                   </div>
+//                   <p
+//                     className="text-xs truncate"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     {chat.preview}
+//                   </p>
+//                   {chat.status === "processing" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.yellow + "20",
+//                         color: theme.yellow,
+//                       }}
+//                     >
+//                       Processing...
+//                     </span>
+//                   )}
+//                   {chat.status === "completed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.green + "20",
+//                         color: theme.green,
+//                       }}
+//                     >
+//                       Completed
+//                     </span>
+//                   )}
+//                   {chat.status === "failed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.red + "20",
+//                         color: theme.red,
+//                       }}
+//                     >
+//                       Failed
+//                     </span>
+//                   )}
+//                 </div>
+//               </motion.div>
+//             ))
+//           ) : (
+//             <div
+//               className="text-center py-8"
+//               style={{ color: theme.textSecondary }}
+//             >
+//               <p className="text-xs">No recent projects</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Collapsed Sidebar Component
+// const CollapsedSidebar = ({
+//   theme,
+//   onNewChat,
+//   recentChats,
+//   onProjectClick,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col items-center py-3">
+//       <motion.div
+//         whileHover={{ scale: 1.1 }}
+//         className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md mb-6 cursor-pointer"
+//         style={{
+//           background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//         }}
+//         onClick={onNewChat}
+//         title="New Project"
+//       >
+//         <HiOutlinePlus className="text-white text-lg" />
+//       </motion.div>
+
+//       <div className="flex-1 w-full px-2">
+//         {recentChats.slice(0, 5).map((chat) => (
+//           <motion.div
+//             key={chat.id}
+//             whileHover={{ scale: 1.05 }}
+//             className="w-full flex justify-center mb-2 cursor-pointer relative"
+//             onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//             title={`${chat.title} - ${chat.status}`}
+//           >
+//             <div
+//               className="p-2 rounded-lg"
+//               style={{ backgroundColor: theme.card }}
+//             >
+//               <span style={{ color: chat.color }} className="text-lg">
+//                 {chat.icon}
+//               </span>
+//             </div>
+//             {chat.status === "processing" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+//             )}
+//             {chat.status === "failed" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+//             )}
+//           </motion.div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Home;
+
+
+////save functionality ai solution
+// import React, { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "motion/react";
+// import { useSearchParams } from "react-router-dom";
+// import axios from "axios";
+// import {
+//   SandpackProvider,
+//   SandpackLayout,
+//   SandpackCodeEditor,
+//   SandpackPreview,
+//   SandpackConsole,
+//   SandpackFileExplorer,
+//   useSandpack,
+// } from "@codesandbox/sandpack-react";
+// import {
+//   HiOutlineChat,
+//   HiOutlinePlus,
+//   HiOutlineX,
+//   HiOutlinePaperAirplane,
+//   HiOutlineShoppingCart,
+//   HiOutlineUserGroup,
+//   HiOutlineVideoCamera,
+//   HiOutlinePhotograph,
+//   HiOutlineLocationMarker,
+//   HiOutlineMap,
+//   HiOutlineCode,
+//   HiOutlineDownload,
+//   HiOutlineFolder,
+//   HiOutlineCheckCircle,
+//   HiOutlineRefresh,
+//   HiOutlineFolderOpen,
+//   HiOutlineChevronLeft,
+//   HiOutlineChevronRight,
+//   HiOutlineExclamation,
+//   HiOutlineMenu,
+//   HiOutlineEye,
+//   HiOutlineCog,
+//   HiOutlineArrowsExpand,
+//   HiOutlineSun,
+//   HiOutlineMoon,
+//   HiOutlineSave,
+// } from "react-icons/hi";
+// import {
+//   BsRobot,
+//   BsHourglassSplit,
+//   BsExclamationTriangle,
+//   BsBug,
+//   BsWrench,
+//   BsCodeSquare,
+//   BsEye,
+// } from "react-icons/bs";
+
+// const API_BASE_URL = "http://127.0.0.1:8000";
+
+// // Storage keys
+// const STORAGE_KEY = "ai_projects";
+// const THEME_KEY = "ai_theme";
+// const EXPLORER_WIDTH_KEY = "explorer_width";
+
+
+// // Theme definitions
+// const themes = {
+//   dark: {
+//     bg: "#0B0F0E",
+//     sidebar: "#111413",
+//     card: "#151918",
+//     border: "#1F2A27",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#E5E7EB",
+//     textSecondary: "#9CA3AF",
+//     inputBg: "#1A1F1D",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#1F2A27",
+//     iconBg: "#1A1F1D",
+//     sandpackBg: "#1e1e1e",
+//     blue: "#3B82F6",
+//   },
+//   light: {
+//     bg: "#F9FAFB",
+//     sidebar: "#FFFFFF",
+//     card: "#F3F4F6",
+//     border: "#E5E7EB",
+//     green: "#22C55E",
+//     greenSoft: "#16A34A",
+//     textPrimary: "#111827",
+//     textSecondary: "#6B7280",
+//     inputBg: "#FFFFFF",
+//     yellow: "#EAB308",
+//     orange: "#F97316",
+//     red: "#EF4444",
+//     hover: "#F3F4F6",
+//     iconBg: "#F3F4F6",
+//     sandpackBg: "#FFFFFF",
+//     blue: "#3B82F6",
+//   },
+// };
+
+// // Save Button Component
+// const SaveButton = ({ onClick, saveStatus }) => {
+//   return (
+//     <motion.button
+//       whileHover={{ scale: 1.05 }}
+//       whileTap={{ scale: 0.95 }}
+//       onClick={onClick}
+//       className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all"
+//       style={{
+//         backgroundColor: saveStatus === 'saving' ? '#6B7280' : saveStatus === 'saved' ? '#22C55E' : '#3B82F6',
+//         color: 'white',
+//       }}
+//       disabled={saveStatus === 'saving'}
+//       title="Save changes"
+//     >
+//       {saveStatus === 'saving' ? (
+//         <>
+//           <HiOutlineRefresh className="animate-spin text-sm" />
+//           <span className="hidden sm:inline">Saving...</span>
+//         </>
+//       ) : saveStatus === 'saved' ? (
+//         <>
+//           <HiOutlineCheckCircle className="text-sm" />
+//           <span className="hidden sm:inline">Saved</span>
+//         </>
+//       ) : (
+//         <>
+//           <HiOutlineSave className="text-sm" />
+//           <span className="hidden sm:inline">Save</span>
+//         </>
+//       )}
+//     </motion.button>
+//   );
+// };
+
+// // Manual Save Handler Component
+// const ManualSaveHandler = ({ jobId, onSave, setSaveStatus }) => {
+//   const { sandpack } = useSandpack();
+
+//   const handleSave = () => {
+//     if (!jobId) {
+//       console.error("No job ID provided for save");
+//       return;
+//     }
+
+//     console.log("Save button clicked - saving files...", sandpack.files);
+
+//     setSaveStatus("saving");
+
+//     try {
+//       // Convert Sandpack files to original structure
+//       const convertedFiles = Object.entries(sandpack.files).map(([path, file]) => {
+//         let filename = path.startsWith("/") ? path.slice(1) : path;
+
+//         // Add frontend prefix except backend or node_modules
+//         if (!filename.startsWith("backend/") && !filename.includes("node_modules")) {
+//           filename = `frontend/${filename}`;
+//         }
+
+//         return {
+//           filename: filename,
+//           content: file.code,
+//         };
+//       });
+
+//       console.log("Converted files:", convertedFiles);
+
+//       // Get stored projects
+//       const stored = localStorage.getItem(STORAGE_KEY);
+
+//       if (!stored) {
+//         console.error("No projects found in localStorage");
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       const projects = JSON.parse(stored);
+
+//       const projectIndex = projects.findIndex((p) => p.id === jobId);
+
+//       if (projectIndex === -1) {
+//         console.error("Project not found:", jobId);
+//         setSaveStatus("idle");
+//         return;
+//       }
+
+//       // Update files
+//       projects[projectIndex].files = convertedFiles;
+//       projects[projectIndex].timestamp = new Date().toLocaleString();
+
+//       // Count files
+//       const frontendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("frontend/")
+//       ).length;
+
+//       const backendFiles = convertedFiles.filter((f) =>
+//         f.filename.startsWith("backend/")
+//       ).length;
+
+//       projects[projectIndex].preview = `${convertedFiles.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`;
+
+//       projects[projectIndex].totalFiles = convertedFiles.length;
+//       projects[projectIndex].frontendFiles = frontendFiles;
+//       projects[projectIndex].backendFiles = backendFiles;
+
+//       // Save back
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+
+//       console.log("Project saved successfully");
+
+//       // callback
+//       if (onSave) {
+//         onSave(convertedFiles);
+//       }
+
+//       setSaveStatus("saved");
+
+//       setTimeout(() => {
+//         setSaveStatus("idle");
+//       }, 2000);
+//     } catch (error) {
+//       console.error("Save error:", error);
+//       setSaveStatus("idle");
+//     }
+//   };
+
+//   return { handleSave };
+// };
+// // Wrapper component to use the hook and expose the save function
+// const SaveHandlerWrapper = ({ jobId, onSave, setSaveStatus, onSaveFunctionReady }) => {
+//   const { handleSave } = ManualSaveHandler({ jobId, onSave, setSaveStatus });
+  
+//   useEffect(() => {
+//     console.log("SaveHandlerWrapper: handleSave function created", handleSave);
+//     if (onSaveFunctionReady) {
+//       onSaveFunctionReady(handleSave);
+//     }
+//   }, [handleSave, onSaveFunctionReady, jobId]);
+  
+//   return null;
+// };
+
+// // Resizable Panel Component
+// const ResizablePanel = ({
+//   children,
+//   defaultSize = 25,
+//   minSize = 15,
+//   maxSize = 50,
+//   direction = "right",
+//   storageKey = "panel_size",
+//   theme
+// }) => {
+//   const isVertical = direction === "top" || direction === "bottom";
+
+//   const [size, setSize] = useState(() => {
+//     const saved = localStorage.getItem(storageKey);
+//     return saved ? parseInt(saved) : defaultSize;
+//   });
+
+//   const [isResizing, setIsResizing] = useState(false);
+//   const panelRef = useRef(null);
+
+//   useEffect(() => {
+//     const handleMouseMove = (e) => {
+//       if (!isResizing) return;
+
+//       const container = panelRef.current?.parentElement;
+//       if (!container) return;
+
+//       const rect = container.getBoundingClientRect();
+//       let newSize;
+
+//       if (isVertical) {
+//         newSize = ((rect.bottom - e.clientY) / rect.height) * 100;
+//       } else {
+//         newSize = ((e.clientX - rect.left) / rect.width) * 100;
+//       }
+
+//       newSize = Math.max(minSize, Math.min(maxSize, newSize));
+
+//       setSize(newSize);
+//       localStorage.setItem(storageKey, Math.round(newSize));
+//     };
+
+//     const handleMouseUp = () => {
+//       setIsResizing(false);
+//       document.body.style.cursor = "default";
+//       document.body.style.userSelect = "auto";
+//     };
+
+//     if (isResizing) {
+//       document.addEventListener("mousemove", handleMouseMove);
+//       document.addEventListener("mouseup", handleMouseUp);
+
+//       document.body.style.cursor = isVertical ? "row-resize" : "col-resize";
+//       document.body.style.userSelect = "none";
+//     }
+
+//     return () => {
+//       document.removeEventListener("mousemove", handleMouseMove);
+//       document.removeEventListener("mouseup", handleMouseUp);
+//     };
+//   }, [isResizing]);
+
+//   return (
+//     <div
+//       ref={panelRef}
+//       className="relative"
+//       style={isVertical ? { height: `${size}%` } : { width: `${size}%` }}
+//     >
+//       {children}
+
+//       <div
+//         className={`absolute ${
+//           isVertical
+//             ? "left-0 right-0 h-1 cursor-row-resize"
+//             : "top-0 bottom-0 w-1 cursor-col-resize"
+//         }`}
+//         style={{
+//           backgroundColor: isResizing ? theme?.blue : "transparent",
+//           zIndex: 20,
+//           bottom: isVertical ? 0 : undefined,
+//           right: !isVertical ? 0 : undefined
+//         }}
+//         onMouseDown={(e) => {
+//           e.preventDefault();
+//           setIsResizing(true);
+//         }}
+//       />
+//     </div>
+//   );
+// };
+// const Home = () => {
+//   const [searchParams, setSearchParams] = useSearchParams();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [hoveredChat, setHoveredChat] = useState(null);
+//   const [message, setMessage] = useState("");
+//   const [messages, setMessages] = useState([]);
+//   const [showHelp, setShowHelp] = useState(true);
+//   const [isTyping, setIsTyping] = useState(false);
+
+//   // Theme State
+//   const [currentTheme, setCurrentTheme] = useState("dark");
+//   const theme = themes[currentTheme];
+
+//   // API States
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [jobStatus, setJobStatus] = useState(null);
+//   const [jobId, setJobId] = useState(null);
+//   const [projectFiles, setProjectFiles] = useState(null);
+//   const [downloadUrl, setDownloadUrl] = useState(null);
+//   const [recentProjects, setRecentProjects] = useState([]);
+//   const [pollingAttempts, setPollingAttempts] = useState(0);
+//   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+//   const [warningDismissed, setWarningDismissed] = useState(false);
+//   const [inputError, setInputError] = useState("");
+//   const [isPollingActive, setIsPollingActive] = useState(false);
+//   const [jobErrorMessage, setJobErrorMessage] = useState("");
+//   const [jobErrorDetails, setJobErrorDetails] = useState(null);
+//   const [initialLoadDone, setInitialLoadDone] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [showDiagnostic, setShowDiagnostic] = useState(false);
+//   const [diagnosticData, setDiagnosticData] = useState(null);
+//   const [lastSaved, setLastSaved] = useState(null);
+//   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved'
+
+//   // Sandpack Files
+//   const [sandpackFiles, setSandpackFiles] = useState({});
+//   const [showSandpack, setShowSandpack] = useState(false);
+
+//   // Sidebar State
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   // View Toggle State (preview/code)
+//   const [workspaceView, setWorkspaceView] = useState("preview");
+
+//   // Fullscreen State
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+
+//   // Mobile Workspace Toggle
+//   const [showMobileWorkspace, setShowMobileWorkspace] = useState(false);
+
+//   // Save function reference
+//   const saveFunctionRef = useRef(null);
+
+//   const messagesEndRef = useRef(null);
+//   const messagesContainerRef = useRef(null);
+//   const inputRef = useRef(null);
+//   const workspaceRef = useRef(null);
+
+//   // Refs for polling management
+//   const pollingIntervalRef = useRef(null);
+//   const currentJobIdRef = useRef(null);
+//   const isPollingRef = useRef(false);
+//   const abortControllerRef = useRef(null);
+
+//   // All 8 templates available
+//   const allTemplates = [
+//     { name: "Education ERP", icon: <HiOutlineCode />, bg: theme.green },
+//     { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.green },
+//     { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.green },
+//     { name: "Chat App", icon: <HiOutlineChat />, bg: theme.green },
+//     { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.green },
+//     { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.green },
+//     { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.green },
+//     { name: "Travel App", icon: <HiOutlineMap />, bg: theme.green },
+//   ];
+
+//   // Only show 4 templates in sidebar
+//   const sidebarTemplates = allTemplates.slice(0, 4);
+
+//   // Load theme from localStorage on mount
+//   useEffect(() => {
+//     const savedTheme = localStorage.getItem(THEME_KEY);
+//     if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
+//       setCurrentTheme(savedTheme);
+//     }
+//   }, []);
+
+//   // Toggle theme function
+//   const toggleTheme = () => {
+//     const newTheme = currentTheme === "dark" ? "light" : "dark";
+//     setCurrentTheme(newTheme);
+//     localStorage.setItem(THEME_KEY, newTheme);
+//   };
+
+//   // Clean code content from markdown code blocks
+//   const cleanCodeContent = (content) => {
+//     const codeBlockRegex = /```[a-z]*\n([\s\S]*?)```/g;
+//     const match = codeBlockRegex.exec(content);
+
+//     let cleaned = match ? match[1].trim() : content;
+
+//     // Remove Tailwind build directives (for Sandpack preview)
+//     cleaned = cleaned
+//       .replace(/@tailwind base;/g, "")
+//       .replace(/@tailwind components;/g, "")
+//       .replace(/@tailwind utilities;/g, "");
+
+//     return cleaned;
+//   };
+
+//   // Convert API files to Sandpack format with Tailwind support
+//   const convertToSandpackFiles = (files) => {
+//     const sandpackFiles = {};
+
+//     files.forEach((file) => {
+//       // Skip backend files for preview
+//       if (file.filename.startsWith("backend/")) {
+//         return;
+//       }
+
+//       // Handle frontend files
+//       let filename = file.filename;
+//       if (filename.startsWith("frontend/")) {
+//         filename = filename.replace("frontend/", "");
+//       }
+
+//       // Only include relevant frontend files
+//       if (
+//         filename.startsWith("src/") ||
+//         filename === "index.html" ||
+//         filename === "package.json" ||
+//         filename === "vite.config.js" ||
+//         filename === "postcss.config.js" ||
+//         filename === "tailwind.config.js"
+//       ) {
+//         // Clean the content from markdown code blocks
+//         let cleanContent = cleanCodeContent(file.content);
+
+//         // Map the file path correctly
+//         let sandpackPath = filename;
+//         if (sandpackPath === "index.html") {
+//           sandpackPath = "/index.html";
+//         } else if (!sandpackPath.startsWith("/")) {
+//           sandpackPath = "/" + sandpackPath;
+//         }
+
+//         sandpackFiles[sandpackPath] = {
+//           code: cleanContent,
+//         };
+//       }
+//     });
+
+//     // Ensure there's an entry file
+//     if (
+//       !sandpackFiles["/src/index.js"] &&
+//       !sandpackFiles["/src/index.jsx"] &&
+//       !sandpackFiles["/src/main.jsx"]
+//     ) {
+//       sandpackFiles["/src/main.jsx"] = {
+//         code: `import React from 'react'
+// import ReactDOM from 'react-dom/client'
+// import App from './App'
+// import './index.css'
+
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// )`,
+//       };
+//     }
+
+//     // Ensure App.jsx exists
+//     if (!sandpackFiles["/src/App.jsx"] && !sandpackFiles["/src/App.js"]) {
+//       sandpackFiles["/src/App.jsx"] = {
+//         code: `import React from 'react'
+
+// export default function App() {
+//   return (
+//     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+//       <h1 className="text-3xl font-bold text-gray-800">Welcome to Your App</h1>
+//     </div>
+//   )
+// }`,
+//       };
+//     }
+
+//     // Ensure index.css exists with Tailwind directives
+//     if (!sandpackFiles["/src/index.css"]) {
+//       sandpackFiles["/src/index.css"] = {
+//         code: `@tailwind base;
+// @tailwind components;
+// @tailwind utilities;`,
+//       };
+//     }
+
+//     // Ensure tailwind.config.js exists
+//     if (!sandpackFiles["/tailwind.config.js"]) {
+//       sandpackFiles["/tailwind.config.js"] = {
+//         code: `/** @type {import('tailwindcss').Config} */
+// export default {
+//   content: [
+//     "./index.html",
+//     "./src/**/*.{js,ts,jsx,tsx}",
+//   ],
+//   theme: {
+//     extend: {},
+//   },
+//   plugins: [],
+// }`,
+//       };
+//     }
+
+//     // Ensure postcss.config.js exists
+//     if (!sandpackFiles["/postcss.config.js"]) {
+//       sandpackFiles["/postcss.config.js"] = {
+//         code: `export default {
+//   plugins: {
+//     tailwindcss: {},
+//     autoprefixer: {},
+//   },
+// }`,
+//       };
+//     }
+
+//     return sandpackFiles;
+//   };
+
+//   // Convert Sandpack files back to original format
+//   const convertFromSandpackFiles = (sandpackFiles) => {
+//     const files = [];
+    
+//     Object.entries(sandpackFiles).forEach(([path, file]) => {
+//       // Remove leading slash
+//       let filename = path.startsWith('/') ? path.slice(1) : path;
+      
+//       // Add frontend/ prefix for frontend files
+//       if (!filename.startsWith('backend/') && !filename.includes('node_modules')) {
+//         filename = `frontend/${filename}`;
+//       }
+
+//       files.push({
+//         filename: filename,
+//         content: file.code
+//       });
+//     });
+
+//     return files;
+//   };
+
+//   // Auto-scroll to bottom when messages change
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages, jobId, projectFiles]);
+
+//   // Auto-show Sandpack when files are ready
+//   useEffect(() => {
+//     if (
+//       jobStatus === "completed" &&
+//       projectFiles &&
+//       Object.keys(sandpackFiles).length > 0
+//     ) {
+//       setShowSandpack(true);
+//     }
+//   }, [jobStatus, projectFiles, sandpackFiles]);
+
+//   const scrollToBottom = () => {
+//     setTimeout(() => {
+//       if (messagesEndRef.current) {
+//         messagesEndRef.current.scrollIntoView({
+//           behavior: "smooth",
+//           block: "end",
+//         });
+//       }
+//     }, 100);
+//   };
+
+//   // Load recent projects from localStorage on mount
+//   useEffect(() => {
+//     loadRecentProjects();
+//   }, []);
+
+//   // Handle URL parameter on mount and when it changes
+//   useEffect(() => {
+//     const projectId = searchParams.get("project");
+
+//     if (projectId && !isLoading) {
+//       // Clear current state before loading new project
+//       setMessages([]);
+//       setShowHelp(false);
+//       setProjectFiles(null);
+//       setSandpackFiles({});
+//       setShowSandpack(false);
+//       setJobStatus(null);
+//       setJobErrorMessage("");
+//       setJobErrorDetails(null);
+
+//       // Load the project
+//       setTimeout(() => {
+//         loadProject(projectId);
+//       }, 100);
+//     } else if (!projectId && !initialLoadDone) {
+//       setShowHelp(true);
+//       setInitialLoadDone(true);
+//     }
+//   }, [searchParams]);
+
+//   // Cleanup polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       stopPolling();
+//     };
+//   }, []);
+
+//   // Handle fullscreen toggle
+//   const toggleFullscreen = () => {
+//     if (!isFullscreen) {
+//       if (workspaceRef.current.requestFullscreen) {
+//         workspaceRef.current.requestFullscreen();
+//       }
+//     } else {
+//       if (document.exitFullscreen) {
+//         document.exitFullscreen();
+//       }
+//     }
+//     setIsFullscreen(!isFullscreen);
+//   };
+
+//   // Listen for fullscreen change events
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       setIsFullscreen(!!document.fullscreenElement);
+//     };
+
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () => {
+//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//     };
+//   }, []);
+
+//   // Diagnostic function to check localStorage
+//   const runDiagnostic = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       const data = {
+//         exists: !!stored,
+//         raw: stored,
+//         parsed: null,
+//         currentProject: jobId,
+//         projectData: null,
+//       };
+
+//       if (stored) {
+//         try {
+//           data.parsed = JSON.parse(stored);
+//           if (jobId) {
+//             data.projectData = data.parsed.find((p) => p.id === jobId);
+//           }
+//         } catch (e) {
+//           data.parseError = e.message;
+//         }
+//       }
+
+//       setDiagnosticData(data);
+//       setShowDiagnostic(true);
+//     } catch (e) {
+//       console.error("Diagnostic error:", e);
+//     }
+//   };
+
+//   // Fix localStorage data
+//   const fixLocalStorage = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+
+//         // Fix any projects with missing fields
+//         const fixed = projects.map((p) => {
+//           if (!p.messages) p.messages = [];
+//           if (!p.error && p.status === "failed") {
+//             p.error = "Unknown error";
+//             p.errorDetails = { message: "Unknown error" };
+//           }
+//           if (!p.preview) {
+//             p.preview =
+//               p.status === "failed"
+//                 ? "Generation failed"
+//                 : p.status === "processing"
+//                   ? "Processing..."
+//                   : "No preview";
+//           }
+//           if (!p.prompt) p.prompt = "Unknown prompt";
+//           if (!p.totalFiles) p.totalFiles = p.files ? p.files.length : 0;
+//           return p;
+//         });
+
+//         localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+//         setRecentProjects(fixed);
+
+//         // Reload current project if any
+//         if (jobId) {
+//           loadProject(jobId);
+//         }
+//       }
+//     } catch (e) {
+//       console.error("Fix error:", e);
+//     }
+//   };
+
+//   const loadRecentProjects = () => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         setRecentProjects(projects);
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//   };
+
+//   // Save project to localStorage
+//   const saveProjectToStorage = (id, files, conversation, prompt = "") => {
+//     try {
+//       const packageJson = files.find(
+//         (f) =>
+//           f.filename === "package.json" ||
+//           f.filename === "frontend/package.json",
+//       );
+//       let projectName = "Project";
+//       if (packageJson) {
+//         try {
+//           const parsed = JSON.parse(packageJson.content);
+//           projectName = parsed.name || projectName;
+//         } catch (e) {
+//           console.error("Error parsing package.json", e);
+//         }
+//       }
+
+//       // Count frontend and backend files
+//       const frontendFiles = files.filter(
+//         (f) =>
+//           f.filename.startsWith("frontend/") ||
+//           !f.filename.startsWith("backend/"),
+//       ).length;
+//       const backendFiles = files.filter((f) =>
+//         f.filename.startsWith("backend/"),
+//       ).length;
+
+//       const projectInfo = {
+//         id: id,
+//         title: projectName,
+//         timestamp: new Date().toLocaleString(),
+//         preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//         files: files,
+//         messages: conversation,
+//         prompt:
+//           prompt ||
+//           conversation.find((m) => m.sender === "user")?.text ||
+//           "Project generation",
+//         status: "completed",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: files.length,
+//         frontendFiles: frontendFiles,
+//         backendFiles: backendFiles,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         projectInfo,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving project:", error);
+//       return [];
+//     }
+//   };
+
+//   // Save pending job to localStorage
+//   const savePendingJob = (id, prompt) => {
+//     try {
+//       const pendingProject = {
+//         id: id,
+//         title: "Processing...",
+//         timestamp: new Date().toLocaleString(),
+//         preview: `Building: "${prompt.substring(0, 50)}${prompt.length > 50 ? "..." : ""}"`,
+//         files: null,
+//         messages: [],
+//         prompt: prompt,
+//         status: "processing",
+//         createdAt: new Date().toISOString(),
+//         error: null,
+//         errorDetails: null,
+//         totalFiles: 0,
+//         frontendFiles: 0,
+//         backendFiles: 0,
+//       };
+
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = [
+//         pendingProject,
+//         ...existingProjects.filter((p) => p.id !== id),
+//       ].slice(0, 20);
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error saving pending job:", error);
+//       return [];
+//     }
+//   };
+
+//   // Update project status in localStorage
+//   const updateProjectStatus = (
+//     id,
+//     status,
+//     files = null,
+//     messages = [],
+//     errorDetails = null,
+//     prompt = "",
+//   ) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       let existingProjects = [];
+//       if (stored) {
+//         try {
+//           existingProjects = JSON.parse(stored);
+//         } catch (e) {
+//           console.error("Error parsing stored projects", e);
+//         }
+//       }
+
+//       const updated = existingProjects.map((project) => {
+//         if (project.id === id) {
+//           if (status === "completed" && files) {
+//             const packageJson = files.find(
+//               (f) =>
+//                 f.filename === "package.json" ||
+//                 f.filename === "frontend/package.json",
+//             );
+//             let projectName = "Project";
+//             if (packageJson) {
+//               try {
+//                 const parsed = JSON.parse(packageJson.content);
+//                 projectName = parsed.name || projectName;
+//               } catch (e) {
+//                 console.error("Error parsing package.json", e);
+//               }
+//             }
+
+//             // Count frontend and backend files
+//             const frontendFiles = files.filter(
+//               (f) =>
+//                 f.filename.startsWith("frontend/") ||
+//                 !f.filename.startsWith("backend/"),
+//             ).length;
+//             const backendFiles = files.filter((f) =>
+//               f.filename.startsWith("backend/"),
+//             ).length;
+
+//             return {
+//               ...project,
+//               title: projectName,
+//               status: "completed",
+//               files: files,
+//               messages: messages,
+//               preview: `${files.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`,
+//               error: null,
+//               errorDetails: null,
+//               prompt: prompt || project.prompt,
+//               totalFiles: files.length,
+//               frontendFiles: frontendFiles,
+//               backendFiles: backendFiles,
+//             };
+//           } else if (status === "failed") {
+//             return {
+//               ...project,
+//               status: "failed",
+//               title: "Failed Project",
+//               preview: "Generation failed",
+//               files: null,
+//               messages: messages,
+//               error: errorDetails?.message || "Unknown error",
+//               errorDetails: errorDetails,
+//               prompt: prompt || project.prompt,
+//             };
+//           } else {
+//             return {
+//               ...project,
+//               status: status,
+//               messages: messages,
+//             };
+//           }
+//         }
+//         return project;
+//       });
+
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//       setRecentProjects(updated);
+
+//       return updated;
+//     } catch (error) {
+//       console.error("Error updating project status:", error);
+//       return [];
+//     }
+//   };
+
+//   // Get project by ID from localStorage
+//   const getProjectById = (id) => {
+//     try {
+//       const stored = localStorage.getItem(STORAGE_KEY);
+//       if (stored) {
+//         const projects = JSON.parse(stored);
+//         const project = projects.find((p) => p.id === id);
+//         return project;
+//       }
+//     } catch (e) {
+//       console.error("Error parsing stored projects", e);
+//     }
+//     return null;
+//   };
+
+//   // Stop polling function
+//   const stopPolling = () => {
+//     if (pollingIntervalRef.current) {
+//       clearInterval(pollingIntervalRef.current);
+//       pollingIntervalRef.current = null;
+//     }
+
+//     if (abortControllerRef.current) {
+//       abortControllerRef.current.abort();
+//       abortControllerRef.current = null;
+//     }
+
+//     isPollingRef.current = false;
+//     setIsPollingActive(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//   };
+
+//   // Check if response is for current job
+//   const isResponseForCurrentJob = (id) => {
+//     return id === currentJobIdRef.current;
+//   };
+
+//   // Poll status function
+//   const pollStatus = async (id) => {
+//     if (!isPollingRef.current || !isResponseForCurrentJob(id)) {
+//       return;
+//     }
+
+//     try {
+//       setPollingAttempts((prev) => prev + 1);
+
+//       const response = await axios.get(`${API_BASE_URL}/status/${id}`, {
+//         timeout: 10000,
+//         signal: abortControllerRef.current?.signal,
+//       });
+
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (response.data.status === "completed") {
+//         stopPolling();
+
+//         const resultResponse = await axios.get(`${API_BASE_URL}/result/${id}`, {
+//           signal: abortControllerRef.current?.signal,
+//         });
+
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         setProjectFiles(resultResponse.data.files);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(resultResponse.data.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsProcessing(false);
+
+//         const packageJson = resultResponse.data.files.find(
+//           (f) =>
+//             f.filename === "package.json" ||
+//             f.filename === "frontend/package.json",
+//         );
+//         let projectName = "Project";
+//         if (packageJson) {
+//           try {
+//             const parsed = JSON.parse(packageJson.content);
+//             projectName = parsed.name || projectName;
+//           } catch (e) {
+//             console.error("Error parsing package.json", e);
+//           }
+//         }
+
+//         // Count frontend and backend files
+//         const frontendFiles = resultResponse.data.files.filter(
+//           (f) =>
+//             f.filename.startsWith("frontend/") ||
+//             !f.filename.startsWith("backend/"),
+//         ).length;
+//         const backendFiles = resultResponse.data.files.filter((f) =>
+//           f.filename.startsWith("backend/"),
+//         ).length;
+
+//         const successMessage = {
+//           id: Date.now(),
+//           text: `✅ **Project Generated Successfully!**
+          
+// I've created a complete ${projectName} project with ${resultResponse.data.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${resultResponse.data.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, successMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt from messages
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         saveProjectToStorage(
+//           id,
+//           resultResponse.data.files,
+//           allMessages,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (response.data.status === "failed") {
+//         if (!isResponseForCurrentJob(id)) {
+//           return;
+//         }
+
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+
+//         // Extract error message from response
+//         const errorMsg =
+//           response.data.error?.message ||
+//           "Unknown error occurred during project generation";
+//         const errorDetails = response.data.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         // Add detailed error message to chat
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Generation Failed**
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Possible reasons:**
+// - The AI couldn't generate valid code for your request
+// - The request contained invalid syntax or requirements
+// - There was a server-side processing error
+// - The prompt was too complex or ambiguous
+
+// **Suggestions:**
+// - Try a simpler and more specific request
+// - Check for any syntax errors in your prompt
+// - Try one of the template projects first
+// - Make sure your request includes specific features
+
+// Click "New Project" to try again.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           errorDetails,
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       } else if (
+//         response.data.status === "processing" ||
+//         response.data.status === "running"
+//       ) {
+//         setJobStatus("processing");
+//         updateProjectStatus(id, "processing");
+//       }
+
+//       if (
+//         isResponseForCurrentJob(id) &&
+//         pollingAttempts >= 60 &&
+//         !showTimeoutWarning &&
+//         !warningDismissed
+//       ) {
+//         setShowTimeoutWarning(true);
+//       }
+//     } catch (error) {
+//       if (!isResponseForCurrentJob(id)) {
+//         return;
+//       }
+
+//       if (
+//         axios.isCancel(error) ||
+//         error.name === "AbortError" ||
+//         error.code === "ERR_CANCELED"
+//       ) {
+//         return;
+//       }
+
+//       console.error("Status check error:", error);
+
+//       // Handle network errors
+//       if (pollingAttempts > 10) {
+//         stopPolling();
+//         setJobStatus("failed");
+//         setIsProcessing(false);
+//         setJobErrorMessage(error.message);
+//         setJobErrorDetails({ type: "network_error", message: error.message });
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Connection Error**
+
+// Unable to reach the server. Please check:
+
+// - The backend server is running at ${API_BASE_URL}
+// - Your internet connection
+// - No firewall blocking the connection
+
+// **Error details:** ${error.message}
+
+// **Technical Details:**
+// \`\`\`
+// Type: Network Error
+// Code: ${error.code || "N/A"}
+// Status: ${error.response?.status || "N/A"}
+// \`\`\`
+
+// **Solutions:**
+// 1. Start the backend server with: \`uvicorn main:app --reload\`
+// 2. Check if the server is running on port 8000
+// 3. Disable any firewall temporarily
+// 4. Try refreshing the page`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         const allMessages = [...messages, errorMessage];
+//         setMessages(allMessages);
+
+//         // Get the original prompt
+//         const userPrompt =
+//           messages.find((m) => m.sender === "user")?.text || "";
+//         updateProjectStatus(
+//           id,
+//           "failed",
+//           null,
+//           allMessages,
+//           { type: "network_error", message: error.message },
+//           userPrompt,
+//         );
+
+//         scrollToBottom();
+//       }
+//     }
+//   };
+
+//   // Start continuous polling
+//   const startPolling = (id) => {
+//     stopPolling();
+
+//     currentJobIdRef.current = id;
+//     setJobId(id);
+//     setJobStatus("processing");
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     isPollingRef.current = true;
+//     setIsPollingActive(true);
+
+//     abortControllerRef.current = new AbortController();
+
+//     pollStatus(id);
+
+//     pollingIntervalRef.current = setInterval(() => {
+//       if (isPollingRef.current && isResponseForCurrentJob(id)) {
+//         pollStatus(id);
+//       }
+//     }, 2000);
+//   };
+
+//   // Load project from localStorage or API - FIXED VERSION
+//   const loadProject = async (id) => {
+//     // Prevent multiple loads
+//     if (!id || id === "null" || id === "undefined") {
+//       setShowHelp(true);
+//       setIsLoading(false);
+//       setIsProcessing(false);
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     stopPolling();
+
+//     setJobId(id);
+//     setIsProcessing(false);
+//     setShowHelp(false);
+//     setJobStatus("loading");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowSandpack(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     currentJobIdRef.current = id;
+
+//     try {
+//       // STEP 1: Check localStorage FIRST for existing project with files
+//       const project = getProjectById(id);
+      
+//       // If project exists in localStorage and has files, use it immediately
+//       if (project && project.files && project.files.length > 0) {
+//         console.log("Project found in localStorage with files, loading from cache");
+        
+//         // Load from localStorage
+//         setProjectFiles(project.files);
+//         setMessages(project.messages || []);
+//         setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//         // Convert to Sandpack format
+//         const sandpackFiles = convertToSandpackFiles(project.files);
+//         setSandpackFiles(sandpackFiles);
+//         setShowSandpack(true);
+
+//         setJobStatus("completed");
+//         setIsLoading(false);
+        
+//         // Add a success message if no messages exist
+//         if (!project.messages || project.messages.length === 0) {
+//           const packageJson = project.files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           const frontendFiles = project.files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = project.files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${project.files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${project.files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+          
+//           setMessages([successMessage]);
+          
+//           // Update the project with the message
+//           updateProjectStatus(
+//             id,
+//             "completed",
+//             project.files,
+//             [successMessage],
+//             null,
+//             project.prompt || ""
+//           );
+//         }
+        
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // STEP 2: If no files in localStorage, check API
+//       console.log("No files in localStorage, checking API for project", id);
+      
+//       // Check API for current status
+//       let apiStatus = null;
+//       let apiError = null;
+
+//       try {
+//         const statusResponse = await axios.get(`${API_BASE_URL}/status/${id}`);
+//         apiStatus = statusResponse.data;
+//       } catch (apiErr) {
+//         apiError = apiErr;
+//       }
+
+//       // PRIORITY 1: If API says completed, use API data
+//       if (apiStatus && apiStatus.status === "completed") {
+//         try {
+//           const resultResponse = await axios.get(
+//             `${API_BASE_URL}/result/${id}`,
+//           );
+          
+//           const files = resultResponse.data.files;
+//           setProjectFiles(files);
+//           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+//           // Convert to Sandpack format
+//           const sandpackFiles = convertToSandpackFiles(files);
+//           setSandpackFiles(sandpackFiles);
+//           setShowSandpack(true);
+
+//           setJobStatus("completed");
+
+//           const packageJson = files.find(
+//             (f) =>
+//               f.filename === "package.json" ||
+//               f.filename === "frontend/package.json",
+//           );
+//           let projectName = "Project";
+//           if (packageJson) {
+//             try {
+//               const parsed = JSON.parse(packageJson.content);
+//               projectName = parsed.name || projectName;
+//             } catch (e) {
+//               console.error("Error parsing package.json", e);
+//             }
+//           }
+
+//           // Count frontend and backend files
+//           const frontendFiles = files.filter(
+//             (f) =>
+//               f.filename.startsWith("frontend/") ||
+//               !f.filename.startsWith("backend/"),
+//           ).length;
+//           const backendFiles = files.filter((f) =>
+//             f.filename.startsWith("backend/"),
+//           ).length;
+
+//           const successMessage = {
+//             id: Date.now(),
+//             text: `✅ **Project Loaded Successfully!**
+            
+// Loaded ${projectName} with ${files.length} files.
+
+// **Quick Stats:**
+// - Total Files: ${files.length}
+// - Frontend Files: ${frontendFiles}
+// - Backend Files: ${backendFiles}
+
+// You can now browse, edit, and preview the code below!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages([successMessage]);
+
+//           // Get prompt from localStorage if available
+//           const userPrompt = project?.prompt || "";
+//           saveProjectToStorage(
+//             id,
+//             files,
+//             [successMessage],
+//             userPrompt,
+//           );
+//           setIsLoading(false);
+//           scrollToBottom();
+//           return;
+//         } catch (resultErr) {
+//           // Fall through to other options
+//           console.error("Error fetching result from API:", resultErr);
+//         }
+//       }
+
+//       // PRIORITY 2: If API says processing
+//       if (
+//         apiStatus &&
+//         (apiStatus.status === "processing" || apiStatus.status === "running")
+//       ) {
+//         setJobStatus("processing");
+//         setIsProcessing(true);
+//         setIsLoading(false);
+
+//         // Use messages from localStorage if available
+//         if (project && project.messages) {
+//           setMessages(project.messages);
+//         } else {
+//           const processingMessage = {
+//             id: Date.now(),
+//             text: `🔄 **Project is still processing...**
+
+// Job ID: ${id}
+
+// The project is still being built. This may take a few moments.
+
+// I'll update you when it's ready!`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+//           setMessages([processingMessage]);
+//         }
+
+//         startPolling(id);
+//         return;
+//       }
+
+//       // PRIORITY 3: If API says failed
+//       if (apiStatus && apiStatus.status === "failed") {
+//         setJobStatus("failed");
+
+//         const errorMsg =
+//           apiStatus.error?.message || "Project generation failed";
+//         const errorDetails = apiStatus.error || { message: errorMsg };
+//         setJobErrorMessage(errorMsg);
+//         setJobErrorDetails(errorDetails);
+
+//         const errorMessage = {
+//           id: Date.now(),
+//           text: `❌ **Project Failed**
+
+// This project failed to generate properly.
+
+// **Error:** ${errorMsg}
+
+// **Error Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **What happened:**
+// - The AI was unable to generate valid code for this request
+// - The request might have contained invalid syntax
+// - There was a server-side processing error
+
+// **Next steps:**
+// - Try creating a new project with a different prompt
+// - Use one of the template projects below
+// - Make your request more specific
+
+// Click "New Project" to start fresh.`,
+//           sender: "ai",
+//           timestamp: new Date().toLocaleTimeString([], {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           }),
+//         };
+
+//         setMessages([errorMessage]);
+
+//         // Update localStorage with failed status
+//         if (project) {
+//           updateProjectStatus(
+//             id,
+//             "failed",
+//             null,
+//             [errorMessage],
+//             errorDetails,
+//             project.prompt,
+//           );
+//         } else {
+//           // Create new failed project in localStorage
+//           const failedProject = {
+//             id: id,
+//             title: "Failed Project",
+//             timestamp: new Date().toLocaleString(),
+//             preview: "Generation failed",
+//             files: null,
+//             messages: [errorMessage],
+//             prompt: "Unknown",
+//             status: "failed",
+//             createdAt: new Date().toISOString(),
+//             error: errorMsg,
+//             errorDetails: errorDetails,
+//             totalFiles: 0,
+//             frontendFiles: 0,
+//             backendFiles: 0,
+//           };
+
+//           const stored = localStorage.getItem(STORAGE_KEY);
+//           let existingProjects = [];
+//           if (stored) {
+//             try {
+//               existingProjects = JSON.parse(stored);
+//             } catch (e) {
+//               console.error("Error parsing stored projects", e);
+//             }
+//           }
+
+//           const updated = [
+//             failedProject,
+//             ...existingProjects.filter((p) => p.id !== id),
+//           ].slice(0, 20);
+//           localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+//           setRecentProjects(updated);
+//         }
+
+//         setIsLoading(false);
+//         scrollToBottom();
+//         return;
+//       }
+
+//       // PRIORITY 4: No data found anywhere
+//       setJobStatus("failed");
+//       setJobErrorMessage("Project not found");
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Project Not Found**
+
+// No project found with ID: ${id}
+
+// The project may have expired or been deleted.
+
+// **Troubleshooting:**
+// - Check if the backend server is running at ${API_BASE_URL}
+// - The project ID might be incorrect
+// - Try creating a new project
+
+// Click "New Project" to start a new one.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     } catch (error) {
+//       console.error("Error loading project:", error);
+//       setJobStatus("failed");
+//       setJobErrorMessage(error.message);
+//       setJobErrorDetails({ type: "load_error", message: error.message });
+
+//       const errorMessage = {
+//         id: Date.now(),
+//         text: `❌ **Error Loading Project**
+
+// Could not load the project. The project may have expired or been deleted.
+
+// **Error details:** ${error.message}
+
+// **Possible reasons:**
+// - The project ID is invalid
+// - The project has been deleted from the server
+// - The server is not responding
+
+// **Solutions:**
+// - Check if the backend server is running
+// - Try creating a new project
+// - Clear your browser cache and try again`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages([errorMessage]);
+//       setIsLoading(false);
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleBuildRequest = async (prompt) => {
+//     if (!prompt || prompt.trim().length < 3) {
+//       setInputError("Please enter a valid request (minimum 3 characters)");
+//       return;
+//     }
+
+//     setInputError("");
+//     setIsProcessing(true);
+//     setJobStatus("processing");
+//     setWarningDismissed(false);
+//     setShowTimeoutWarning(false);
+//     setShowSandpack(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+
+//     try {
+//       const buildResponse = await axios.post(`${API_BASE_URL}/build`, null, {
+//         params: { prompt },
+//         timeout: 30000,
+//       });
+
+//       const { job_id } = buildResponse.data;
+
+//       if (!job_id) {
+//         throw new Error("No job ID returned from server");
+//       }
+
+//       savePendingJob(job_id, prompt);
+//       setSearchParams({ project: job_id });
+
+//       const processingMessage = {
+//         id: Date.now(),
+//         text: `🔄 **Processing your request...**\n\n**Job ID:** ${job_id}\n**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"\n**Status:** Building your project...\n\nThis may take 30-60 seconds depending on complexity.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, processingMessage]);
+//       scrollToBottom();
+
+//       startPolling(job_id);
+//     } catch (error) {
+//       console.error("Build request failed:", error);
+
+//       let errorMessage = "Failed to start project generation.";
+//       let errorDetails = {};
+
+//       if (error.code === "ECONNABORTED") {
+//         errorMessage = "Request timeout. The server took too long to respond.";
+//         errorDetails = { type: "timeout", code: "ECONNABORTED" };
+//       } else if (error.response) {
+//         errorMessage = `Server error: ${error.response.status} - ${error.response.data?.detail || error.response.statusText}`;
+//         errorDetails = {
+//           type: "server_error",
+//           status: error.response.status,
+//           data: error.response.data,
+//         };
+//       } else if (error.request) {
+//         errorMessage =
+//           "Cannot connect to server. Please check if the backend is running.";
+//         errorDetails = { type: "connection_error", message: error.message };
+//       } else {
+//         errorMessage = error.message;
+//         errorDetails = { type: "unknown_error", message: error.message };
+//       }
+
+//       const errorMsg = {
+//         id: Date.now(),
+//         text: `❌ **Build Request Failed**
+
+// **Error:** ${errorMessage}
+
+// **Technical Details:**
+// \`\`\`json
+// ${JSON.stringify(errorDetails, null, 2)}
+// \`\`\`
+
+// **Troubleshooting:**
+// 1. Make sure the backend server is running at ${API_BASE_URL}
+// 2. Check if the server is accessible (try opening ${API_BASE_URL}/docs in browser)
+// 3. Verify there are no CORS issues
+// 4. Try again with a simpler request
+
+// Click "New Project" to try again.`,
+//         sender: "ai",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, errorMsg]);
+//       setIsProcessing(false);
+//       setJobStatus("error");
+//       scrollToBottom();
+//     }
+//   };
+
+//   const handleSendMessage = () => {
+//     if (message.trim() && !isProcessing) {
+//       setInputError("");
+
+//       const userMessageObj = {
+//         id: Date.now(),
+//         text: message,
+//         sender: "user",
+//         timestamp: new Date().toLocaleTimeString([], {
+//           hour: "2-digit",
+//           minute: "2-digit",
+//         }),
+//       };
+
+//       setMessages((prev) => [...prev, userMessageObj]);
+//       scrollToBottom();
+
+//       const lowercaseMsg = message.toLowerCase();
+
+//       const isProjectRequest =
+//         lowercaseMsg.includes("create") ||
+//         lowercaseMsg.includes("build") ||
+//         lowercaseMsg.includes("make") ||
+//         lowercaseMsg.includes("generate") ||
+//         lowercaseMsg.includes("develop") ||
+//         lowercaseMsg.includes("website") ||
+//         lowercaseMsg.includes("app") ||
+//         lowercaseMsg.includes("application");
+
+//       const matchedTemplate = allTemplates.find((t) =>
+//         lowercaseMsg.includes(t.name.toLowerCase()),
+//       );
+
+//       if (isProjectRequest || matchedTemplate) {
+//         setIsTyping(true);
+//         setShowHelp(false);
+
+//         const currentMessage = message;
+//         setMessage("");
+
+//         setTimeout(() => {
+//           setIsTyping(false);
+
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: `🔄 **Starting project generation...**\n\nI'll create a complete ${matchedTemplate ? matchedTemplate.name : "custom"} project for you. This will take a few moments. Please wait...`,
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           scrollToBottom();
+//           handleBuildRequest(currentMessage);
+//         }, 1000);
+//       } else {
+//         setMessage("");
+//         setShowHelp(false);
+//         setIsTyping(true);
+
+//         setTimeout(() => {
+//           const aiMessageObj = {
+//             id: Date.now() + 1,
+//             text: "I can help you build complete projects! Try asking me to create something specific like:\n\n• 'Create a modern education ERP website'\n• 'Build an e-commerce platform'\n• 'Make a social media dashboard'\n• 'Generate a chat application'\n\nWhat would you like me to build for you today?",
+//             sender: "ai",
+//             timestamp: new Date().toLocaleTimeString([], {
+//               hour: "2-digit",
+//               minute: "2-digit",
+//             }),
+//           };
+
+//           setMessages((prev) => [...prev, aiMessageObj]);
+//           setIsTyping(false);
+//           scrollToBottom();
+//         }, 1500);
+//       }
+//     }
+//   };
+
+//   const handleKeyPress = (e) => {
+//     if (e.key === "Enter" && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSendMessage();
+//     }
+//   };
+
+//   const handleNewChat = () => {
+//     stopPolling();
+
+//     setMessages([]);
+//     setShowHelp(true);
+//     setMessage("");
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobId(null);
+//     setJobStatus(null);
+//     setDownloadUrl(null);
+//     setIsProcessing(false);
+//     setPollingAttempts(0);
+//     setShowTimeoutWarning(false);
+//     setWarningDismissed(false);
+//     setInputError("");
+//     setIsPollingActive(false);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     currentJobIdRef.current = null;
+
+//     setSearchParams({});
+
+//     scrollToBottom();
+//   };
+
+//   const handleTemplateClick = (templateName) => {
+//     const templateMsg = {
+//       id: Date.now(),
+//       text: `I want to build a ${templateName} application`,
+//       sender: "user",
+//       timestamp: new Date().toLocaleTimeString([], {
+//         hour: "2-digit",
+//         minute: "2-digit",
+//       }),
+//     };
+//     setMessages([templateMsg]);
+//     setShowHelp(false);
+//     scrollToBottom();
+
+//     let prompt = "";
+
+//     switch (templateName) {
+//       case "Education ERP":
+//         prompt =
+//           "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard.";
+//         break;
+//       case "E-commerce":
+//         prompt =
+//           "Build a full E-commerce website with product catalog, shopping cart, and user authentication.";
+//         break;
+//       case "Social Media":
+//         prompt =
+//           "Create a Social Media platform with user profiles, posts, likes, and comments.";
+//         break;
+//       case "Chat App":
+//         prompt =
+//           "Build a Real-time Chat Application with private messaging and group chats.";
+//         break;
+//       case "Video App":
+//         prompt =
+//           "Create a Video Streaming Platform with video upload, video player, playlists, and subscriptions.";
+//         break;
+//       case "Music App":
+//         prompt =
+//           "Build a Music Streaming App with audio playback, playlists, and album browsing.";
+//         break;
+//       case "Food App":
+//         prompt =
+//           "Create a Food Delivery App with restaurant listings, menu browsing, and order tracking.";
+//         break;
+//       case "Travel App":
+//         prompt =
+//           "Build a Travel Booking Platform with property listings, search filters, and booking calendar.";
+//         break;
+//       default:
+//         prompt = `Create a complete ${templateName} application with modern UI and responsive design.`;
+//     }
+
+//     handleBuildRequest(prompt);
+//   };
+
+//   const handleDownload = () => {
+//     if (downloadUrl) {
+//       window.open(downloadUrl, "_blank");
+//     }
+//   };
+
+//   // Handle project click from sidebar
+//   const handleProjectClick = (jobId) => {
+//     // Clear current state before loading new project
+//     setMessages([]);
+//     setShowHelp(false);
+//     setProjectFiles(null);
+//     setSandpackFiles({});
+//     setShowSandpack(false);
+//     setJobStatus(null);
+//     setJobErrorMessage("");
+//     setJobErrorDetails(null);
+//     setShowMobileWorkspace(false);
+//     setSaveStatus('idle');
+//     // Set the URL parameter
+//     setSearchParams({ project: jobId });
+//   };
+
+//   // Handle manual save
+//   const handleManualSave = () => {
+//     console.log("Manual save triggered, saveFunctionRef.current:", saveFunctionRef.current);
+//     if (saveFunctionRef.current) {
+//       saveFunctionRef.current();
+//     } else {
+//       console.error("Save function not available yet - check if Sandpack is loaded");
+//     }
+//   };
+
+//   // Handle file save from ManualSaveHandler component
+// const handleFileSave = (files, activeFile) => {
+//   console.log("Files saved successfully:", files.length);
+
+//   setLastSaved(new Date());
+
+//   setProjectFiles(files);
+
+//   const updatedSandpackFiles = convertToSandpackFiles(files);
+//   setSandpackFiles(updatedSandpackFiles);
+
+//   loadRecentProjects();
+
+//   // restore active tab
+//   if (activeFile) {
+//     setTimeout(() => {
+//       sandpack.setActiveFile(activeFile);
+//     }, 0);
+//   }
+// };
+//   // Callback to receive the save function from the handler
+//   const handleSaveFunctionReady = (saveFn) => {
+//     console.log("Save function ready and stored in ref");
+//     saveFunctionRef.current = saveFn;
+//   };
+
+//   // Debug effect to check if jobId exists
+//   useEffect(() => {
+//     console.log("Current jobId:", jobId, "jobStatus:", jobStatus);
+//   }, [jobId, jobStatus]);
+
+//   // Loading animation component
+//   const ProcessingAnimation = () => {
+//     const [dots, setDots] = useState("");
+
+//     useEffect(() => {
+//       const interval = setInterval(() => {
+//         setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+//       }, 500);
+//       return () => clearInterval(interval);
+//     }, []);
+
+//     return (
+//       <div className="flex flex-col items-center justify-center p-8">
+//         <div className="relative">
+//           <motion.div
+//             animate={{ rotate: 360 }}
+//             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+//             className="w-16 h-16 border-4 border-t-transparent rounded-full"
+//             style={{ borderColor: theme.green, borderTopColor: "transparent" }}
+//           />
+//           <div className="absolute inset-0 flex items-center justify-center">
+//             <BsRobot className="text-xl" style={{ color: theme.green }} />
+//           </div>
+//         </div>
+//         <p
+//           className="mt-4 text-sm font-medium"
+//           style={{ color: theme.textPrimary }}
+//         >
+//           Building your project{dots}
+//         </p>
+//         {pollingAttempts > 0 && (
+//           <p className="mt-1 text-xs" style={{ color: theme.textSecondary }}>
+//             Elapsed: {Math.floor(pollingAttempts * 2)} seconds
+//           </p>
+//         )}
+//       </div>
+//     );
+//   };
+
+//   // Enhanced Error Display Component
+//   const ErrorDisplay = ({ message, details }) => {
+//     const [showDetails, setShowDetails] = useState(false);
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.red + "40",
+//           backgroundColor: theme.red + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.red + "20" }}
+//           >
+//             <BsExclamationTriangle
+//               className="text-2xl"
+//               style={{ color: theme.red }}
+//             />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.red }}
+//             >
+//               Project Generation Failed
+//             </h3>
+//             <div className="space-y-3">
+//               <div
+//                 className="p-3 rounded-lg"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderLeft: `4px solid ${theme.red}`,
+//                 }}
+//               >
+//                 <p
+//                   className="text-sm font-mono"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   {message || "Unknown error occurred"}
+//                 </p>
+//               </div>
+
+//               {details && (
+//                 <div>
+//                   <button
+//                     onClick={() => setShowDetails(!showDetails)}
+//                     className="flex items-center gap-2 text-xs mb-2"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <BsBug className="text-xs" />
+//                     {showDetails
+//                       ? "Hide technical details"
+//                       : "Show technical details"}
+//                   </button>
+
+//                   {showDetails && (
+//                     <pre
+//                       className="p-3 rounded-lg text-xs overflow-auto max-h-40"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       {JSON.stringify(details, null, 2)}
+//                     </pre>
+//                   )}
+//                 </div>
+//               )}
+
+//               <div className="mt-4">
+//                 <h4
+//                   className="text-sm font-semibold mb-2"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   Common Solutions:
+//                 </h4>
+//                 <ul className="space-y-2">
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>Try a simpler or more specific request</span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Check if your request has valid syntax and clear
+//                       requirements
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Try again with a different project type from the templates
+//                     </span>
+//                   </li>
+//                   <li
+//                     className="flex items-start gap-2 text-xs"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     <span
+//                       className="inline-block w-1.5 h-1.5 rounded-full mt-1.5"
+//                       style={{ backgroundColor: theme.green }}
+//                     ></span>
+//                     <span>
+//                       Make sure the backend server is running properly
+//                     </span>
+//                   </li>
+//                 </ul>
+//               </div>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={handleNewChat}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <HiOutlinePlus className="text-base" />
+//                   New Project
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => window.location.reload()}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineRefresh className="text-base" />
+//                   Refresh Page
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Diagnostic Display Component
+//   const DiagnosticDisplay = ({ data, onClose, onFix }) => {
+//     if (!data) return null;
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-6 rounded-xl overflow-hidden border"
+//         style={{
+//           borderColor: theme.yellow + "40",
+//           backgroundColor: theme.yellow + "10",
+//         }}
+//       >
+//         <div className="flex items-start gap-4 p-6">
+//           <div
+//             className="p-3 rounded-full flex-shrink-0"
+//             style={{ backgroundColor: theme.yellow + "20" }}
+//           >
+//             <BsWrench className="text-2xl" style={{ color: theme.yellow }} />
+//           </div>
+//           <div className="flex-1">
+//             <h3
+//               className="text-lg font-semibold mb-2"
+//               style={{ color: theme.yellow }}
+//             >
+//               Diagnostic Information
+//             </h3>
+//             <div className="space-y-3">
+//               <pre
+//                 className="p-3 rounded-lg text-xs overflow-auto max-h-96"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   color: theme.textSecondary,
+//                 }}
+//               >
+//                 {JSON.stringify(data, null, 2)}
+//               </pre>
+
+//               <div className="flex gap-3 mt-4">
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onFix}
+//                   className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
+//                   style={{ backgroundColor: theme.green }}
+//                 >
+//                   <BsWrench className="text-base" />
+//                   Fix localStorage
+//                 </motion.button>
+//                 <motion.button
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={onClose}
+//                   className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineX className="text-base" />
+//                   Close
+//                 </motion.button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     );
+//   };
+
+//   // Get template for Sandpack
+//   const getSandpackTemplate = () => {
+//     // Check if it's a React project
+//     if (
+//       sandpackFiles["/src/App.jsx"] ||
+//       sandpackFiles["/src/App.js"] ||
+//       sandpackFiles["/src/main.jsx"]
+//     ) {
+//       return "react";
+//     }
+//     return "react"; // Default to react
+//   };
+
+//   // Get dependencies from package.json and ensure Tailwind is included
+//   const getDependencies = () => {
+//     const packageJsonFile = projectFiles?.find(
+//       (f) =>
+//         f.filename === "package.json" || f.filename === "frontend/package.json",
+//     );
+//     let dependencies = {};
+
+//     if (packageJsonFile) {
+//       try {
+//         const cleanContent = cleanCodeContent(packageJsonFile.content);
+//         const packageJson = JSON.parse(cleanContent);
+//         dependencies = packageJson.dependencies || {};
+//       } catch (e) {
+//         console.error("Error parsing package.json", e);
+//       }
+//     }
+
+//     // Ensure Tailwind dependencies are present
+//     return {
+//       ...dependencies,
+//       react: dependencies.react || "^18.2.0",
+//       "react-dom": dependencies["react-dom"] || "^18.2.0",
+//       "react-router-dom": dependencies["react-router-dom"] || "^6.3.0",
+//         // Animation
+//   "framer-motion": "^10.16.4",
+//   "gsap": "^3.12.5",
+
+//   // API / HTTP
+//   "axios": "^1.6.7",
+
+//   // Forms
+//   "react-hook-form": "^7.50.0",
+
+//   // Icons
+//   "react-icons": "^5.0.1",
+//   "lucide-react": "^0.376.0",
+
+//   // Charts
+//   "chart.js": "^4.4.1",
+//   "react-chartjs-2": "^5.2.0",
+//   "recharts": "^2.10.4",
+
+//   // Date / time
+//   "dayjs": "^1.11.10",
+
+//   // Utility
+//   "lodash": "^4.17.21",
+//   "clsx": "^2.1.0",
+
+//   // UI components
+//   "@headlessui/react": "^1.7.18",
+//   "@heroicons/react": "^2.1.1",
+
+//   // Notifications
+//   "react-hot-toast": "^2.4.1",
+
+//   // State management
+//   "zustand": "^4.5.2",
+
+//   // Data fetching
+//   "@tanstack/react-query": "^5.28.0",
+
+//   // Drag & Drop
+//   "@dnd-kit/core": "^6.1.0",
+
+//   // Tables
+//   "@tanstack/react-table": "^8.11.7",
+
+//   // Markdown
+//   "react-markdown": "^9.0.1",
+
+//   // Code highlighting
+//   "react-syntax-highlighter": "^15.5.0",
+
+//   // File upload
+//   "react-dropzone": "^14.2.3",
+
+//   // Maps
+//   "leaflet": "^1.9.4",
+//   "react-leaflet": "^4.2.1",
+
+//   // Modal / dialogs
+//   "react-modal": "^3.16.1",
+
+//   // Loading skeleton
+//   "react-loading-skeleton": "^3.3.1"
+//     };
+//   };
+
+//   // Prepare recent chats for sidebar with enhanced information
+//   const recentChats = recentProjects.map((project) => {
+//     let icon, color, title;
+
+//     if (project.status === "processing") {
+//       icon = <HiOutlineRefresh className="animate-spin" />;
+//       color = theme.yellow;
+//       title = project.title || "Processing...";
+//     } else if (project.status === "failed") {
+//       icon = <HiOutlineExclamation />;
+//       color = theme.red;
+//       title = "Failed Project";
+//     } else if (project.status === "completed") {
+//       icon = <HiOutlineCheckCircle />;
+//       color = theme.green;
+//       title = project.title || "Completed Project";
+//     } else {
+//       icon = <HiOutlineFolder />;
+//       color = theme.textPrimary;
+//       title = project.title || "Project";
+//     }
+
+//     // Create preview text without "frontend" word
+//     let previewText = "";
+//     if (project.status === "completed" && project.totalFiles) {
+//       previewText = `${project.totalFiles} files total (${project.frontendFiles || 0} frontend, ${project.backendFiles || 0} backend)`;
+//     } else if (project.prompt) {
+//       previewText =
+//         project.prompt.substring(0, 50) +
+//         (project.prompt.length > 50 ? "..." : "");
+//     } else {
+//       previewText = project.preview || "No preview";
+//     }
+
+//     return {
+//       id: project.id,
+//       title: title,
+//       preview: previewText,
+//       time: project.timestamp,
+//       icon: icon,
+//       color: color,
+//       jobId: project.id,
+//       status: project.status,
+//       prompt: project.prompt,
+//       error: project.error,
+//       totalFiles: project.totalFiles || 0,
+//       frontendFiles: project.frontendFiles || 0,
+//       backendFiles: project.backendFiles || 0,
+//     };
+//   });
+
+//   return (
+//     <div
+//       className="h-screen w-full overflow-hidden transition-colors duration-300"
+//       style={{ backgroundColor: theme.bg }}
+//     >
+//       {/* Mobile Menu Overlay */}
+//       <AnimatePresence>
+//         {isMobileMenuOpen && (
+//           <motion.div
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             exit={{ opacity: 0 }}
+//             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+//             onClick={() => setIsMobileMenuOpen(false)}
+//           />
+//         )}
+//       </AnimatePresence>
+
+//       {/* Mobile Sidebar */}
+//       <motion.aside
+//         initial={{ x: "-100%" }}
+//         animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
+//         transition={{ type: "tween", duration: 0.3 }}
+//         className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-xl overflow-y-auto"
+//         style={{ backgroundColor: theme.sidebar }}
+//       >
+//         <SidebarContent
+//           recentChats={recentChats}
+//           templates={sidebarTemplates}
+//           allTemplates={allTemplates}
+//           onClose={() => setIsMobileMenuOpen(false)}
+//           theme={theme}
+//           hoveredChat={hoveredChat}
+//           setHoveredChat={setHoveredChat}
+//           onNewChat={handleNewChat}
+//           onProjectClick={handleProjectClick}
+//           onTemplateClick={handleTemplateClick}
+//           currentTheme={currentTheme}
+//           toggleTheme={toggleTheme}
+//         />
+//       </motion.aside>
+
+//       {/* Desktop Layout */}
+//       <div className="flex h-full w-full">
+//         {/* Desktop Sidebar with Collapse Toggle */}
+//         <motion.aside
+//           animate={{ width: sidebarCollapsed ? 80 : 288 }}
+//           className="hidden lg:block h-full border-r relative transition-all duration-300"
+//           style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+//         >
+//           <button
+//             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+//             className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg"
+//             style={{
+//               backgroundColor: theme.card,
+//               borderColor: theme.border,
+//               color: theme.textPrimary,
+//             }}
+//           >
+//             {sidebarCollapsed ? (
+//               <HiOutlineChevronRight />
+//             ) : (
+//               <HiOutlineChevronLeft />
+//             )}
+//           </button>
+
+//           {sidebarCollapsed ? (
+//             <CollapsedSidebar
+//               theme={theme}
+//               onNewChat={handleNewChat}
+//               recentChats={recentChats}
+//               onProjectClick={handleProjectClick}
+//             />
+//           ) : (
+//             <SidebarContent
+//               recentChats={recentChats}
+//               templates={sidebarTemplates}
+//               allTemplates={allTemplates}
+//               theme={theme}
+//               hoveredChat={hoveredChat}
+//               setHoveredChat={setHoveredChat}
+//               onNewChat={handleNewChat}
+//               onProjectClick={handleProjectClick}
+//               onTemplateClick={handleTemplateClick}
+//               currentTheme={currentTheme}
+//               toggleTheme={toggleTheme}
+//             />
+//           )}
+//         </motion.aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 h-full flex flex-col w-full min-w-0">
+//           {/* Fixed Header */}
+//           <div
+//             className="flex-shrink-0 border-b w-full"
+//             style={{
+//               backgroundColor: theme.sidebar,
+//               borderColor: theme.border,
+//             }}
+//           >
+//             <div className="flex items-center justify-between px-4 py-3">
+//               <div className="flex items-center gap-3">
+//                 <button
+//                   onClick={() => setIsMobileMenuOpen(true)}
+//                   className="lg:hidden p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                 >
+//                   <HiOutlineMenu className="text-lg" />
+//                 </button>
+//                 <h2
+//                   className="text-sm font-medium hidden sm:block"
+//                   style={{ color: theme.textPrimary }}
+//                 >
+//                   AI Developer Assistant
+//                 </h2>
+//               </div>
+
+//               <div className="flex items-center gap-2">
+//                 {/* Theme Toggle Button */}
+//                 <motion.button
+//                   whileHover={{ scale: 1.05 }}
+//                   whileTap={{ scale: 0.95 }}
+//                   onClick={toggleTheme}
+//                   className="p-2 rounded-full"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     color: theme.textPrimary,
+//                   }}
+//                   title={
+//                     currentTheme === "dark"
+//                       ? "Switch to Light Mode"
+//                       : "Switch to Dark Mode"
+//                   }
+//                 >
+//                   {currentTheme === "dark" ? (
+//                     <HiOutlineSun className="text-lg" />
+//                   ) : (
+//                     <HiOutlineMoon className="text-lg" />
+//                   )}
+//                 </motion.button>
+
+//                 {/* Mobile Workspace Toggle Button */}
+//                 {jobStatus === "completed" && (
+//                   <button
+//                     onClick={() => setShowMobileWorkspace(!showMobileWorkspace)}
+//                     className="lg:hidden p-2 rounded-full"
+//                     style={{
+//                       backgroundColor: theme.card,
+//                       color: showMobileWorkspace ? theme.green : theme.textPrimary,
+//                     }}
+//                     title={showMobileWorkspace ? "Show Chat" : "Show Workspace"}
+//                   >
+//                     {showMobileWorkspace ? (
+//                       <HiOutlineChat className="text-lg" />
+//                     ) : (
+//                       <HiOutlineCode className="text-lg" />
+//                     )}
+//                   </button>
+//                 )}
+
+//                 {jobId && (
+//                   <>
+//                     <span
+//                       className="text-xs px-2 py-1 rounded-full hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                     >
+//                       Job: {jobId.substring(0, 8)}...
+//                     </span>
+//                     {jobStatus === "processing" && isPollingActive && (
+//                       <div className="flex items-center gap-1">
+//                         <motion.div
+//                           animate={{ rotate: 360 }}
+//                           transition={{
+//                             duration: 2,
+//                             repeat: Infinity,
+//                             ease: "linear",
+//                           }}
+//                         >
+//                           <HiOutlineRefresh
+//                             className="text-lg"
+//                             style={{ color: theme.green }}
+//                           />
+//                         </motion.div>
+//                         {pollingAttempts > 0 && (
+//                           <span
+//                             className="text-xs hidden sm:inline"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             {Math.floor(pollingAttempts * 2)}s
+//                           </span>
+//                         )}
+//                       </div>
+//                     )}
+//                     {jobStatus === "completed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.green + "20",
+//                           color: theme.green,
+//                         }}
+//                       >
+//                         <HiOutlineCheckCircle className="text-xs" />
+//                         Completed
+//                       </span>
+//                     )}
+//                     {jobStatus === "failed" && (
+//                       <span
+//                         className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+//                         style={{
+//                           backgroundColor: theme.red + "20",
+//                           color: theme.red,
+//                         }}
+//                       >
+//                         <HiOutlineExclamation className="text-xs" />
+//                         Failed
+//                       </span>
+//                     )}
+//                   </>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Two Column Layout - Responsive */}
+//           <div className="flex-1 flex overflow-hidden">
+//             {/* Left Column - Messages Area */}
+//             <div
+//               className={`
+//                 ${jobStatus === "completed" ? "lg:w-2/5" : "w-full"} 
+//                 ${jobStatus === "completed" && showMobileWorkspace ? "hidden lg:flex" : "flex"}
+//                 border-r overflow-hidden flex-col transition-all duration-300
+//               `}
+//               style={{ borderColor: theme.border }}
+//             >
+//               <div
+//                 className="p-3 border-b"
+//                 style={{
+//                   backgroundColor: theme.card,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <h3
+//                   className="text-xs font-semibold uppercase"
+//                   style={{ color: theme.textSecondary }}
+//                 >
+//                   AI Conversation
+//                 </h3>
+//               </div>
+//               <div
+//                 ref={messagesContainerRef}
+//                 className="flex-1 overflow-y-auto"
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 <div className="p-6">
+//                   <div className="max-w-full mx-auto">
+//                     {/* Timeout Warning Banner */}
+//                     <AnimatePresence>
+//                       {showTimeoutWarning &&
+//                         jobStatus === "processing" &&
+//                         !warningDismissed && (
+//                           <motion.div
+//                             initial={{ opacity: 0, y: -20 }}
+//                             animate={{ opacity: 1, y: 0 }}
+//                             exit={{ opacity: 0, y: -20 }}
+//                             className="mb-4 p-4 rounded-lg border"
+//                             style={{
+//                               backgroundColor: theme.yellow + "20",
+//                               borderColor: theme.yellow,
+//                             }}
+//                           >
+//                             <div className="flex items-start gap-3">
+//                               <BsHourglassSplit
+//                                 className="text-xl flex-shrink-0 animate-pulse"
+//                                 style={{ color: theme.yellow }}
+//                               />
+//                               <div className="flex-1">
+//                                 <h4
+//                                   className="text-sm font-semibold"
+//                                   style={{ color: theme.yellow }}
+//                                 >
+//                                   Taking longer than expected
+//                                 </h4>
+//                                 <p
+//                                   className="text-xs mt-1"
+//                                   style={{ color: theme.textSecondary }}
+//                                 >
+//                                   Your project is still being built. Complex
+//                                   projects can take 2-5 minutes.
+//                                 </p>
+//                                 <div className="flex gap-2 mt-3">
+//                                   <button
+//                                     onClick={() => {
+//                                       setWarningDismissed(true);
+//                                       setShowTimeoutWarning(false);
+//                                     }}
+//                                     className="text-xs px-3 py-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: "transparent",
+//                                       color: theme.textSecondary,
+//                                       border: `1px solid ${theme.border}`,
+//                                     }}
+//                                   >
+//                                     Dismiss
+//                                   </button>
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           </motion.div>
+//                         )}
+//                     </AnimatePresence>
+
+//                     {/* Diagnostic Display */}
+//                     {showDiagnostic && diagnosticData && (
+//                       <DiagnosticDisplay
+//                         data={diagnosticData}
+//                         onClose={() => setShowDiagnostic(false)}
+//                         onFix={fixLocalStorage}
+//                       />
+//                     )}
+
+//                     <AnimatePresence mode="wait">
+//                       {showHelp && messages.length === 0 ? (
+//                         /* Help Section */
+//                         <motion.div
+//                           key="help"
+//                           initial={{ opacity: 0, y: 10 }}
+//                           animate={{ opacity: 1, y: 0 }}
+//                           exit={{ opacity: 0, y: -10 }}
+//                           transition={{ duration: 0.2 }}
+//                         >
+//                           <h2
+//                             className="text-lg sm:text-xl font-semibold mb-2"
+//                             style={{ color: theme.textPrimary }}
+//                           >
+//                             What would you like to build today?
+//                           </h2>
+//                           <p
+//                             className="text-sm mb-6"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build complete projects and get a VS
+//                             Code-like environment!
+//                           </p>
+
+//                           {/* Project Templates - Show all 8 templates in help section */}
+//                           <div className="mb-8">
+//                             <h3
+//                               className="text-sm font-semibold mb-2"
+//                               style={{ color: theme.textPrimary }}
+//                             >
+//                               Popular Projects
+//                             </h3>
+//                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+//                               {allTemplates.map((template, index) => (
+//                                 <motion.button
+//                                   key={index}
+//                                   whileHover={{ scale: 1.02 }}
+//                                   whileTap={{ scale: 0.98 }}
+//                                   className="text-white p-3 rounded-xl flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-all"
+//                                   style={{ backgroundColor: template.bg }}
+//                                   onClick={() =>
+//                                     handleTemplateClick(template.name)
+//                                   }
+//                                 >
+//                                   <span className="text-xl">
+//                                     {template.icon}
+//                                   </span>
+//                                   <span className="text-xs font-medium text-center">
+//                                     {template.name}
+//                                   </span>
+//                                 </motion.button>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </motion.div>
+//                       ) : (
+//                         /* Messages */
+//                         <motion.div
+//                           key="messages"
+//                           initial={{ opacity: 0 }}
+//                           animate={{ opacity: 1 }}
+//                           exit={{ opacity: 0 }}
+//                         >
+//                           {messages.map((msg, index) => (
+//                             <motion.div
+//                               key={msg.id}
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               transition={{
+//                                 duration: 0.2,
+//                                 delay: index * 0.05,
+//                               }}
+//                               className={`mb-4 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+//                             >
+//                               <div
+//                                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+//                                   msg.sender === "user"
+//                                     ? "rounded-br-none"
+//                                     : "rounded-bl-none"
+//                                 }`}
+//                                 style={{
+//                                   backgroundColor:
+//                                     msg.sender === "user"
+//                                       ? theme.green
+//                                       : theme.card,
+//                                   color:
+//                                     msg.sender === "user"
+//                                       ? "#FFFFFF"
+//                                       : theme.textPrimary,
+//                                 }}
+//                               >
+//                                 {msg.sender === "ai" && (
+//                                   <div className="flex items-center gap-2 mb-2">
+//                                     <BsRobot className="text-xs" />
+//                                     <span className="text-xs font-medium">
+//                                       AI Developer Assistant
+//                                     </span>
+//                                   </div>
+//                                 )}
+//                                 <div className="text-sm whitespace-pre-wrap font-mono">
+//                                   {msg.text}
+//                                 </div>
+//                                 <p className="text-xs mt-2 opacity-70 text-right">
+//                                   {msg.timestamp}
+//                                 </p>
+//                               </div>
+//                             </motion.div>
+//                           ))}
+
+//                           {/* Processing Animation */}
+//                           {isProcessing &&
+//                             jobStatus === "processing" &&
+//                             !projectFiles &&
+//                             isPollingActive && (
+//                               <motion.div
+//                                 initial={{ opacity: 0 }}
+//                                 animate={{ opacity: 1 }}
+//                                 exit={{ opacity: 0 }}
+//                                 className="flex justify-center"
+//                               >
+//                                 <ProcessingAnimation />
+//                               </motion.div>
+//                             )}
+
+//                           {/* Error Display for Failed Jobs */}
+//                           {jobStatus === "failed" && jobErrorMessage && (
+//                             <ErrorDisplay
+//                               message={jobErrorMessage}
+//                               details={jobErrorDetails}
+//                             />
+//                           )}
+
+//                           {/* Typing indicator */}
+//                           {isTyping && (
+//                             <motion.div
+//                               initial={{ opacity: 0, y: 10 }}
+//                               animate={{ opacity: 1, y: 0 }}
+//                               className="flex justify-start"
+//                             >
+//                               <div
+//                                 className="rounded-2xl rounded-bl-none px-4 py-3"
+//                                 style={{ backgroundColor: theme.card }}
+//                               >
+//                                 <div className="flex gap-1">
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.2,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                   <motion.span
+//                                     animate={{ y: [0, -3, 0] }}
+//                                     transition={{
+//                                       duration: 0.6,
+//                                       repeat: Infinity,
+//                                       delay: 0.4,
+//                                     }}
+//                                     className="w-1.5 h-1.5 rounded-full"
+//                                     style={{
+//                                       backgroundColor: theme.textSecondary,
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </motion.div>
+//                           )}
+
+//                           <div ref={messagesEndRef} />
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Fixed Input Area for Messages */}
+//               <div
+//                 className="flex-shrink-0 border-t w-full p-3"
+//                 style={{
+//                   backgroundColor: theme.sidebar,
+//                   borderColor: theme.border,
+//                 }}
+//               >
+//                 <div className="max-w-full mx-auto">
+//                   <div className="relative">
+//                     <textarea
+//                       ref={inputRef}
+//                       value={message}
+//                       onChange={(e) => setMessage(e.target.value)}
+//                       onKeyPress={handleKeyPress}
+//                       placeholder="Ask me to build any project..."
+//                       className={`w-full pl-3 placeholder:text-xs pr-24 py-4 border rounded-md text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${
+//                         inputError
+//                           ? "border-red-500 focus:ring-red-500"
+//                           : "focus:ring-[#22C55E]"
+//                       }`}
+//                       style={{
+//                         backgroundColor: theme.inputBg,
+//                         borderColor: inputError ? theme.red : theme.border,
+//                         color: theme.textPrimary,
+//                         minHeight: "70px",
+//                         maxHeight: "160px",
+//                         resize: "none",
+//                       }}
+//                       rows="2"
+//                       onInput={(e) => {
+//                         e.target.style.height = "auto";
+//                         e.target.style.height =
+//                           Math.min(e.target.scrollHeight, 150) + "px";
+//                       }}
+//                       disabled={isProcessing && jobStatus === "processing"}
+//                     />
+//                     <div className="absolute right-2 bottom-3 flex items-center gap-2">
+//                       <button
+//                         onClick={handleSendMessage}
+//                         disabled={isProcessing && jobStatus === "processing"}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+//                         style={{
+//                           backgroundColor:
+//                             isProcessing && jobStatus === "processing"
+//                               ? theme.textSecondary
+//                               : theme.green,
+//                         }}
+//                         title={
+//                           isProcessing
+//                             ? "Currently building a project"
+//                             : "Send message"
+//                         }
+//                       >
+//                         <HiOutlinePaperAirplane className="text-sm" />
+//                       </button>
+//                       <button
+//                         onClick={handleNewChat}
+//                         className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0"
+//                         style={{ backgroundColor: theme.card }}
+//                         title="Start new chat"
+//                       >
+//                         <HiOutlinePlus className="text-sm" />
+//                       </button>
+//                     </div>
+//                   </div>
+//                   {inputError && (
+//                     <p className="text-xs mt-1 text-red-500">{inputError}</p>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Right Column - Workspace Area - Responsive */}
+//             {jobStatus === "completed" && (
+//               <div
+//                 ref={workspaceRef}
+//                 className={`
+//                   lg:w-3/5 
+//                   ${showMobileWorkspace ? "w-full" : "hidden lg:block"}
+//                   overflow-hidden flex flex-col transition-all relative z-50 duration-300
+//                 `}
+//                 style={{ backgroundColor: theme.bg }}
+//               >
+//                 {/* Workspace Header with View Toggles and Fullscreen */}
+//                 <div
+//                   className="px-3 p-1/2 border-b flex items-center justify-between"
+//                   style={{
+//                     backgroundColor: theme.card,
+//                     borderColor: theme.border,
+//                   }}
+//                 >
+//                   <div className="flex items-center gap-2">
+//                     <h3
+//                       className="sm:text-xs whitespace-nowrap text-[10px] font-semibold uppercase"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       Project Workspace
+//                     </h3>
+//                     {downloadUrl && (
+//                       <motion.button
+//                         whileHover={{ scale: 1.05 }}
+//                         whileTap={{ scale: 0.95 }}
+//                         onClick={handleDownload}
+//                         className="flex items-center gap-1 px-2 sm:py-1 rounded text-white text-xs"
+//                         style={{ backgroundColor: theme.green }}
+//                       >
+//                         <HiOutlineDownload className="text-xs" />
+//                       zip
+//                       </motion.button>
+//                     )}
+//                     <button
+//                       onClick={runDiagnostic}
+//                       className="p-1.5 rounded-full text-xs hidden sm:inline-block"
+//                       style={{
+//                         backgroundColor: theme.card,
+//                         color: theme.textSecondary,
+//                       }}
+//                       title="Run diagnostic"
+//                     >
+//                       <BsWrench className="text-sm" />
+//                     </button>
+
+//                     {/* Manual Save Button - Now in the workspace header */}
+//                     {jobId && jobStatus === "completed" && (
+//                       <SaveButton 
+//                         onClick={handleManualSave} 
+//                         saveStatus={saveStatus}
+//                       />
+//                     )}
+//                   </div>
+
+//                   {/* View Toggle Buttons */}
+//                   {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                     <div className="flex items-center gap-2">
+//                       <div
+//                         className="flex items-center gap-1 rounded-lg p-1"
+//                         style={{ backgroundColor: theme.card }}
+//                       >
+//                         <button
+//                           onClick={() => setWorkspaceView("preview")}
+//                           className={`px-3 sm:py-1 rounded-md text-xs font-medium transition-all ${
+//                             workspaceView === "preview"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "preview"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "preview"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Preview View"
+//                         >
+//                           <BsEye className="text-sm inline mr-1 mb-1" />
+//                           <span className="hidden sm:inline">Preview</span>
+//                         </button>
+//                         <button
+//                           onClick={() => setWorkspaceView("code")}
+//                           className={`px-3 py-1 rounded-md text-xs flex justify-center items-center font-medium transition-all ${
+//                             workspaceView === "code"
+//                               ? "bg-gray-700 text-white"
+//                               : "text-gray-400 hover:text-white"
+//                           }`}
+//                           style={{
+//                             backgroundColor:
+//                               workspaceView === "code"
+//                                 ? theme.green + "40"
+//                                 : "transparent",
+//                             color:
+//                               workspaceView === "code"
+//                                 ? theme.textPrimary
+//                                 : theme.textSecondary,
+//                           }}
+//                           title="Code View"
+//                         >
+//                           <BsCodeSquare className="text-sm inline mr-1" />
+//                           <span className="hidden sm:inline">Code</span>
+//                         </button>
+//                       </div>
+
+//                       {/* Fullscreen Button */}
+//                       <button
+//                         onClick={toggleFullscreen}
+//                         className="p-2 rounded-md transition-all hidden sm:inline-block"
+//                         style={{
+//                           backgroundColor: theme.card,
+//                           color: theme.textSecondary,
+//                         }}
+//                         title={
+//                           isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+//                         }
+//                       >
+//                         <HiOutlineArrowsExpand className="text-sm" />
+//                       </button>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* Workspace Content */}
+//                 <div className="flex-1 overflow-hidden">
+//                   {!showSandpack || Object.keys(sandpackFiles).length === 0 ? (
+//                     <div className="h-full flex items-center justify-center flex-col gap-4">
+//                       {jobStatus === "processing" ? (
+//                         <ProcessingAnimation />
+//                       ) : jobStatus === "failed" ? (
+//                         <div className="text-center">
+//                           <BsExclamationTriangle
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.red }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Project generation failed
+//                           </p>
+//                         </div>
+//                       ) : (
+//                         <div className="text-center">
+//                           <HiOutlineCode
+//                             className="text-4xl mx-auto mb-3"
+//                             style={{ color: theme.textSecondary }}
+//                           />
+//                           <p
+//                             className="text-sm"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Your project will appear here
+//                           </p>
+//                           <p
+//                             className="text-xs mt-2"
+//                             style={{ color: theme.textSecondary }}
+//                           >
+//                             Ask me to build something to get started
+//                           </p>
+//                         </div>
+//                       )}
+//                     </div>
+//                   ) : (
+//                     <div
+//                       className="h-full overflow-hidden"
+//                       style={{ backgroundColor: theme.sandpackBg }}
+//                     >
+//                       <SandpackProvider
+//                         key={jobId || "sandpack-provider"}
+//                         template={getSandpackTemplate()}
+//                         theme={currentTheme === "dark" ? "dark" : "light"}
+//                         files={sandpackFiles}
+//                         customSetup={{
+//                           dependencies: getDependencies(),
+//                           entry: sandpackFiles["/src/index.js"]
+//                             ? "/src/index.js"
+//                             : sandpackFiles["/src/index.jsx"]
+//                               ? "/src/index.jsx"
+//                               : sandpackFiles["/src/main.jsx"]
+//                                 ? "/src/main.jsx"
+//                                 : "/src/index.js",
+//                         }}
+//                         options={{
+//                           externalResources: [
+//                          // Tailwind
+//       "https://cdn.tailwindcss.com",
+
+//       // UI components
+//       "https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css",
+
+//       // Icons
+//       "https://unpkg.com/lucide@latest",
+//       "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
+
+//       // Animations
+//       "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
+
+//       // GSAP
+//       "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+
+//       // Utilities
+//       "https://unpkg.com/axios/dist/axios.min.js",
+//       "https://unpkg.com/dayjs@1.11.10/dayjs.min.js"
+//     ],
+//                           visibleFiles: Object.keys(sandpackFiles),
+//                           activeFile:
+//                             Object.keys(sandpackFiles).find(
+//                               (f) =>
+//                                 f.includes("App.jsx") ||
+//                                 f.includes("App.js") ||
+//                                 f.includes("main.jsx"),
+//                             ) || Object.keys(sandpackFiles)[0],
+//                         }}
+//                       >
+//                         {/* Save handler wrapper - properly inside SandpackProvider */}
+//                         <SaveHandlerWrapper 
+//                           jobId={jobId} 
+//                           onSave={handleFileSave} 
+//                           setSaveStatus={setSaveStatus}
+//                           onSaveFunctionReady={handleSaveFunctionReady}
+//                         />
+                        
+//                         <SandpackLayout className="h-full">
+//                           {workspaceView === "preview" && (
+//                             /* Preview View - Full height preview with console at bottom */
+//                             <div className="flex flex-col h-full w-full">
+//                               {/* Preview (80%) */}
+//                               <div
+//                                 className="h-[80%] flex flex-col"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   PREVIEW
+//                                 </div>
+//                                 <div className="flex-1">
+//                                   <SandpackPreview
+//                                     showOpenInCodeSandbox={false}
+//                                     showRefreshButton={true}
+//                                     className="h-[75vh]"
+//                                   />
+//                                 </div>
+//                               </div>
+
+//                               {/* Console (20%) */}
+//                               <div
+//                                 className="h-[20%] border-t flex flex-col"
+//                                 style={{ borderColor: theme.border }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-1 text-xs border-b font-semibold"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   CONSOLE
+//                                 </div>
+//                                <ResizablePanel
+//                                 defaultSize={25}
+//                                 minSize={10}
+//                                  maxSize={60}
+//                                  direction="top"
+//                                  storageKey="console_height"
+//                                   theme={theme}
+//                                 >
+//                                 <div className="flex-1 overflow-auto">
+//                                   <SandpackConsole />
+//                                 </div>
+//                                 </ResizablePanel>
+//                               </div>
+//                             </div>
+//                           )}
+
+//                           {workspaceView === "code" && (
+//                             /* Code View - Full height with resizable file explorer and editor */
+//                             <div className={`flex flex-row ${isFullscreen?"h-[95vh]":"h-[85vh]"} w-full`}>
+//                               {/* FILE EXPLORER - Resizable Panel */}
+//                               <ResizablePanel
+//                                 defaultWidth={25}
+//                                 minWidth={17}
+//                                 maxWidth={50}
+//                                 direction="right"
+//                                 storageKey={EXPLORER_WIDTH_KEY}
+//                                 theme={theme}
+//                               >
+//                                 <div
+//                                   className="h-full border-r flex flex-col"
+//                                   style={{
+//                                     backgroundColor: theme.card,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   <div
+//                                     className="sm:px-3 px-1 sm:py-2 py-1.5 text-xs border-b flex justify-between flex-wrap items-center font-semibold"
+//                                     style={{
+//                                       color: theme.textSecondary,
+//                                       borderColor: theme.border,
+//                                     }}
+//                                   >
+//                                     <h4 className="sm:text-xs text-[8px]">EXPLORER</h4>
+//                                     {showSandpack && Object.keys(sandpackFiles).length > 0 && (
+//                                       <div
+//                                         className="sm:px-2 px-1 flex justify-center items-center text-[9px]"
+//                                         style={{
+//                                           backgroundColor: theme.card,
+//                                           borderColor: theme.border,
+//                                           color: theme.textSecondary,
+//                                         }}
+//                                       >
+//                                         {Object.keys(sandpackFiles).length} files
+//                                       </div>
+//                                     )}
+//                                   </div>
+//                                   <div className="flex-1 overflow-auto">
+//                                     <SandpackFileExplorer
+//                                       className="text-xs"
+//                                       autoHiddenFiles={false}
+//                                       style={{
+//                                         height: "100%",
+//                                         overflow: "auto",
+//                                       }}
+//                                     />
+//                                   </div>
+//                                 </div>
+//                               </ResizablePanel>
+                              
+//                               {/* EDITOR - Takes remaining width */}
+//                               <div
+//                                 className="flex-1 h-full flex flex-col overflow-hidden"
+//                                 style={{ backgroundColor: theme.sandpackBg }}
+//                               >
+//                                 <div
+//                                   className="px-3 py-2 text-xs border-b font-semibold flex-shrink-0"
+//                                   style={{
+//                                     color: theme.textSecondary,
+//                                     borderColor: theme.border,
+//                                   }}
+//                                 >
+//                                   EDITOR
+//                                 </div>
+//                                 <div className="flex-1 overflow-hidden">
+//                                   <SandpackCodeEditor
+//                                     showTabs
+//                                     showLineNumbers
+//                                     wrapContent={false}
+//                                     closableTabs={true}
+//                                     style={{
+//                                       height: "100%",
+//                                       overflow: "auto",
+//                                     }}
+//                                   />
+//                                 </div>
+//                               </div>
+//                             </div>
+//                           )}
+//                         </SandpackLayout>
+//                       </SandpackProvider>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Sidebar Component
+// const SidebarContent = ({
+//   recentChats,
+//   templates,
+//   allTemplates,
+//   onClose,
+//   theme,
+//   hoveredChat,
+//   setHoveredChat,
+//   onNewChat,
+//   onProjectClick,
+//   onTemplateClick,
+//   currentTheme,
+//   toggleTheme,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col">
+//       {/* Header */}
+//       <div
+//         className="p-3 border-b flex-shrink-0"
+//         style={{ borderColor: theme.border }}
+//       >
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center gap-3 min-w-0">
+//             <motion.div
+//               whileHover={{ scale: 1.02 }}
+//               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+//               style={{
+//                 background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//               }}
+//             >
+//               <img
+//                 src="/EVA.png"
+//                 alt="EVA"
+//                 height={60}
+//                 className="rounded-full"
+//               />
+//             </motion.div>
+//             <div className="min-w-0">
+//               <h1
+//                 className="text-sm font-semibold truncate"
+//                 style={{ color: theme.textPrimary }}
+//               >
+//                 EVA AI
+//               </h1>
+//               <p
+//                 className="text-xs truncate"
+//                 style={{ color: theme.textSecondary }}
+//               >
+//                 Full-Stack AI
+//               </p>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             {/* Theme Toggle in Sidebar */}
+//             <motion.button
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//               onClick={toggleTheme}
+//               className="p-2 rounded-full"
+//               style={{ backgroundColor: theme.card, color: theme.textPrimary }}
+//               title={
+//                 currentTheme === "dark"
+//                   ? "Switch to Light Mode"
+//                   : "Switch to Dark Mode"
+//               }
+//             >
+//               {currentTheme === "dark" ? (
+//                 <HiOutlineSun className="text-sm" />
+//               ) : (
+//                 <HiOutlineMoon className="text-sm" />
+//               )}
+//             </motion.button>
+//             {onClose && (
+//               <motion.button
+//                 whileHover={{ rotate: 90 }}
+//                 transition={{ duration: 0.2 }}
+//                 onClick={onClose}
+//                 className="lg:hidden p-2 rounded-full flex-shrink-0"
+//                 style={{ backgroundColor: theme.card }}
+//               >
+//                 <HiOutlineX style={{ color: theme.textPrimary }} />
+//               </motion.button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* New Chat Button */}
+//       <div className="p-4 mx-3 flex-shrink-0">
+//         <motion.button
+//           whileHover={{ scale: 1.02 }}
+//           whileTap={{ scale: 0.98 }}
+//           onClick={onNewChat}
+//           className="w-full py-2.5 px-4 text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
+//           style={{ backgroundColor: theme.green }}
+//         >
+//           <HiOutlinePlus className="text-base" />
+//           <span className="truncate">New Project</span>
+//         </motion.button>
+//       </div>
+
+
+      
+
+//       {/* Recent Projects Section */}
+//       <div className="flex-1 px-3 overflow-y-auto no-scrollbar min-h-72">
+//         <h2
+//           className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
+//           style={{ color: theme.textSecondary }}
+//         >
+//           Recent Projects
+//         </h2>
+//         <div className="space-y-1 pb-4">
+//           {recentChats.length > 0 ? (
+//             recentChats.map((chat) => (
+//               <motion.div
+//                 key={chat.id}
+//                 whileHover={{ x: 4 }}
+//                 className="flex items-start gap-3 p-3 rounded-xl cursor-pointer group"
+//                 style={{
+//                   backgroundColor:
+//                     hoveredChat === chat.id ? theme.hover : "transparent",
+//                   opacity: chat.status === "processing" ? 0.8 : 1,
+//                 }}
+//                 onMouseEnter={() => setHoveredChat(chat.id)}
+//                 onMouseLeave={() => setHoveredChat(null)}
+//                 onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//               >
+//                 <div
+//                   className="p-2 rounded-full flex-shrink-0"
+//                   style={{ backgroundColor: theme.iconBg }}
+//                 >
+//                   <span style={{ color: chat.color }} className="text-sm">
+//                     {chat.icon}
+//                   </span>
+//                 </div>
+//                 <div className="flex-1 min-w-0">
+//                   <div className="flex items-center justify-between gap-2">
+//                     <h4
+//                       className="text-sm font-medium truncate"
+//                       style={{ color: theme.textPrimary }}
+//                     >
+//                       {chat.title}
+//                     </h4>
+//                     <span
+//                       className="text-xs flex-shrink-0"
+//                       style={{ color: theme.textSecondary }}
+//                     >
+//                       {chat.time}
+//                     </span>
+//                   </div>
+//                   <p
+//                     className="text-xs truncate"
+//                     style={{ color: theme.textSecondary }}
+//                   >
+//                     {chat.preview}
+//                   </p>
+//                   {chat.status === "processing" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.yellow + "20",
+//                         color: theme.yellow,
+//                       }}
+//                     >
+//                       Processing...
+//                     </span>
+//                   )}
+//                   {chat.status === "completed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.green + "20",
+//                         color: theme.green,
+//                       }}
+//                     >
+//                       Completed
+//                     </span>
+//                   )}
+//                   {chat.status === "failed" && (
+//                     <span
+//                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
+//                       style={{
+//                         backgroundColor: theme.red + "20",
+//                         color: theme.red,
+//                       }}
+//                     >
+//                       Failed
+//                     </span>
+//                   )}
+//                 </div>
+//               </motion.div>
+//             ))
+//           ) : (
+//             <div
+//               className="text-center py-8"
+//               style={{ color: theme.textSecondary }}
+//             >
+//               <p className="text-xs">No recent projects</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Collapsed Sidebar Component
+// const CollapsedSidebar = ({
+//   theme,
+//   onNewChat,
+//   recentChats,
+//   onProjectClick,
+// }) => {
+//   return (
+//     <div className="h-full flex flex-col items-center py-3">
+//       <motion.div
+//         whileHover={{ scale: 1.1 }}
+//         className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md mb-6 cursor-pointer"
+//         style={{
+//           background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
+//         }}
+//         onClick={onNewChat}
+//         title="New Project"
+//       >
+//         <HiOutlinePlus className="text-white text-lg" />
+//       </motion.div>
+
+//       <div className="flex-1 w-full px-2">
+//         {recentChats.slice(0, 5).map((chat) => (
+//           <motion.div
+//             key={chat.id}
+//             whileHover={{ scale: 1.05 }}
+//             className="w-full flex justify-center mb-2 cursor-pointer relative"
+//             onClick={() => onProjectClick && onProjectClick(chat.jobId)}
+//             title={`${chat.title} - ${chat.status}`}
+//           >
+//             <div
+//               className="p-2 rounded-lg"
+//               style={{ backgroundColor: theme.card }}
+//             >
+//               <span style={{ color: chat.color }} className="text-lg">
+//                 {chat.icon}
+//               </span>
+//             </div>
+//             {chat.status === "processing" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+//             )}
+//             {chat.status === "failed" && (
+//               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+//             )}
+//           </motion.div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Home;
+
+
+///ai 
+
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -11630,6 +25866,7 @@ import {
   SandpackPreview,
   SandpackConsole,
   SandpackFileExplorer,
+  useSandpack,
 } from "@codesandbox/sandpack-react";
 import {
   HiOutlineChat,
@@ -11657,7 +25894,14 @@ import {
   HiOutlineArrowsExpand,
   HiOutlineSun,
   HiOutlineMoon,
+  HiOutlineSave,
+  HiOutlineSparkles,
+  HiOutlineLightBulb,
+  
+  HiOutlineBeaker,
+  HiOutlineSearch
 } from "react-icons/hi";
+import { Typewriter } from "react-simple-typewriter";
 import {
   BsRobot,
   BsHourglassSplit,
@@ -11666,54 +25910,438 @@ import {
   BsWrench,
   BsCodeSquare,
   BsEye,
+  BsStars,
+  BsLightning,
+  BsGear,
+  BsGraphUp,
+  BsCloudCheck,
+  BsShieldCheck,
+
+  BsFileText, 
+  BsFolder, 
+  BsCopy,
+  BsCheck2,
+   BsFolderFill,
+  BsFolder2Open 
 } from "react-icons/bs";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+import { FiMonitor, FiTablet, FiSmartphone } from "react-icons/fi";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 // Storage keys
 const STORAGE_KEY = "ai_projects";
 const THEME_KEY = "ai_theme";
 const EXPLORER_WIDTH_KEY = "explorer_width";
 
-// Theme definitions
+// Modern Theme Definitions with gradients
 const themes = {
   dark: {
-    bg: "#0B0F0E",
-    sidebar: "#111413",
-    card: "#151918",
-    border: "#1F2A27",
-    green: "#22C55E",
-    greenSoft: "#16A34A",
-    textPrimary: "#E5E7EB",
-    textSecondary: "#9CA3AF",
-    inputBg: "#1A1F1D",
-    yellow: "#EAB308",
-    orange: "#F97316",
-    red: "#EF4444",
-    hover: "#1F2A27",
-    iconBg: "#1A1F1D",
-    sandpackBg: "#1e1e1e",
-    blue: "#3B82F6",
+    // Modern Dark Theme (Neon Noir)
+    bg: "#0A0A0F",
+    sidebar: "#0F0F15",
+    card: "#14141C",
+    cardHover: "#1A1A24",
+    border: "#2A2A35",
+    borderLight: "#353540",
+    green: "#00E599",
+    greenSoft: "#00B8FF",
+    greenGradient: "linear-gradient(135deg, #00E599 0%, #00B8FF 100%)",
+    textPrimary: "#FFFFFF",
+    textSecondary: "#A0A0B0",
+    textMuted: "#6B6B80",
+    inputBg: "#1A1A24",
+    inputBorder: "#2A2A35",
+    inputFocus: "#00E599",
+    yellow: "#FFB800",
+    orange: "#FF6B00",
+    red: "#FF4D4D",
+    redSoft: "#FF6B6B",
+    hover: "#1E1E2A",
+    iconBg: "#1A1A24",
+    sandpackBg: "#1E1E2A",
+    blue: "#00B8FF",
+    purple: "#9747FF",
+    purpleGradient: "#7466FA",
+    accent1: "#00E599",
+    accent2: "#00B8FF",
+    accent3: "#9747FF",
+    glow: "#7466FA",
+    glowBlue: "#7466FA",
+    glowPurple: "#7466FA",
   },
   light: {
-    bg: "#F9FAFB",
+    // Modern Light Theme (Glass White)
+    bg: "#F8FAFC",
     sidebar: "#FFFFFF",
-    card: "#F3F4F6",
-    border: "#E5E7EB",
-    green: "#22C55E",
-    greenSoft: "#16A34A",
-    textPrimary: "#111827",
-    textSecondary: "#6B7280",
+    card: "#F1F5F9",
+    cardHover: "#E2E8F0",
+    border: "#E2E8F0",
+    borderLight: "#CBD5E1",
+    green: "#059669",
+    greenSoft: "#0284C7",
+    greenGradient: "linear-gradient(135deg, #059669 0%, #0284C7 100%)",
+    textPrimary: "#0F172A",
+    textSecondary: "#475569",
+    textMuted: "#64748B",
     inputBg: "#FFFFFF",
-    yellow: "#EAB308",
-    orange: "#F97316",
-    red: "#EF4444",
-    hover: "#F3F4F6",
-    iconBg: "#F3F4F6",
+    inputBorder: "#E2E8F0",
+    inputFocus: "#059669",
+    yellow: "#D97706",
+    orange: "#EA580C",
+    red: "#DC2626",
+    redSoft: "#EF4444",
+    hover: "#E2E8F0",
+    iconBg: "#F1F5F9",
     sandpackBg: "#FFFFFF",
-    blue: "#3B82F6",
+    blue: "#0284C7",
+    purple: "#7C3AED",
+    purpleGradient: "linear-gradient(135deg, #7C3AED 0%, #0284C7 100%)",
+    accent1: "#059669",
+    accent2: "#0284C7",
+    accent3: "#7C3AED",
+    glow: "0 0 20px rgba(5, 150, 105, 0.2)",
+    glowBlue: "0 0 20px rgba(2, 132, 199, 0.2)",
+    glowPurple: "0 0 20px rgba(124, 58, 237, 0.2)",
   },
 };
+
+// Save Button Component (Modernized)
+const SaveButton = ({ onClick, saveStatus,currentTheme }) => {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className="flex items-center gap-2 px-2.5 py-[.1rem] rounded-full text-xs font-medium transition-all shadow-lg"
+      style={{
+        background: saveStatus === 'saving' 
+          ? themes.dark.textMuted 
+          : saveStatus === 'saved' 
+            ? themes.dark.greenGradient 
+            : themes.dark.purpleGradient,
+        color: '#FFFFFF',
+        boxShadow: saveStatus === 'saved' 
+          ? themes.dark.glow 
+          : saveStatus === 'saving' 
+            ? 'none' 
+            : themes.dark.glowPurple,
+      }}
+      disabled={saveStatus === 'saving'}
+      title="Save changes"
+    >
+      {saveStatus === 'saving' ? (
+        <>
+          <HiOutlineRefresh className="animate-spin text-sm" />
+          {/* <span className="hidden sm:inline">Saving...</span> */}
+        </>
+      ) : saveStatus === 'saved' ? (
+        <>
+          <HiOutlineCheckCircle className="text-sm" />
+          {/* <span className="hidden sm:inline">Saved</span> */}
+        </>
+      ) : (
+        <>
+          <HiOutlineSave className="text-sm" />
+          {/* <span className="hidden sm:inline">Save</span> */}
+        </>
+      )}
+    </motion.button>
+  );
+};
+
+// Manual Save Handler Component (unchanged)
+const ManualSaveHandler = ({ jobId, onSave, setSaveStatus }) => {
+  const { sandpack } = useSandpack();
+
+  const handleSave = () => {
+    if (!jobId) {
+      console.error("No job ID provided for save");
+      return;
+    }
+
+    console.log("Save button clicked - saving files...", sandpack.files);
+
+    setSaveStatus("saving");
+
+    try {
+      // Convert Sandpack files to original structure
+      const convertedFiles = Object.entries(sandpack.files).map(([path, file]) => {
+        let filename = path.startsWith("/") ? path.slice(1) : path;
+
+        // Add frontend prefix except backend or node_modules
+        if (!filename.startsWith("backend/") && !filename.includes("node_modules")) {
+          filename = `frontend/${filename}`;
+        }
+
+        return {
+          filename: filename,
+          content: file.code,
+        };
+      });
+
+      console.log("Converted files:", convertedFiles);
+
+      // Get stored projects
+      const stored = localStorage.getItem(STORAGE_KEY);
+
+      if (!stored) {
+        console.error("No projects found in localStorage");
+        setSaveStatus("idle");
+        return;
+      }
+
+      const projects = JSON.parse(stored);
+
+      const projectIndex = projects.findIndex((p) => p.id === jobId);
+
+      if (projectIndex === -1) {
+        console.error("Project not found:", jobId);
+        setSaveStatus("idle");
+        return;
+      }
+
+      // Update files
+      projects[projectIndex].files = convertedFiles;
+      projects[projectIndex].timestamp = new Date().toLocaleString();
+
+      // Count files
+      const frontendFiles = convertedFiles.filter((f) =>
+        f.filename.startsWith("frontend/")
+      ).length;
+
+      const backendFiles = convertedFiles.filter((f) =>
+        f.filename.startsWith("backend/")
+      ).length;
+
+      projects[projectIndex].preview = `${convertedFiles.length} files total (${frontendFiles} frontend, ${backendFiles} backend)`;
+
+      projects[projectIndex].totalFiles = convertedFiles.length;
+      projects[projectIndex].frontendFiles = frontendFiles;
+      projects[projectIndex].backendFiles = backendFiles;
+
+      // Save back
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+
+      console.log("Project saved successfully");
+
+      // callback
+      if (onSave) {
+        onSave(convertedFiles);
+      }
+
+      setSaveStatus("saved");
+
+      setTimeout(() => {
+        setSaveStatus("idle");
+      }, 2000);
+    } catch (error) {
+      console.error("Save error:", error);
+      setSaveStatus("idle");
+    }
+  };
+
+  return { handleSave };
+};
+
+// Wrapper component to use the hook and expose the save function
+const SaveHandlerWrapper = ({ jobId, onSave, setSaveStatus, onSaveFunctionReady }) => {
+  const { handleSave } = ManualSaveHandler({ jobId, onSave, setSaveStatus });
+  
+  useEffect(() => {
+    console.log("SaveHandlerWrapper: handleSave function created", handleSave);
+    if (onSaveFunctionReady) {
+      onSaveFunctionReady(handleSave);
+    }
+  }, [handleSave, onSaveFunctionReady, jobId]);
+  
+  return null;
+};
+
+// Modern Processing Animation Component
+const ModernProcessingAnimation = ({ pollingAttempts }) => {
+  const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center justify-center p-8"
+    >
+      {/* Minimal Loading Animation */}
+      <div className="relative">
+        <motion.div
+          className="w-16 h-16 rounded-full"
+          style={{
+            background: `linear-gradient(135deg, ${themes.dark.accent1}20, ${themes.dark.accent2}20)`,
+            border: `1px solid ${themes.dark.accent1}40`,
+          }}
+          animate={{
+            scale: [1, 1.02, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            border: `1px solid ${themes.dark.accent1}`,
+            borderTopColor: "transparent",
+            borderRightColor: "transparent",
+            borderBottomColor: "transparent",
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+        
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img 
+            src="/Ai.svg" 
+            alt="AI" 
+            className="w-7 h-7"
+            style={{ filter: "brightness(0) invert(1)", opacity: 0.9 }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 text-center">
+        <p 
+          className="text-sm font-medium"
+          style={{ color: themes.dark.textPrimary }}
+        >
+          Processing{dots}
+        </p>
+        {pollingAttempts > 0 && (
+          <div className="mt-3">
+            <div 
+              className="w-32 h-0.5 rounded-full mx-auto"
+              style={{ backgroundColor: themes.dark.border }}
+            >
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((pollingAttempts * 2) / 60 * 100, 100)}%` }}
+                className="h-full rounded-full"
+                style={{ backgroundColor: themes.dark.accent1 }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// Resizable Panel Component (unchanged)
+const ResizablePanel = ({
+  children,
+  defaultSize = 25,
+  minSize = 15,
+  maxSize = 50,
+  direction = "right",
+  storageKey = "panel_size",
+  theme
+}) => {
+  const isVertical = direction === "top" || direction === "bottom";
+
+  const [size, setSize] = useState(() => {
+    const saved = localStorage.getItem(storageKey);
+    return saved ? parseInt(saved) : defaultSize;
+  });
+
+  const [isResizing, setIsResizing] = useState(false);
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+
+      const container = panelRef.current?.parentElement;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      let newSize;
+
+      if (isVertical) {
+        newSize = ((rect.bottom - e.clientY) / rect.height) * 100;
+      } else {
+        newSize = ((e.clientX - rect.left) / rect.width) * 100;
+      }
+
+      newSize = Math.max(minSize, Math.min(maxSize, newSize));
+
+      setSize(newSize);
+      localStorage.setItem(storageKey, Math.round(newSize));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = "default";
+      document.body.style.userSelect = "auto";
+    };
+
+    if (isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+
+      document.body.style.cursor = isVertical ? "row-resize" : "col-resize";
+      document.body.style.userSelect = "none";
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing]);
+
+  return (
+    <div
+      ref={panelRef}
+      className="relative"
+      style={isVertical ? { height: `${size}%` } : { width: `${size}%` }}
+    >
+      {children}
+
+      <div
+        className={`absolute ${
+          isVertical
+            ? "left-0 right-0 h-1 cursor-row-resize"
+            : "top-0 bottom-0 w-1 cursor-col-resize"
+        }`}
+        style={{
+          backgroundColor: isResizing ? theme?.blue : "transparent",
+          zIndex: 20,
+          bottom: isVertical ? 0 : undefined,
+          right: !isVertical ? 0 : undefined
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setIsResizing(true);
+        }}
+      />
+    </div>
+  );
+};
+
+
+
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11746,6 +26374,8 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showDiagnostic, setShowDiagnostic] = useState(false);
   const [diagnosticData, setDiagnosticData] = useState(null);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved'
 
   // Sandpack Files
   const [sandpackFiles, setSandpackFiles] = useState({});
@@ -11763,6 +26393,9 @@ const Home = () => {
   // Mobile Workspace Toggle
   const [showMobileWorkspace, setShowMobileWorkspace] = useState(false);
 
+  // Save function reference
+  const saveFunctionRef = useRef(null);
+
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
@@ -11774,16 +26407,20 @@ const Home = () => {
   const isPollingRef = useRef(false);
   const abortControllerRef = useRef(null);
 
-  // All 8 templates available
+
+  const [deviceView, setDeviceView] = useState("desktop");
+const [previewWidth, setPreviewWidth] = useState("100%");
+
+  // Modern Templates with icons
   const allTemplates = [
-    { name: "Education ERP", icon: <HiOutlineCode />, bg: theme.green },
-    { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.green },
-    { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.green },
-    { name: "Chat App", icon: <HiOutlineChat />, bg: theme.green },
-    { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.green },
-    { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.green },
-    { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.green },
-    { name: "Travel App", icon: <HiOutlineMap />, bg: theme.green },
+    { name: "Education ERP", icon: <HiOutlineSparkles />, bg: theme.accent1, gradient: theme.greenGradient },
+    { name: "E-commerce", icon: <HiOutlineShoppingCart />, bg: theme.accent2, gradient: theme.blueGradient || "linear-gradient(135deg, #00B8FF 0%, #9747FF 100%)" },
+    { name: "Social Media", icon: <HiOutlineUserGroup />, bg: theme.accent3, gradient: theme.purpleGradient },
+    { name: "Chat App", icon: <HiOutlineChat />, bg: theme.accent1, gradient: theme.greenGradient },
+    { name: "Video App", icon: <HiOutlineVideoCamera />, bg: theme.accent2, gradient: theme.blueGradient || "linear-gradient(135deg, #00B8FF 0%, #9747FF 100%)" },
+    { name: "Music App", icon: <HiOutlinePhotograph />, bg: theme.accent3, gradient: theme.purpleGradient },
+    { name: "Food App", icon: <HiOutlineLocationMarker />, bg: theme.accent1, gradient: theme.greenGradient },
+    { name: "Travel App", icon: <HiOutlineMap />, bg: theme.accent2, gradient: theme.blueGradient || "linear-gradient(135deg, #00B8FF 0%, #9747FF 100%)" },
   ];
 
   // Only show 4 templates in sidebar
@@ -11889,8 +26526,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-gray-800">Welcome to Your App</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-white mb-4">Welcome to Your App</h1>
+        <p className="text-gray-300">Built with AI</p>
+      </div>
     </div>
   )
 }`,
@@ -11902,7 +26542,13 @@ export default function App() {
       sandpackFiles["/src/index.css"] = {
         code: `@tailwind base;
 @tailwind components;
-@tailwind utilities;`,
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}`,
       };
     }
 
@@ -11936,6 +26582,28 @@ export default {
     }
 
     return sandpackFiles;
+  };
+
+  // Convert Sandpack files back to original format
+  const convertFromSandpackFiles = (sandpackFiles) => {
+    const files = [];
+    
+    Object.entries(sandpackFiles).forEach(([path, file]) => {
+      // Remove leading slash
+      let filename = path.startsWith('/') ? path.slice(1) : path;
+      
+      // Add frontend/ prefix for frontend files
+      if (!filename.startsWith('backend/') && !filename.includes('node_modules')) {
+        filename = `frontend/${filename}`;
+      }
+
+      files.push({
+        filename: filename,
+        content: file.code
+      });
+    });
+
+    return files;
   };
 
   // Auto-scroll to bottom when messages change
@@ -12427,14 +27095,14 @@ export default {
 
         const successMessage = {
           id: Date.now(),
-          text: `✅ **Project Generated Successfully!**
+          text: `## ✅ **Project Generated Successfully!**
           
-I've created a complete ${projectName} project with ${resultResponse.data.files.length} files.
+I've created a complete **${projectName}** project with **${resultResponse.data.files.length}** files.
 
-**Quick Stats:**
-- Total Files: ${resultResponse.data.files.length}
-- Frontend Files: ${frontendFiles}
-- Backend Files: ${backendFiles}
+### Quick Stats:
+- 📁 Total Files: ${resultResponse.data.files.length}
+- 🎨 Frontend Files: ${frontendFiles}
+- ⚙️ Backend Files: ${backendFiles}
 
 You can now browse, edit, and preview the code below!`,
           sender: "ai",
@@ -12478,28 +27146,28 @@ You can now browse, edit, and preview the code below!`,
         // Add detailed error message to chat
         const errorMessage = {
           id: Date.now(),
-          text: `❌ **Project Generation Failed**
+          text: `## ❌ **Project Generation Failed**
 
 **Error:** ${errorMsg}
 
-**Error Details:**
+### Error Details:
 \`\`\`json
 ${JSON.stringify(errorDetails, null, 2)}
 \`\`\`
 
-**Possible reasons:**
+### Possible reasons:
 - The AI couldn't generate valid code for your request
 - The request contained invalid syntax or requirements
 - There was a server-side processing error
 - The prompt was too complex or ambiguous
 
-**Suggestions:**
+### Suggestions:
 - Try a simpler and more specific request
 - Check for any syntax errors in your prompt
 - Try one of the template projects first
 - Make sure your request includes specific features
 
-Click "New Project" to try again.`,
+Click **"New Project"** to try again.`,
           sender: "ai",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -12564,7 +27232,7 @@ Click "New Project" to try again.`,
 
         const errorMessage = {
           id: Date.now(),
-          text: `❌ **Connection Error**
+          text: `## ❌ **Connection Error**
 
 Unable to reach the server. Please check:
 
@@ -12574,14 +27242,14 @@ Unable to reach the server. Please check:
 
 **Error details:** ${error.message}
 
-**Technical Details:**
+### Technical Details:
 \`\`\`
 Type: Network Error
 Code: ${error.code || "N/A"}
 Status: ${error.response?.status || "N/A"}
 \`\`\`
 
-**Solutions:**
+### Solutions:
 1. Start the backend server with: \`uvicorn main:app --reload\`
 2. Check if the server is running on port 8000
 3. Disable any firewall temporarily
@@ -12640,7 +27308,7 @@ Status: ${error.response?.status || "N/A"}
     }, 2000);
   };
 
-  // Load project from localStorage or API
+  // Load project from localStorage or API - FIXED VERSION
   const loadProject = async (id) => {
     // Prevent multiple loads
     if (!id || id === "null" || id === "undefined") {
@@ -12667,7 +27335,92 @@ Status: ${error.response?.status || "N/A"}
     currentJobIdRef.current = id;
 
     try {
-      // FIRST: Check API for current status
+      // STEP 1: Check localStorage FIRST for existing project with files
+      const project = getProjectById(id);
+      
+      // If project exists in localStorage and has files, use it immediately
+      if (project && project.files && project.files.length > 0) {
+        console.log("Project found in localStorage with files, loading from cache");
+        
+        // Load from localStorage
+        setProjectFiles(project.files);
+        setMessages(project.messages || []);
+        setDownloadUrl(`${API_BASE_URL}/download/${id}`);
+
+        // Convert to Sandpack format
+        const sandpackFiles = convertToSandpackFiles(project.files);
+        setSandpackFiles(sandpackFiles);
+        setShowSandpack(true);
+
+        setJobStatus("completed");
+        setIsLoading(false);
+        
+        // Add a success message if no messages exist
+        if (!project.messages || project.messages.length === 0) {
+          const packageJson = project.files.find(
+            (f) =>
+              f.filename === "package.json" ||
+              f.filename === "frontend/package.json",
+          );
+          let projectName = "Project";
+          if (packageJson) {
+            try {
+              const parsed = JSON.parse(packageJson.content);
+              projectName = parsed.name || projectName;
+            } catch (e) {
+              console.error("Error parsing package.json", e);
+            }
+          }
+
+          const frontendFiles = project.files.filter(
+            (f) =>
+              f.filename.startsWith("frontend/") ||
+              !f.filename.startsWith("backend/"),
+          ).length;
+          const backendFiles = project.files.filter((f) =>
+            f.filename.startsWith("backend/"),
+          ).length;
+
+          const successMessage = {
+            id: Date.now(),
+            text: `## ✅ **Project Loaded Successfully!**
+            
+Loaded **${projectName}** with **${project.files.length}** files.
+
+### Quick Stats:
+- 📁 Total Files: ${project.files.length}
+- 🎨 Frontend Files: ${frontendFiles}
+- ⚙️ Backend Files: ${backendFiles}
+
+You can now browse, edit, and preview the code below!`,
+            sender: "ai",
+            timestamp: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+          
+          setMessages([successMessage]);
+          
+          // Update the project with the message
+          updateProjectStatus(
+            id,
+            "completed",
+            project.files,
+            [successMessage],
+            null,
+            project.prompt || ""
+          );
+        }
+        
+        scrollToBottom();
+        return;
+      }
+
+      // STEP 2: If no files in localStorage, check API
+      console.log("No files in localStorage, checking API for project", id);
+      
+      // Check API for current status
       let apiStatus = null;
       let apiError = null;
 
@@ -12678,28 +27431,25 @@ Status: ${error.response?.status || "N/A"}
         apiError = apiErr;
       }
 
-      // SECOND: Check localStorage
-      const project = getProjectById(id);
-
       // PRIORITY 1: If API says completed, use API data
       if (apiStatus && apiStatus.status === "completed") {
         try {
           const resultResponse = await axios.get(
             `${API_BASE_URL}/result/${id}`,
           );
-          setProjectFiles(resultResponse.data.files);
+          
+          const files = resultResponse.data.files;
+          setProjectFiles(files);
           setDownloadUrl(`${API_BASE_URL}/download/${id}`);
 
           // Convert to Sandpack format
-          const sandpackFiles = convertToSandpackFiles(
-            resultResponse.data.files,
-          );
+          const sandpackFiles = convertToSandpackFiles(files);
           setSandpackFiles(sandpackFiles);
           setShowSandpack(true);
 
           setJobStatus("completed");
 
-          const packageJson = resultResponse.data.files.find(
+          const packageJson = files.find(
             (f) =>
               f.filename === "package.json" ||
               f.filename === "frontend/package.json",
@@ -12715,25 +27465,25 @@ Status: ${error.response?.status || "N/A"}
           }
 
           // Count frontend and backend files
-          const frontendFiles = resultResponse.data.files.filter(
+          const frontendFiles = files.filter(
             (f) =>
               f.filename.startsWith("frontend/") ||
               !f.filename.startsWith("backend/"),
           ).length;
-          const backendFiles = resultResponse.data.files.filter((f) =>
+          const backendFiles = files.filter((f) =>
             f.filename.startsWith("backend/"),
           ).length;
 
           const successMessage = {
             id: Date.now(),
-            text: `✅ **Project Loaded Successfully!**
+            text: `## ✅ **Project Loaded Successfully!**
             
-Loaded ${projectName} with ${resultResponse.data.files.length} files.
+Loaded **${projectName}** with **${files.length}** files.
 
-**Quick Stats:**
-- Total Files: ${resultResponse.data.files.length}
-- Frontend Files: ${frontendFiles}
-- Backend Files: ${backendFiles}
+### Quick Stats:
+- 📁 Total Files: ${files.length}
+- 🎨 Frontend Files: ${frontendFiles}
+- ⚙️ Backend Files: ${backendFiles}
 
 You can now browse, edit, and preview the code below!`,
             sender: "ai",
@@ -12749,7 +27499,7 @@ You can now browse, edit, and preview the code below!`,
           const userPrompt = project?.prompt || "";
           saveProjectToStorage(
             id,
-            resultResponse.data.files,
+            files,
             [successMessage],
             userPrompt,
           );
@@ -12758,6 +27508,7 @@ You can now browse, edit, and preview the code below!`,
           return;
         } catch (resultErr) {
           // Fall through to other options
+          console.error("Error fetching result from API:", resultErr);
         }
       }
 
@@ -12776,9 +27527,9 @@ You can now browse, edit, and preview the code below!`,
         } else {
           const processingMessage = {
             id: Date.now(),
-            text: `🔄 **Project is still processing...**
+            text: `## 🔄 **Project is still processing...**
 
-Job ID: ${id}
+**Job ID:** ${id}
 
 The project is still being built. This may take a few moments.
 
@@ -12808,28 +27559,28 @@ I'll update you when it's ready!`,
 
         const errorMessage = {
           id: Date.now(),
-          text: `❌ **Project Failed**
+          text: `## ❌ **Project Failed**
 
 This project failed to generate properly.
 
 **Error:** ${errorMsg}
 
-**Error Details:**
+### Error Details:
 \`\`\`json
 ${JSON.stringify(errorDetails, null, 2)}
 \`\`\`
 
-**What happened:**
+### What happened:
 - The AI was unable to generate valid code for this request
 - The request might have contained invalid syntax
 - There was a server-side processing error
 
-**Next steps:**
+### Next steps:
 - Try creating a new project with a different prompt
 - Use one of the template projects below
 - Make your request more specific
 
-Click "New Project" to start fresh.`,
+Click **"New Project"** to start fresh.`,
           sender: "ai",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -12891,97 +27642,24 @@ Click "New Project" to start fresh.`,
         return;
       }
 
-      // PRIORITY 4: Use localStorage data if API is not available
-      if (project) {
-        if (project.files) {
-          // Completed project from localStorage
-          setProjectFiles(project.files);
-          setMessages(project.messages || []);
-          setDownloadUrl(`${API_BASE_URL}/download/${id}`);
-
-          // Convert to Sandpack format
-          const sandpackFiles = convertToSandpackFiles(project.files);
-          setSandpackFiles(sandpackFiles);
-          setShowSandpack(true);
-
-          setJobStatus("completed");
-          setIsLoading(false);
-          scrollToBottom();
-          return;
-        } else if (project.status === "processing") {
-          // Processing project from localStorage
-          setMessages(project.messages || []);
-          setJobStatus("processing");
-          setIsProcessing(true);
-          setIsLoading(false);
-          startPolling(id);
-          return;
-        } else if (project.status === "failed") {
-          // Failed project from localStorage
-          setJobStatus("failed");
-
-          const errorMsg = project.error || "This project failed to generate";
-          const errorDetails = project.errorDetails || { message: errorMsg };
-
-          setJobErrorMessage(errorMsg);
-          setJobErrorDetails(errorDetails);
-
-          const errorMessage = {
-            id: Date.now(),
-            text: `❌ **Project Failed to Load**
-
-This project failed to generate properly.
-
-**Error:** ${errorMsg}
-
-**Details:**
-\`\`\`json
-${JSON.stringify(errorDetails, null, 2)}
-\`\`\`
-
-**What happened:**
-- The AI was unable to generate valid code for this request
-- The project might have had syntax errors
-- The server might have encountered an error
-
-**Next steps:**
-- Try creating a new project with a different prompt
-- Use one of the template projects below
-- Make your request more specific
-
-Click "New Project" to start fresh.`,
-            sender: "ai",
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          };
-
-          setMessages([errorMessage]);
-          setIsLoading(false);
-          scrollToBottom();
-          return;
-        }
-      }
-
-      // PRIORITY 5: No data found anywhere
+      // PRIORITY 4: No data found anywhere
       setJobStatus("failed");
       setJobErrorMessage("Project not found");
 
       const errorMessage = {
         id: Date.now(),
-        text: `❌ **Project Not Found**
+        text: `## ❌ **Project Not Found**
 
-No project found with ID: ${id}
+No project found with ID: **${id}**
 
 The project may have expired or been deleted.
 
-**Troubleshooting:**
+### Troubleshooting:
 - Check if the backend server is running at ${API_BASE_URL}
 - The project ID might be incorrect
 - Try creating a new project
 
-Click "New Project" to start a new one.`,
+Click **"New Project"** to start a new one.`,
         sender: "ai",
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -13000,18 +27678,18 @@ Click "New Project" to start a new one.`,
 
       const errorMessage = {
         id: Date.now(),
-        text: `❌ **Error Loading Project**
+        text: `## ❌ **Error Loading Project**
 
 Could not load the project. The project may have expired or been deleted.
 
 **Error details:** ${error.message}
 
-**Possible reasons:**
+### Possible reasons:
 - The project ID is invalid
 - The project has been deleted from the server
 - The server is not responding
 
-**Solutions:**
+### Solutions:
 - Check if the backend server is running
 - Try creating a new project
 - Clear your browser cache and try again`,
@@ -13060,7 +27738,15 @@ Could not load the project. The project may have expired or been deleted.
 
       const processingMessage = {
         id: Date.now(),
-        text: `🔄 **Processing your request...**\n\n**Job ID:** ${job_id}\n**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"\n**Status:** Building your project...\n\nThis may take 30-60 seconds depending on complexity.`,
+        text: `## 🚀 **Processing your request...**
+
+**Job ID:** \`${job_id}\`
+
+**Prompt:** "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"
+
+**Status:** Building your project with AI...
+
+This may take **30-60 seconds** depending on complexity.`,
         sender: "ai",
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -13099,22 +27785,22 @@ Could not load the project. The project may have expired or been deleted.
 
       const errorMsg = {
         id: Date.now(),
-        text: `❌ **Build Request Failed**
+        text: `## ❌ **Build Request Failed**
 
 **Error:** ${errorMessage}
 
-**Technical Details:**
+### Technical Details:
 \`\`\`json
 ${JSON.stringify(errorDetails, null, 2)}
 \`\`\`
 
-**Troubleshooting:**
+### Troubleshooting:
 1. Make sure the backend server is running at ${API_BASE_URL}
 2. Check if the server is accessible (try opening ${API_BASE_URL}/docs in browser)
 3. Verify there are no CORS issues
 4. Try again with a simpler request
 
-Click "New Project" to try again.`,
+Click **"New Project"** to try again.`,
         sender: "ai",
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -13174,7 +27860,7 @@ Click "New Project" to try again.`,
 
           const aiMessageObj = {
             id: Date.now() + 1,
-            text: `🔄 **Starting project generation...**\n\nI'll create a complete ${matchedTemplate ? matchedTemplate.name : "custom"} project for you. This will take a few moments. Please wait...`,
+            text: `🔄 **Starting project generation...**\n\nI'll create a complete **${matchedTemplate ? matchedTemplate.name : "custom"}** project for you. This will take a few moments. Please wait...`,
             sender: "ai",
             timestamp: new Date().toLocaleTimeString([], {
               hour: "2-digit",
@@ -13194,7 +27880,17 @@ Click "New Project" to try again.`,
         setTimeout(() => {
           const aiMessageObj = {
             id: Date.now() + 1,
-            text: "I can help you build complete projects! Try asking me to create something specific like:\n\n• 'Create a modern education ERP website'\n• 'Build an e-commerce platform'\n• 'Make a social media dashboard'\n• 'Generate a chat application'\n\nWhat would you like me to build for you today?",
+            text: `## 🤖 **Hello! I'm your AI Developer Assistant**
+
+I can help you build complete projects! Try asking me to create something specific like:
+
+- ✨ "Create a modern education ERP website"
+- 🛍️ "Build an e-commerce platform"
+- 👥 "Make a social media dashboard"
+- 💬 "Generate a chat application"
+- 🎬 "Create a video streaming app"
+
+### What would you like me to build for you today?`,
             sender: "ai",
             timestamp: new Date().toLocaleTimeString([], {
               hour: "2-digit",
@@ -13238,6 +27934,7 @@ Click "New Project" to try again.`,
     setJobErrorMessage("");
     setJobErrorDetails(null);
     setShowMobileWorkspace(false);
+    setSaveStatus('idle');
     currentJobIdRef.current = null;
 
     setSearchParams({});
@@ -13248,7 +27945,7 @@ Click "New Project" to try again.`,
   const handleTemplateClick = (templateName) => {
     const templateMsg = {
       id: Date.now(),
-      text: `I want to build a ${templateName} application`,
+      text: `I want to build a **${templateName}** application`,
       sender: "user",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
@@ -13264,38 +27961,38 @@ Click "New Project" to try again.`,
     switch (templateName) {
       case "Education ERP":
         prompt =
-          "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard.";
+          "Create a complete Education ERP website with student management, teacher portal, attendance tracking, and grade books. Include responsive dashboard with modern UI use framer-motion gsap animation.";
         break;
       case "E-commerce":
         prompt =
-          "Build a full E-commerce website with product catalog, shopping cart, and user authentication.";
+          "Build a full E-commerce website with product catalog, shopping cart, user authentication, payment integration, and admin dashboard use framer-motion gsap animation.";
         break;
       case "Social Media":
         prompt =
-          "Create a Social Media platform with user profiles, posts, likes, and comments.";
+          "Create a Social Media platform with user profiles, posts, likes, comments, followers, and real-time notifications use framer-motion gsap animation.";
         break;
       case "Chat App":
         prompt =
-          "Build a Real-time Chat Application with private messaging and group chats.";
+          "Build a Real-time Chat Application with private messaging, group chats, file sharing, and online status use framer-motion gsap animation.";
         break;
       case "Video App":
         prompt =
-          "Create a Video Streaming Platform with video upload, video player, playlists, and subscriptions.";
+          "Create a Video Streaming Platform with video upload, video player, playlists, subscriptions, and recommendations use framer-motion gsap animation.";
         break;
       case "Music App":
         prompt =
-          "Build a Music Streaming App with audio playback, playlists, and album browsing.";
+          "Build a Music Streaming App with audio playback, playlists, album browsing, search, and offline support use framer-motion gsap animation.";
         break;
       case "Food App":
         prompt =
-          "Create a Food Delivery App with restaurant listings, menu browsing, and order tracking.";
+          "Create a Food Delivery App with restaurant listings, menu browsing, order tracking, and reviews use framer-motion gsap animation.";
         break;
       case "Travel App":
         prompt =
-          "Build a Travel Booking Platform with property listings, search filters, and booking calendar.";
+          "Build a Travel Booking Platform with property listings, search filters, booking calendar, and user reviews use framer-motion gsap animation.";
         break;
       default:
-        prompt = `Create a complete ${templateName} application with modern UI and responsive design.`;
+        prompt = `Create a complete ${templateName} application with modern UI, responsive design, and best practices use framer-motion gsap animation .`;
     }
 
     handleBuildRequest(prompt);
@@ -13319,48 +28016,51 @@ Click "New Project" to try again.`,
     setJobErrorMessage("");
     setJobErrorDetails(null);
     setShowMobileWorkspace(false);
+    setSaveStatus('idle');
     // Set the URL parameter
     setSearchParams({ project: jobId });
   };
 
-  // Loading animation component
-  const ProcessingAnimation = () => {
-    const [dots, setDots] = useState("");
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
-      }, 500);
-      return () => clearInterval(interval);
-    }, []);
-
-    return (
-      <div className="flex flex-col items-center justify-center p-8">
-        <div className="relative">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-t-transparent rounded-full"
-            style={{ borderColor: theme.green, borderTopColor: "transparent" }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <BsRobot className="text-xl" style={{ color: theme.green }} />
-          </div>
-        </div>
-        <p
-          className="mt-4 text-sm font-medium"
-          style={{ color: theme.textPrimary }}
-        >
-          Building your project{dots}
-        </p>
-        {pollingAttempts > 0 && (
-          <p className="mt-1 text-xs" style={{ color: theme.textSecondary }}>
-            Elapsed: {Math.floor(pollingAttempts * 2)} seconds
-          </p>
-        )}
-      </div>
-    );
+  // Handle manual save
+  const handleManualSave = () => {
+    console.log("Manual save triggered, saveFunctionRef.current:", saveFunctionRef.current);
+    if (saveFunctionRef.current) {
+      saveFunctionRef.current();
+    } else {
+      console.error("Save function not available yet - check if Sandpack is loaded");
+    }
   };
+
+  // Handle file save from ManualSaveHandler component
+const handleFileSave = (files, activeFile) => {
+  console.log("Files saved successfully:", files.length);
+
+  setLastSaved(new Date());
+
+  setProjectFiles(files);
+
+  const updatedSandpackFiles = convertToSandpackFiles(files);
+  setSandpackFiles(updatedSandpackFiles);
+
+  loadRecentProjects();
+
+  // restore active tab
+  if (activeFile) {
+    setTimeout(() => {
+      sandpack.setActiveFile(activeFile);
+    }, 0);
+  }
+};
+  // Callback to receive the save function from the handler
+  const handleSaveFunctionReady = (saveFn) => {
+    console.log("Save function ready and stored in ref");
+    saveFunctionRef.current = saveFn;
+  };
+
+  // Debug effect to check if jobId exists
+  useEffect(() => {
+    console.log("Current jobId:", jobId, "jobStatus:", jobStatus);
+  }, [jobId, jobStatus]);
 
   // Enhanced Error Display Component
   const ErrorDisplay = ({ message, details }) => {
@@ -13374,6 +28074,7 @@ Click "New Project" to try again.`,
         style={{
           borderColor: theme.red + "40",
           backgroundColor: theme.red + "10",
+          backdropFilter: "blur(10px)",
         }}
       >
         <div className="flex items-start gap-4 p-6">
@@ -13499,8 +28200,8 @@ Click "New Project" to try again.`,
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleNewChat}
-                  className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
-                  style={{ backgroundColor: theme.green }}
+                  className="px-4 py-2 rounded text-white text-sm font-medium flex items-center gap-2"
+                  style={{ background: theme.greenGradient }}
                 >
                   <HiOutlinePlus className="text-base" />
                   New Project
@@ -13527,75 +28228,286 @@ Click "New Project" to try again.`,
   };
 
   // Diagnostic Display Component
-  const DiagnosticDisplay = ({ data, onClose, onFix }) => {
-    if (!data) return null;
+const DiagnosticDisplay = ({ data, onClose, onFix, currentTheme = "dark" }) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [copiedFile, setCopiedFile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [expandedFolders, setExpandedFolders] = useState({});
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-6 rounded-xl overflow-hidden border"
-        style={{
-          borderColor: theme.yellow + "40",
-          backgroundColor: theme.yellow + "10",
-        }}
-      >
-        <div className="flex items-start gap-4 p-6">
+  if (!data) return null;
+
+  const projectData = data.projectData;
+  const files = projectData?.files || [];
+  const isDark = currentTheme === "dark";
+
+  // Group files by folder
+  const groupedFiles = files.reduce((acc, file) => {
+    const parts = file.filename.split("/");
+    const folder = parts.length > 1 ? parts[0] : "root";
+    if (!acc[folder]) acc[folder] = [];
+    acc[folder].push({
+      ...file,
+      name: parts.slice(1).join("/") || file.filename,
+      extension: file.filename.split(".").pop(),
+    });
+    return acc;
+  }, {});
+
+  // Sort folders
+  const sortedFolders = Object.keys(groupedFiles).sort((a, b) => {
+    if (a === "root") return 1;
+    if (b === "root") return -1;
+    return a.localeCompare(b);
+  });
+
+  // Initialize all folders as expanded
+  React.useEffect(() => {
+    const allExpanded = {};
+    sortedFolders.forEach(folder => {
+      allExpanded[folder] = true;
+    });
+    setExpandedFolders(allExpanded);
+    
+    // Auto-select first file if available
+    if (files.length > 0 && !selectedFile) {
+      const firstFile = files[0];
+      setSelectedFile(firstFile);
+    }
+  }, []);
+
+  // Filter files based on search
+  const filteredFolders = sortedFolders.reduce((acc, folder) => {
+    const filteredFiles = groupedFiles[folder].filter(file =>
+      file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      folder.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    if (filteredFiles.length > 0) {
+      acc[folder] = filteredFiles;
+    }
+    return acc;
+  }, {});
+
+  const copyToClipboard = async (content, fileName) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedFile(fileName);
+      setTimeout(() => setCopiedFile(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const getFileIcon = (extension) => {
+    const icons = {
+      js: "📄", jsx: "⚛️", ts: "📘", tsx: "⚛️",
+      css: "🎨", html: "🌐", json: "📦", md: "📝",
+      config: "⚙️", default: "📄"
+    };
+    return icons[extension] || icons.default;
+  };
+
+  const getLanguage = (filename) => {
+    const ext = filename.split(".").pop();
+    const langMap = {
+      js: "javascript", jsx: "jsx", ts: "typescript",
+      tsx: "tsx", css: "css", html: "html",
+      json: "json", md: "markdown"
+    };
+    return langMap[ext] || "javascript";
+  };
+
+  const toggleFolder = (folder) => {
+    setExpandedFolders(prev => ({
+      ...prev,
+      [folder]: !prev[folder]
+    }));
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-6 mb-3 rounded overflow-hidden border"
+      style={{
+        borderColor: theme.yellow + "40",
+        backgroundColor: theme.yellow + "10",
+        backdropFilter: "blur(10px)",
+      }}
+    >
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-start gap-3 p-4 border-b" style={{ borderColor: theme.yellow + "20" }}>
           <div
-            className="p-3 rounded-full flex-shrink-0"
+            className="p-2.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: theme.yellow + "20" }}
           >
-            <BsWrench className="text-2xl" style={{ color: theme.yellow }} />
+            <BsWrench className="text-xl" style={{ color: theme.yellow }} />
           </div>
           <div className="flex-1">
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: theme.yellow }}
-            >
-              Diagnostic Information
-            </h3>
-            <div className="space-y-3">
-              <pre
-                className="p-3 rounded-lg text-xs overflow-auto max-h-96"
-                style={{
-                  backgroundColor: theme.card,
-                  color: theme.textSecondary,
-                }}
-              >
-                {JSON.stringify(data, null, 2)}
-              </pre>
-
-              <div className="flex gap-3 mt-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onFix}
-                  className="px-4 py-2 rounded-full text-white text-sm font-medium flex items-center gap-2"
-                  style={{ backgroundColor: theme.green }}
-                >
-                  <BsWrench className="text-base" />
-                  Fix localStorage
-                </motion.button>
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-3">
+              <h3 className="text-lg font-semibold" style={{ color: theme.yellow }}>
+                Project Files · {files.length} Files
+              </h3>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <HiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm opacity-50" />
+                  <input
+                    type="text"
+                    placeholder="Search files..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 pr-3 py-1.5 text-sm rounded-lg outline-none"
+                    style={{
+                      backgroundColor: theme.card,
+                      color: theme.textPrimary,
+                      border: `1px solid ${theme.yellow}30`,
+                    }}
+                  />
+                </div>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={onClose}
-                  className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+                  className="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2"
                   style={{
                     backgroundColor: theme.card,
                     color: theme.textPrimary,
                   }}
                 >
                   <HiOutlineX className="text-base" />
-                  Close
+                 
                 </motion.button>
               </div>
             </div>
+            <p className="text-sm opacity-70" style={{ color: theme.textSecondary }}>
+              {projectData.title} · Generated: {new Date(projectData.createdAt).toLocaleString()}
+            </p>
           </div>
         </div>
-      </motion.div>
-    );
-  };
+
+        {/* Main Content */}
+        <div className="flex flex-1 flex-col min-h-[500px] max-h-[900px]">
+          {/* File Explorer */}
+          <div
+            className="w-[80%] mx-auto border-r overflow-y-auto"
+            style={{ borderColor: theme.yellow + "20" }}
+          >
+            <div className="p-3">
+              {Object.keys(filteredFolders).length === 0 ? (
+                <p className="text-sm text-center opacity-50 py-8">No files found</p>
+              ) : (
+                Object.entries(filteredFolders).map(([folder, files]) => (
+                  <div key={folder} className="mb-2">
+                    <button
+                      onClick={() => toggleFolder(folder)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10"
+                      style={{ color: theme.textPrimary }}
+                    >
+                      <span className="text-base">
+                        {expandedFolders[folder] ? "📂" : "📁"}
+                      </span>
+                      <span className="flex-1 text-left capitalize">{folder}</span>
+                      <span className="text-xs opacity-50">({files.length})</span>
+                    </button>
+                    {expandedFolders[folder] && (
+                      <div className="ml-6 mt-1 space-y-0.5">
+                        {files.map((file) => (
+                          <button
+                            key={file.filename}
+                            onClick={() => setSelectedFile(file)}
+                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all ${
+                              selectedFile?.filename === file.filename
+                                ? "bg-white/20"
+                                : "hover:bg-white/10"
+                            }`}
+                            style={{
+                              color: selectedFile?.filename === file.filename 
+                                ? theme.yellow 
+                                : theme.textSecondary,
+                            }}
+                          >
+                            <span>{getFileIcon(file.extension)}</span>
+                            <span className="flex-1 text-left truncate">{file.name}</span>
+                            <span className="text-xs opacity-40 uppercase">{file.extension}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Code Viewer */}
+<div className="flex-1 overflow-hidden mb-3 flex flex-col">
+  {selectedFile && (
+    <>
+      {/* File Header */}
+      <div
+        className="flex items-center justify-between h-12 px-4 py-3 border-b"
+        style={{ borderColor: theme.yellow + "20" }}
+      >
+        <div className="flex items-center gap-2">
+          <BsCodeSquare className="text-sm" style={{ color: theme.yellow }} />
+          <span className="text-sm font-mono font-medium">{selectedFile.name}</span>
+          <span 
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: theme.yellow + "20", color: theme.yellow }}
+          >
+            {selectedFile.extension}
+          </span>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => copyToClipboard(selectedFile.content, selectedFile.filename)}
+          className="px-3 py-1 rounded-lg text-sm flex items-center gap-1.5 transition-colors hover:bg-white/10"
+          style={{ color: theme.textSecondary }}
+        >
+          {copiedFile === selectedFile.filename ? (
+            <>
+              <BsCheck2 className="text-sm" />
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <BsCopy className="text-sm" />
+              <span>Copy</span>
+            </>
+          )}
+        </motion.button>
+      </div>
+
+      {/* Code Content with Syntax Highlighter */}
+      {/* <div className="flex-1 overflow-auto">
+        <SyntaxHighlighter
+          language={getLanguage(selectedFile.filename)}
+          style={isDark ? vscDarkPlus : vs}
+          customStyle={{
+            margin: 0,
+            padding: "1rem",
+            fontSize: "13px",
+            background: theme.card,
+            height: "100%",
+          }}
+          showLineNumbers
+          wrapLines
+        >
+          {selectedFile.content}
+        </SyntaxHighlighter>
+      </div> */}
+    </>
+  )}
+</div>
+        </div>
+       
+      </div>
+    </motion.div>
+  );
+};
+
+
 
   // Get template for Sandpack
   const getSandpackTemplate = () => {
@@ -13634,6 +28546,69 @@ Click "New Project" to try again.`,
       react: dependencies.react || "^18.2.0",
       "react-dom": dependencies["react-dom"] || "^18.2.0",
       "react-router-dom": dependencies["react-router-dom"] || "^6.3.0",
+        // Animation
+  "framer-motion": "^10.16.4",
+  "gsap": "^3.12.5",
+
+  // API / HTTP
+  "axios": "^1.6.7",
+
+  // Forms
+  "react-hook-form": "^7.50.0",
+
+  // Icons
+  "react-icons": "^5.0.1",
+  "lucide-react": "^0.376.0",
+
+  // Charts
+  "chart.js": "^4.4.1",
+  "react-chartjs-2": "^5.2.0",
+  "recharts": "^2.10.4",
+
+  // Date / time
+  "dayjs": "^1.11.10",
+
+  // Utility
+  "lodash": "^4.17.21",
+  "clsx": "^2.1.0",
+
+  // UI components
+  "@headlessui/react": "^1.7.18",
+  "@heroicons/react": "^2.1.1",
+
+  // Notifications
+  "react-hot-toast": "^2.4.1",
+
+  // State management
+  "zustand": "^4.5.2",
+
+  // Data fetching
+  "@tanstack/react-query": "^5.28.0",
+
+  // Drag & Drop
+  "@dnd-kit/core": "^6.1.0",
+
+  // Tables
+  "@tanstack/react-table": "^8.11.7",
+
+  // Markdown
+  "react-markdown": "^9.0.1",
+
+  // Code highlighting
+  "react-syntax-highlighter": "^15.5.0",
+
+  // File upload
+  "react-dropzone": "^14.2.3",
+
+  // Maps
+  "leaflet": "^1.9.4",
+  "react-leaflet": "^4.2.1",
+
+  // Modal / dialogs
+  "react-modal": "^3.16.1",
+
+  // Loading skeleton
+  "react-loading-skeleton": "^3.3.1"
     };
   };
 
@@ -13688,86 +28663,19 @@ Click "New Project" to try again.`,
     };
   });
 
-  // Resizable Panel Component (moved inside Home to access theme)
-  const ResizablePanel = ({ children, defaultWidth = 25, minWidth = 15, maxWidth = 40, direction = "right", storageKey = "panel_width" }) => {
-    const [width, setWidth] = useState(() => {
-      const saved = localStorage.getItem(storageKey);
-      return saved ? parseInt(saved) : defaultWidth;
-    });
-    const [isResizing, setIsResizing] = useState(false);
-    const panelRef = useRef(null);
-
-    useEffect(() => {
-      const handleMouseMove = (e) => {
-        if (!isResizing) return;
-
-        const container = panelRef.current?.parentElement;
-        if (!container) return;
-
-        const containerRect = container.getBoundingClientRect();
-        let newWidth;
-
-        if (direction === "right") {
-          newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-        } else {
-          newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
-        }
-
-        // Clamp width between min and max
-        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-        
-        setWidth(newWidth);
-        localStorage.setItem(storageKey, Math.round(newWidth));
-      };
-
-      const handleMouseUp = () => {
-        setIsResizing(false);
-        document.body.style.cursor = "default";
-        document.body.style.userSelect = "auto";
-      };
-
-      if (isResizing) {
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-        document.body.style.cursor = "col-resize";
-        document.body.style.userSelect = "none";
-      }
-
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }, [isResizing, direction, minWidth, maxWidth]);
-
-    return (
-      <div
-        ref={panelRef}
-        className="relative h-full"
-        style={{ width: `${width}%` }}
-      >
-        {children}
-        <div
-          className={`absolute top-0 bottom-0 w-1 cursor-col-resize hover:bg-opacity-50 transition-colors ${
-            direction === "right" ? "-right-0.5" : "-left-0.5"
-          } ${isResizing ? "bg-blue-500" : "hover:bg-blue-500"}`}
-          style={{
-            backgroundColor: isResizing ? theme.blue : "transparent",
-            zIndex: 20,
-          }}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            setIsResizing(true);
-          }}
-        />
-      </div>
-    );
-  };
-
   return (
     <div
       className="h-screen w-full overflow-hidden transition-colors duration-300"
       style={{ backgroundColor: theme.bg }}
     >
+      {/* Modern Gradient Background Effect */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full opacity-30">
+          <div className="absolute top-20 left-20 w-96 h-96 rounded-full blur-3xl" style={{ background: theme.accent1 }} />
+          <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full blur-3xl" style={{ background: theme.accent3 }} />
+        </div>
+      </div>
+
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -13775,7 +28683,7 @@ Click "New Project" to try again.`,
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -13786,7 +28694,7 @@ Click "New Project" to try again.`,
         initial={{ x: "-100%" }}
         animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
         transition={{ type: "tween", duration: 0.3 }}
-        className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-xl overflow-y-auto"
+        className="fixed inset-y-0 left-0 w-[280px] z-50 lg:hidden shadow-2xl overflow-y-auto"
         style={{ backgroundColor: theme.sidebar }}
       >
         <SidebarContent
@@ -13806,7 +28714,7 @@ Click "New Project" to try again.`,
       </motion.aside>
 
       {/* Desktop Layout */}
-      <div className="flex h-full w-full">
+      <div className="flex h-full w-full relative">
         {/* Desktop Sidebar with Collapse Toggle */}
         <motion.aside
           animate={{ width: sidebarCollapsed ? 80 : 288 }}
@@ -13815,7 +28723,7 @@ Click "New Project" to try again.`,
         >
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg"
+            className="absolute -right-3 top-20 z-10 p-1.5 rounded-full border shadow-lg hover:scale-110 transition-transform"
             style={{
               backgroundColor: theme.card,
               borderColor: theme.border,
@@ -13849,47 +28757,32 @@ Click "New Project" to try again.`,
               onTemplateClick={handleTemplateClick}
               currentTheme={currentTheme}
               toggleTheme={toggleTheme}
+               projectId={jobId}
+              
             />
           )}
         </motion.aside>
 
         {/* Main Content */}
-        <main className="flex-1 h-full flex flex-col w-full min-w-0">
-          {/* Fixed Header */}
+        <main className="flex-1 h-full flex flex-col w-full min-w-0 relative">
+          {/* Fixed Header with Glass Effect */}
           <div
-            className="flex-shrink-0 border-b w-full"
+            className="flex-shrink-0 border-b w-full backdrop-blur-xl bg-opacity-80"
             style={{
-              backgroundColor: theme.sidebar,
+              backgroundColor: theme.sidebar + "CC",
               borderColor: theme.border,
             }}
           >
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="lg:hidden p-2 rounded-full"
-                  style={{
-                    backgroundColor: theme.card,
-                    color: theme.textPrimary,
-                  }}
-                >
-                  <HiOutlineMenu className="text-lg" />
-                </button>
-                <h2
-                  className="text-sm font-medium hidden sm:block"
-                  style={{ color: theme.textPrimary }}
-                >
-                  AI Developer Assistant
-                </h2>
-              </div>
+            <div className="flex items-center justify-end px-4 py-2">
+             
 
               <div className="flex items-center gap-2">
                 {/* Theme Toggle Button */}
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={toggleTheme}
-                  className="p-2 rounded-full"
+                  className="p-2 rounded-full hover:shadow-lg transition-all"
                   style={{
                     backgroundColor: theme.card,
                     color: theme.textPrimary,
@@ -13911,7 +28804,7 @@ Click "New Project" to try again.`,
                 {jobStatus === "completed" && (
                   <button
                     onClick={() => setShowMobileWorkspace(!showMobileWorkspace)}
-                    className="lg:hidden p-2 rounded-full"
+                    className="lg:hidden p-2 rounded-full hover:scale-110 transition-all"
                     style={{
                       backgroundColor: theme.card,
                       color: showMobileWorkspace ? theme.green : theme.textPrimary,
@@ -13928,17 +28821,20 @@ Click "New Project" to try again.`,
 
                 {jobId && (
                   <>
-                    <span
-                      className="text-xs px-2 py-1 rounded-full hidden sm:inline-block"
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-xs px-3 py-1.5 rounded-full hidden sm:inline-block border"
                       style={{
                         backgroundColor: theme.card,
                         color: theme.textSecondary,
+                        borderColor: theme.border,
                       }}
                     >
                       Job: {jobId.substring(0, 8)}...
-                    </span>
+                    </motion.span>
                     {jobStatus === "processing" && isPollingActive && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ backgroundColor: theme.card }}>
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{
@@ -13963,20 +28859,25 @@ Click "New Project" to try again.`,
                       </div>
                     )}
                     {jobStatus === "completed" && (
-                      <span
-                        className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1 hidden sm:flex border"
                         style={{
-                          backgroundColor: theme.green + "20",
-                          color: theme.green,
-                        }}
+                        backgroundColor: theme.card,
+                        color: theme.textSecondary,
+                        borderColor: theme.border,
+                      }}
                       >
                         <HiOutlineCheckCircle className="text-xs" />
                         Completed
-                      </span>
+                      </motion.span>
                     )}
                     {jobStatus === "failed" && (
-                      <span
-                        className="text-xs px-2 py-1 rounded-full flex items-center gap-1 hidden sm:flex"
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1 hidden sm:flex"
                         style={{
                           backgroundColor: theme.red + "20",
                           color: theme.red,
@@ -13984,7 +28885,7 @@ Click "New Project" to try again.`,
                       >
                         <HiOutlineExclamation className="text-xs" />
                         Failed
-                      </span>
+                      </motion.span>
                     )}
                   </>
                 )}
@@ -14004,22 +28905,22 @@ Click "New Project" to try again.`,
               style={{ borderColor: theme.border }}
             >
               <div
-                className="p-3 border-b"
-                style={{
-                  backgroundColor: theme.card,
-                  borderColor: theme.border,
-                }}
+                className="p-3"
+                // style={{
+                //   backgroundColor: theme.card,
+                //   borderColor: theme.border,
+                // }}
               >
-                <h3
-                  className="text-xs font-semibold uppercase"
+                {/* <h3
+                  className="text-xs font-semibold uppercase tracking-wider"
                   style={{ color: theme.textSecondary }}
                 >
                   AI Conversation
-                </h3>
+                </h3> */}
               </div>
               <div
                 ref={messagesContainerRef}
-                className="flex-1 overflow-y-auto"
+                className="flex-1 overflow-y-auto scroll-smooth"
                 style={{ backgroundColor: theme.bg }}
               >
                 <div className="p-6">
@@ -14033,7 +28934,7 @@ Click "New Project" to try again.`,
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="mb-4 p-4 rounded-lg border"
+                            className="mb-4 p-4 rounded-lg border backdrop-blur-sm"
                             style={{
                               backgroundColor: theme.yellow + "20",
                               borderColor: theme.yellow,
@@ -14041,7 +28942,7 @@ Click "New Project" to try again.`,
                           >
                             <div className="flex items-start gap-3">
                               <BsHourglassSplit
-                                className="text-xl flex-shrink-0 animate-pulse"
+                                className="text-xl flex-shrink-0 animate-spin"
                                 style={{ color: theme.yellow }}
                               />
                               <div className="flex-1">
@@ -14086,6 +28987,7 @@ Click "New Project" to try again.`,
                         data={diagnosticData}
                         onClose={() => setShowDiagnostic(false)}
                         onFix={fixLocalStorage}
+                        currentTheme={currentTheme}
                       />
                     )}
 
@@ -14094,46 +28996,66 @@ Click "New Project" to try again.`,
                         /* Help Section */
                         <motion.div
                           key="help"
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
                         >
+                          <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="w-20 h-20 mx-auto mb-2 rounded-full flex items-center justify-center"
+                            // style={{ background: theme.purpleGradient }}
+                          >
+                           <img src="/Ai.svg" className="w-full h-full ">
+                           </img>
+                          </motion.div>
+                          
                           <h2
-                            className="text-lg sm:text-xl font-semibold mb-2"
-                            style={{ color: theme.textPrimary }}
-                          >
-                            What would you like to build today?
-                          </h2>
-                          <p
-                            className="text-sm mb-6"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            Ask me to build complete projects and get a VS
-                            Code-like environment!
-                          </p>
-
+  className={`text-2xl ${currentTheme=="dark"?"text-gray-200":"text-zinc-800"} font-bold mb-2 text-center`}
+  
+>
+  <Typewriter
+   words={[
+  "What would you like to build?",
+  "Build a modern website",
+  "Create a powerful mobile app",
+  "Design an intelligent AI tool",
+  "Develop a professional dashboard",
+]}
+    loop={false}
+    cursor
+    cursorStyle="|"
+    typeSpeed={50}
+    deleteSpeed={30}
+    delaySpeed={1000}
+  />
+</h2>
+                          
                           {/* Project Templates - Show all 8 templates in help section */}
-                          <div className="mb-8">
-                            <h3
-                              className="text-sm font-semibold mb-2"
-                              style={{ color: theme.textPrimary }}
+                          <div className="mb-5">
+                           
+                            <div className="flex flex-col items-center justify-center flex-wrap">
+                                 <h3
+                              className={`text-sm font-semibold mb-3 ${currentTheme=="dark"?"text-gray-200":"text-zinc-800"}`}
+                              
                             >
-                              Popular Projects
+                              Popular Project Templates {currentTheme}
                             </h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                              {allTemplates.map((template, index) => (
+                            <div className="lg:w-[65%] w-[90%] justify-center  flex gap-x-2 flex-wrap gap-y-2">
+                                  {allTemplates.map((template, index) => (
                                 <motion.button
                                   key={index}
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="text-white p-3 rounded-xl flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-all"
-                                  style={{ backgroundColor: template.bg }}
+                                  whileHover={{ scale: 1.05, y: -2 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  className={` ${currentTheme=="dark"?"text-gray-300 border-zinc-700 bg-zinc-950":"text-gray-800 border-gray-400"} p-2  cursor-pointer rounded-md lg:w-[10rem] w-[8rem] border  flex flex-col items-center gap-1.5 shadow   shadow-md hover:shadow-xl transition-all`}
+                                //   style={{ background: template.gradient }}
                                   onClick={() =>
                                     handleTemplateClick(template.name)
                                   }
                                 >
-                                  <span className="text-xl">
+                                  <span className="text-2xl">
                                     {template.icon}
                                   </span>
                                   <span className="text-xs font-medium text-center">
@@ -14141,6 +29063,7 @@ Click "New Project" to try again.`,
                                   </span>
                                 </motion.button>
                               ))}
+                            </div>
                             </div>
                           </div>
                         </motion.div>
@@ -14151,53 +29074,92 @@ Click "New Project" to try again.`,
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
+                          className="space-y-4"
                         >
-                          {messages.map((msg, index) => (
-                            <motion.div
-                              key={msg.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{
-                                duration: 0.2,
-                                delay: index * 0.05,
-                              }}
-                              className={`mb-4 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-                            >
-                              <div
-                                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                                  msg.sender === "user"
-                                    ? "rounded-br-none"
-                                    : "rounded-bl-none"
-                                }`}
-                                style={{
-                                  backgroundColor:
-                                    msg.sender === "user"
-                                      ? theme.green
-                                      : theme.card,
-                                  color:
-                                    msg.sender === "user"
-                                      ? "#FFFFFF"
-                                      : theme.textPrimary,
-                                }}
-                              >
-                                {msg.sender === "ai" && (
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <BsRobot className="text-xs" />
-                                    <span className="text-xs font-medium">
-                                      AI Developer Assistant
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="text-sm whitespace-pre-wrap font-mono">
-                                  {msg.text}
-                                </div>
-                                <p className="text-xs mt-2 opacity-70 text-right">
-                                  {msg.timestamp}
-                                </p>
-                              </div>
-                            </motion.div>
-                          ))}
-
+                {messages.map((msg, index) => {
+  const isUser = msg.sender === "user";
+  const isDark = currentTheme === "dark";
+  
+  return (
+    <motion.div
+      key={msg.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.2,
+        delay: index * 0.05,
+      }}
+      className={`flex  ${isUser ? "justify-end" : "justify-start"}`}
+    >
+      <div
+        className={`
+          max-w-[85%] 
+          rounded-2xl 
+          px-4 
+          py-3 
+          transition-all 
+          duration-200
+          ${isUser 
+            ? [
+                "rounded-br-none",
+                isDark 
+                  ? "bg-blue-500/80 text-white" 
+                  : "bg-blue-400 text-white",
+              ].join(" ")
+            : [
+                "rounded-bl-none",
+                isDark 
+                  ? "bg-zinc-900 text-gray-100 border border-zinc-800" 
+                  : "bg-gray-100 text-gray-900",
+              ].join(" ")
+          }
+        `}
+        style={{
+          boxShadow: isUser ? "none" : "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        }}
+      >
+        {!isUser && (
+          <div className="flex items-center gap-2 mb-2">
+            <div className={`
+              p-1 rounded-full 
+              ${isDark 
+                ? "bg-emerald-500/20 text-emerald-400" 
+                : "bg-green-100 text-green-600"
+              }
+            `}>
+              <BsRobot className="text-xs" />
+            </div>
+            <span className={`
+              text-xs font-medium 
+              ${isDark 
+                ? "text-gray-400" 
+                : "text-gray-600"
+              }
+            `}>
+              AI Developer
+            </span>
+          </div>
+        )}
+        
+        <div className="text-xs whitespace-pre-wrap leading-relaxed">
+          {msg.text}
+        </div>
+        
+        <p className={`
+          text-xs mt-2 opacity-60 text-right 
+          ${isUser 
+            ? "text-white/60" 
+            : isDark 
+              ? "text-gray-500" 
+              : "text-gray-400"
+          }
+        `}>
+          {msg.timestamp}
+        </p>
+      </div>
+    </motion.div>
+  );
+})}
                           {/* Processing Animation */}
                           {isProcessing &&
                             jobStatus === "processing" &&
@@ -14209,7 +29171,7 @@ Click "New Project" to try again.`,
                                 exit={{ opacity: 0 }}
                                 className="flex justify-center"
                               >
-                                <ProcessingAnimation />
+                                <ModernProcessingAnimation pollingAttempts={pollingAttempts} />
                               </motion.div>
                             )}
 
@@ -14281,15 +29243,15 @@ Click "New Project" to try again.`,
                 </div>
               </div>
 
-              {/* Fixed Input Area for Messages */}
+              {/* Fixed Input Area for Messages with Modern Design */}
               <div
-                className="flex-shrink-0 border-t w-full p-3"
+                className="flex-shrink-0 border-t w-full p-2 backdrop-blur-xl"
                 style={{
-                  backgroundColor: theme.sidebar,
+                  backgroundColor: theme.sidebar + "CC",
                   borderColor: theme.border,
                 }}
               >
-                <div className="max-w-full mx-auto">
+                <div className="lg:max-w-[70%] max-w-full mx-auto">
                   <div className="relative">
                     <textarea
                       ref={inputRef}
@@ -14297,10 +29259,10 @@ Click "New Project" to try again.`,
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Ask me to build any project..."
-                      className={`w-full pl-3 placeholder:text-xs pr-24 py-4 border rounded-md text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${
+                      className={`w-full pl-4 placeholder:text-sm pr-28 py-1.5 border-2 rounded text-sm focus:outline-none focus:ring-2 resize-none transition-all ${
                         inputError
                           ? "border-red-500 focus:ring-red-500"
-                          : "focus:ring-[#22C55E]"
+                          : "focus:ring-[#7466FA]"
                       }`}
                       style={{
                         backgroundColor: theme.inputBg,
@@ -14319,16 +29281,18 @@ Click "New Project" to try again.`,
                       disabled={isProcessing && jobStatus === "processing"}
                     />
                     <div className="absolute right-2 bottom-3 flex items-center gap-2">
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={handleSendMessage}
                         disabled={isProcessing && jobStatus === "processing"}
-                        className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{
-                          backgroundColor:
-                            isProcessing && jobStatus === "processing"
-                              ? theme.textSecondary
-                              : theme.green,
-                        }}
+                        className="p-2 text-white bg-[#7466FA] rounded transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        // style={{
+                        //   background: isProcessing && jobStatus === "processing"
+                        //     ? theme.textMuted
+                        //     : theme.greenGradient,
+                        //   boxShadow: theme.glow,
+                        // }}
                         title={
                           isProcessing
                             ? "Currently building a project"
@@ -14336,19 +29300,24 @@ Click "New Project" to try again.`,
                         }
                       >
                         <HiOutlinePaperAirplane className="text-sm" />
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={handleNewChat}
-                        className="p-2 text-white rounded-full transition-colors hover:opacity-90 flex-shrink-0"
-                        style={{ backgroundColor: theme.card }}
+                        className="p-2 rounded transition-all hover:shadow-lg"
+                        style={{
+                          backgroundColor: theme.card,
+                          color: theme.textPrimary,
+                        }}
                         title="Start new chat"
                       >
                         <HiOutlinePlus className="text-sm" />
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                   {inputError && (
-                    <p className="text-xs mt-1 text-red-500">{inputError}</p>
+                    <p className="text-xs mt-2 text-red-500">{inputError}</p>
                   )}
                 </div>
               </div>
@@ -14361,40 +29330,42 @@ Click "New Project" to try again.`,
                 className={`
                   lg:w-3/5 
                   ${showMobileWorkspace ? "w-full" : "hidden lg:block"}
-                  overflow-hidden flex flex-col transition-all duration-300
+                  overflow-hidden flex flex-col transition-all relative z-50 duration-300
                 `}
                 style={{ backgroundColor: theme.bg }}
               >
                 {/* Workspace Header with View Toggles and Fullscreen */}
                 <div
-                  className="px-3 p-1/2 border-b flex items-center justify-between"
+                  className="px-4 py-[.1rem] border-b  flex items-center justify-between"
                   style={{
                     backgroundColor: theme.card,
                     borderColor: theme.border,
                   }}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <h3
-                      className="text-xs font-semibold uppercase"
+                      className="text-xs font-semibold uppercase tracking-wider"
                       style={{ color: theme.textSecondary }}
                     >
                       Project Workspace
                     </h3>
-                    {downloadUrl && (
+                    <div className={`flex gap-x-2 ${currentTheme=="dark"?"border-zinc-700":"border-zinc-300"} rounded-full  border `}>
+                        {downloadUrl && (
                       <motion.button
+                      title="Download"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleDownload}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-white text-xs"
-                        style={{ backgroundColor: theme.green }}
+                        className={`flex border cursor-pointer ${currentTheme=="dark"?"text-zinc-200 bg-zinc-950 rounded-full border-zinc-700":"text-black rounded-full bg-white border-zinc-300"} items-center gap-2 px-1.5 py-1.5 rounded  text-xs font-medium`}
+                        // style={{ background: theme.greenGradient }}
                       >
-                        <HiOutlineDownload className="text-xs" />
-                        ZIP
+                        <HiOutlineDownload className="text-lg" />
+
                       </motion.button>
                     )}
                     <button
                       onClick={runDiagnostic}
-                      className="p-1.5 rounded-full text-xs hidden sm:inline-block"
+                      className="p-1.5 rounded text-xs hidden sm:inline-block cursor-pointer  transition-transform"
                       style={{
                         backgroundColor: theme.card,
                         color: theme.textSecondary,
@@ -14403,77 +29374,188 @@ Click "New Project" to try again.`,
                     >
                       <BsWrench className="text-sm" />
                     </button>
+
+                    {/* Manual Save Button - Now in the workspace header */}
+                    {jobId && jobStatus === "completed" && (
+                      <SaveButton 
+                        onClick={handleManualSave} 
+                        saveStatus={saveStatus}
+                      />
+                    )}
+                    </div>
                   </div>
+
+                  {/* ////screen size responsive */}
+                {showSandpack && isFullscreen && Object.keys(sandpackFiles).length > 0 && (
+  <div className="flex items-center gap-1.5 cursor-pointer">
+    {/* Device View Icons with Sliding Background */}
+    <div
+      className={`relative flex cursor-pointer items-center gap-1 border ${
+        currentTheme == "dark" ? "border-zinc-700 bg-zinc-950" : "border-zinc-300 bg-white"
+      } rounded-full p-1`}
+    >
+      {/* Sliding Background */}
+      <motion.div
+        className="absolute bg-[#7466FA] rounded-full"
+        style={{
+          width: "calc(33.33% - 4px)",
+          height: "calc(100% - 8px)",
+          top: "4px",
+        }}
+        animate={{
+          left: deviceView === "desktop" 
+            ? "4px" 
+            : deviceView === "tablet" 
+              ? "calc(33.33% - 0px)" 
+              : "calc(66.66% - 0px)",
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 30,
+        }}
+      />
+      
+      {/* Desktop Icon */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          setDeviceView("desktop");
+          setPreviewWidth("100%");
+        }}
+        className={`relative z-10 p-1.5 rounded-full transition-all ${
+          deviceView === "desktop"
+            ? "text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+        title="Desktop View"
+      >
+        <FiMonitor className="text-sm" />
+      </motion.button>
+
+      {/* Tablet Icon */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          setDeviceView("tablet");
+          setPreviewWidth("768px");
+        }}
+        className={`relative z-10 p-1.5 rounded-full transition-all ${
+          deviceView === "tablet"
+            ? "text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+        title="Tablet View"
+      >
+        <FiTablet className="text-sm" />
+      </motion.button>
+
+      {/* Mobile Icon */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          setDeviceView("mobile");
+          setPreviewWidth("375px");
+        }}
+        className={`relative z-10 p-1.5 rounded-full transition-all ${
+          deviceView === "mobile"
+            ? "text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+        title="Mobile View"
+      >
+        <FiSmartphone className="text-sm" />
+      </motion.button>
+    </div>
+  </div>
+)}
 
                   {/* View Toggle Buttons */}
                   {showSandpack && Object.keys(sandpackFiles).length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="flex items-center gap-1 rounded-lg p-1"
-                        style={{ backgroundColor: theme.card }}
-                      >
-                        <button
-                          onClick={() => setWorkspaceView("preview")}
-                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                            workspaceView === "preview"
-                              ? "bg-gray-700 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                          style={{
-                            backgroundColor:
-                              workspaceView === "preview"
-                                ? theme.green + "40"
-                                : "transparent",
-                            color:
-                              workspaceView === "preview"
-                                ? theme.textPrimary
-                                : theme.textSecondary,
-                          }}
-                          title="Preview View"
-                        >
-                          <BsEye className="text-sm inline mr-1" />
-                          <span className="hidden sm:inline">Preview</span>
-                        </button>
-                        <button
-                          onClick={() => setWorkspaceView("code")}
-                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                            workspaceView === "code"
-                              ? "bg-gray-700 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                          style={{
-                            backgroundColor:
-                              workspaceView === "code"
-                                ? theme.green + "40"
-                                : "transparent",
-                            color:
-                              workspaceView === "code"
-                                ? theme.textPrimary
-                                : theme.textSecondary,
-                          }}
-                          title="Code View"
-                        >
-                          <BsCodeSquare className="text-sm inline mr-1" />
-                          <span className="hidden sm:inline">Code</span>
-                        </button>
-                      </div>
+  <div className="flex items-center gap-2">
+    {/* Preview/Code Toggle */}
+    <div
+      className={`relative flex cursor-pointer items-center gap-1 border ${currentTheme=="dark"?"border-zinc-700 bg-zinc-950":"border-zinc-300"} rounded-full p-1`}
+    //   style={{ backgroundColor: theme.bg }}
+    >
+      {/* Sliding Background */}
+      <motion.div
+        className="absolute bg-[#7466FA] rounded-full"
+        style={{
+          width: "calc(50% - 4px)",
+          height: "calc(100% - 8px)",
+          top: "4px",
+        //   background: theme.greenGradient,
+        }}
+        animate={{
+          left: workspaceView === "preview" ? "4px" : "calc(50% - 0px)",
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 30,
+        }}
+      />
+      
+      {/* Preview Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setWorkspaceView("preview")}
+        className={`relative z-10 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+          workspaceView === "preview"
+            ? "text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+        style={{
+          color: workspaceView === "preview" ? "white" : theme.textSecondary,
+        }}
+        title="Preview View"
+      >
+        <BsEye className="text-sm inline ml-[.2rem]  mb-[.1rem]" />
+        {/* <span className="hidden sm:inline">Preview</span> */}
+      </motion.button>
+      
+      {/* Code Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setWorkspaceView("code")}
+        className={`relative z-10 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+          workspaceView === "code"
+            ? "text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+        style={{
+          color: workspaceView === "code" ? "white" : theme.textSecondary,
+        }}
+        title="Code View"
+      >
+        <BsCodeSquare className="text-sm ml-[.2rem] inline mr-1" />
+        {/* <span className="hidden sm:inline">Code</span> */}
+      </motion.button>
+    </div>
 
-                      {/* Fullscreen Button */}
-                      <button
-                        onClick={toggleFullscreen}
-                        className="p-2 rounded-md transition-all hidden sm:inline-block"
-                        style={{
-                          backgroundColor: theme.card,
-                          color: theme.textSecondary,
-                        }}
-                        title={
-                          isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
-                        }
-                      >
-                        <HiOutlineArrowsExpand className="text-sm" />
-                      </button>
-                    </div>
-                  )}
+   
+    {/* Fullscreen Button */}
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={toggleFullscreen}
+      className="p-2 rounded-lg transition-all hidden sm:inline-block"
+      style={{
+        backgroundColor: theme.bg,
+        color: theme.textSecondary,
+      }}
+      title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+    >
+      <HiOutlineArrowsExpand className="text-sm" />
+    </motion.button>
+  </div>
+)}
                 </div>
 
                 {/* Workspace Content */}
@@ -14481,39 +29563,53 @@ Click "New Project" to try again.`,
                   {!showSandpack || Object.keys(sandpackFiles).length === 0 ? (
                     <div className="h-full flex items-center justify-center flex-col gap-4">
                       {jobStatus === "processing" ? (
-                        <ProcessingAnimation />
+                        <ModernProcessingAnimation pollingAttempts={pollingAttempts} />
                       ) : jobStatus === "failed" ? (
-                        <div className="text-center">
-                          <BsExclamationTriangle
-                            className="text-4xl mx-auto mb-3"
-                            style={{ color: theme.red }}
-                          />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-center"
+                        >
+                          <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.red + "20" }}>
+                            <BsExclamationTriangle
+                              className="text-4xl"
+                              style={{ color: theme.red }}
+                            />
+                          </div>
                           <p
-                            className="text-sm"
+                            className="text-sm font-medium"
                             style={{ color: theme.textSecondary }}
                           >
                             Project generation failed
                           </p>
-                        </div>
+                          <p className="text-xs mt-2" style={{ color: theme.textMuted }}>
+                            Please try again with a different prompt
+                          </p>
+                        </motion.div>
                       ) : (
-                        <div className="text-center">
-                          <HiOutlineCode
-                            className="text-4xl mx-auto mb-3"
-                            style={{ color: theme.textSecondary }}
-                          />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-center"
+                        >
+                          <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: theme.purpleGradient }}>
+                            <HiOutlineCode
+                              className="text-4xl text-white"
+                            />
+                          </div>
                           <p
-                            className="text-sm"
+                            className="text-sm font-medium"
                             style={{ color: theme.textSecondary }}
                           >
                             Your project will appear here
                           </p>
                           <p
                             className="text-xs mt-2"
-                            style={{ color: theme.textSecondary }}
+                            style={{ color: theme.textMuted }}
                           >
                             Ask me to build something to get started
                           </p>
-                        </div>
+                        </motion.div>
                       )}
                     </div>
                   ) : (
@@ -14537,7 +29633,27 @@ Click "New Project" to try again.`,
                                 : "/src/index.js",
                         }}
                         options={{
-                          externalResources: ["https://cdn.tailwindcss.com"],
+                          externalResources: [
+                         // Tailwind
+      "https://cdn.tailwindcss.com",
+
+      // UI components
+      "https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css",
+
+      // Icons
+      "https://unpkg.com/lucide@latest",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
+
+      // Animations
+      "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
+
+      // GSAP
+      "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+
+      // Utilities
+      "https://unpkg.com/axios/dist/axios.min.js",
+      "https://unpkg.com/dayjs@1.11.10/dayjs.min.js"
+    ],
                           visibleFiles: Object.keys(sandpackFiles),
                           activeFile:
                             Object.keys(sandpackFiles).find(
@@ -14548,6 +29664,14 @@ Click "New Project" to try again.`,
                             ) || Object.keys(sandpackFiles)[0],
                         }}
                       >
+                        {/* Save handler wrapper - properly inside SandpackProvider */}
+                        <SaveHandlerWrapper 
+                          jobId={jobId} 
+                          onSave={handleFileSave} 
+                          setSaveStatus={setSaveStatus}
+                          onSaveFunctionReady={handleSaveFunctionReady}
+                        />
+                        
                         <SandpackLayout className="h-full">
                           {workspaceView === "preview" && (
                             /* Preview View - Full height preview with console at bottom */
@@ -14566,11 +29690,17 @@ Click "New Project" to try again.`,
                                 >
                                   PREVIEW
                                 </div>
-                                <div className="flex-1">
+                                <div  style={{
+      width: previewWidth,
+      height: "100%",
+      margin: "0 auto",
+      transition: "width 0.3s ease-in-out",
+    }} className="flex-1">
                                   <SandpackPreview
+                                    
                                     showOpenInCodeSandbox={false}
                                     showRefreshButton={true}
-                                    className="h-[70vh]"
+                                    className="h-[75vh]"
                                   />
                                 </div>
                               </div>
@@ -14589,23 +29719,33 @@ Click "New Project" to try again.`,
                                 >
                                   CONSOLE
                                 </div>
+                               <ResizablePanel
+                                defaultSize={25}
+                                minSize={10}
+                                 maxSize={60}
+                                 direction="top"
+                                 storageKey="console_height"
+                                  theme={theme}
+                                >
                                 <div className="flex-1 overflow-auto">
                                   <SandpackConsole />
                                 </div>
+                                </ResizablePanel>
                               </div>
                             </div>
                           )}
 
                           {workspaceView === "code" && (
                             /* Code View - Full height with resizable file explorer and editor */
-                            <div className="flex flex-row h-[95vh] w-full">
+                            <div className={`flex flex-row ${isFullscreen?"h-[95vh]":"h-[85vh]"} w-full`}>
                               {/* FILE EXPLORER - Resizable Panel */}
                               <ResizablePanel
                                 defaultWidth={25}
-                                minWidth={16}
+                                minWidth={17}
                                 maxWidth={50}
                                 direction="right"
                                 storageKey={EXPLORER_WIDTH_KEY}
+                                theme={theme}
                               >
                                 <div
                                   className="h-full border-r flex flex-col"
@@ -14615,18 +29755,18 @@ Click "New Project" to try again.`,
                                   }}
                                 >
                                   <div
-                                    className="px-3 py-2 text-xs border-b flex justify-between items-center font-semibold"
+                                    className="sm:px-3 px-1 sm:py-2 py-1.5 text-xs border-b flex justify-between flex-wrap items-center font-semibold"
                                     style={{
                                       color: theme.textSecondary,
                                       borderColor: theme.border,
                                     }}
                                   >
-                                    <h4>EXPLORER</h4>
+                                    <h4 className="sm:text-xs text-[8px]">EXPLORER</h4>
                                     {showSandpack && Object.keys(sandpackFiles).length > 0 && (
                                       <div
-                                        className="px-2 flex justify-center items-center text-[10px]"
+                                        className="sm:px-2 px-1 flex justify-center items-center text-[9px] rounded"
                                         style={{
-                                          backgroundColor: theme.card,
+                                          backgroundColor: theme.bg,
                                           borderColor: theme.border,
                                           color: theme.textSecondary,
                                         }}
@@ -14691,7 +29831,7 @@ Click "New Project" to try again.`,
   );
 };
 
-// Sidebar Component
+// Sidebar Component (Modernized)
 const SidebarContent = ({
   recentChats,
   templates,
@@ -14705,25 +29845,40 @@ const SidebarContent = ({
   onTemplateClick,
   currentTheme,
   toggleTheme,
+  projectId,
+  
 }) => {
+
+   
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
+      {/* Header with Gradient */}
       <div
-        className="p-3 border-b flex-shrink-0"
+        className="px-4  border-b"
         style={{ borderColor: theme.border }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
-              style={{
-                background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
-              }}
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center  flex-shrink-0"
+            //   style={{
+            //     background: theme.purpleGradient,
+            //   }}
             >
+             {/* <video
+  width="400"
+  className="rounded-full"
+  autoPlay
+  loop
+  muted
+  playsInline
+>
+  <source src="/logo.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video> */}
               <img
-                src="/EVA.png"
+                src="/Ai.svg"
                 alt="EVA"
                 height={60}
                 className="rounded-full"
@@ -14736,21 +29891,16 @@ const SidebarContent = ({
               >
                 EVA AI
               </h1>
-              <p
-                className="text-xs truncate"
-                style={{ color: theme.textSecondary }}
-              >
-                Full-Stack AI
-              </p>
+              
             </div>
           </div>
           <div className="flex items-center gap-2">
             {/* Theme Toggle in Sidebar */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1, rotate: 180 }}
+              whileTap={{ scale: 0.9 }}
               onClick={toggleTheme}
-              className="p-2 rounded-full"
+              className="p-2 rounded-full hover:shadow-lg transition-all"
               style={{ backgroundColor: theme.card, color: theme.textPrimary }}
               title={
                 currentTheme === "dark"
@@ -14766,10 +29916,10 @@ const SidebarContent = ({
             </motion.button>
             {onClose && (
               <motion.button
-                whileHover={{ rotate: 90 }}
+                whileHover={{ rotate: 90, scale: 1.1 }}
                 transition={{ duration: 0.2 }}
                 onClick={onClose}
-                className="lg:hidden p-2 rounded-full flex-shrink-0"
+                className="lg:hidden  p-2 rounded-full flex-shrink-0 hover:shadow-lg transition-all"
                 style={{ backgroundColor: theme.card }}
               >
                 <HiOutlineX style={{ color: theme.textPrimary }} />
@@ -14779,45 +29929,21 @@ const SidebarContent = ({
         </div>
       </div>
 
-      {/* New Chat Button */}
+      {/* New Chat Button with Gradient */}
       <div className="p-4 mx-3 flex-shrink-0">
         <motion.button
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onNewChat}
-          className="w-full py-2.5 px-4 text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
-          style={{ backgroundColor: theme.green }}
+          className="w-full  bg-[#7466FA] py-3 px-4 text-white rounded text-xs font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all"
+        //   style={{ background: theme.greenGradient }}
         >
           <HiOutlinePlus className="text-base" />
           <span className="truncate">New Project</span>
         </motion.button>
       </div>
 
-      {/* Templates Section */}
-      <div className="px-3 mb-4">
-        <h2
-          className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
-          style={{ color: theme.textSecondary }}
-        >
-          Quick Templates
-        </h2>
-        <div className="grid grid-cols-2 gap-2">
-          {templates.map((template, index) => (
-            <motion.button
-              key={index}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="p-2 rounded-lg text-xs text-white flex items-center justify-center gap-1.5"
-              style={{ backgroundColor: template.bg }}
-              onClick={() => onTemplateClick(template.name)}
-            >
-              <span className="text-sm">{template.icon}</span>
-              <span className="truncate">{template.name}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
-
+   
       {/* Recent Projects Section */}
       <div className="flex-1 px-3 overflow-y-auto no-scrollbar min-h-72">
         <h2
@@ -14826,22 +29952,19 @@ const SidebarContent = ({
         >
           Recent Projects
         </h2>
-        <div className="space-y-1 pb-4">
+        <div className=" pb-3">
           {recentChats.length > 0 ? (
             recentChats.map((chat) => (
               <motion.div
                 key={chat.id}
                 whileHover={{ x: 4 }}
-                className="flex items-start gap-3 p-3 rounded-xl cursor-pointer group"
-                style={{
-                  backgroundColor:
-                    hoveredChat === chat.id ? theme.hover : "transparent",
-                  opacity: chat.status === "processing" ? 0.8 : 1,
-                }}
+                className={`flex  ${String(projectId)===String(chat?.id) && currentTheme == "dark"?"bg-[#1E1E2A]":""} ${String(projectId)===String(chat?.id) && currentTheme == "light"&&"border border-gray-200"} items-start gap-1 p-2 rounded cursor-pointer group`}
+                
                 onMouseEnter={() => setHoveredChat(chat.id)}
                 onMouseLeave={() => setHoveredChat(null)}
                 onClick={() => onProjectClick && onProjectClick(chat.jobId)}
               >
+                
                 <div
                   className="p-2 rounded-full flex-shrink-0"
                   style={{ backgroundColor: theme.iconBg }}
@@ -14859,14 +29982,14 @@ const SidebarContent = ({
                       {chat.title}
                     </h4>
                     <span
-                      className="text-xs flex-shrink-0"
+                      className="text-[10px] flex-shrink-0"
                       style={{ color: theme.textSecondary }}
                     >
                       {chat.time}
                     </span>
                   </div>
                   <p
-                    className="text-xs truncate"
+                    className="text-[10px] truncate"
                     style={{ color: theme.textSecondary }}
                   >
                     {chat.preview}
@@ -14882,7 +30005,7 @@ const SidebarContent = ({
                       Processing...
                     </span>
                   )}
-                  {chat.status === "completed" && (
+                  {/* {chat.status === "completed" && (
                     <span
                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
                       style={{
@@ -14892,7 +30015,8 @@ const SidebarContent = ({
                     >
                       Completed
                     </span>
-                  )}
+                  )} */}
+
                   {chat.status === "failed" && (
                     <span
                       className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded"
@@ -14921,7 +30045,7 @@ const SidebarContent = ({
   );
 };
 
-// Collapsed Sidebar Component
+// Collapsed Sidebar Component (Modernized)
 const CollapsedSidebar = ({
   theme,
   onNewChat,
@@ -14929,13 +30053,13 @@ const CollapsedSidebar = ({
   onProjectClick,
 }) => {
   return (
-    <div className="h-full flex flex-col items-center py-3">
+    <div className="h-full flex flex-col items-center py-4">
       <motion.div
-        whileHover={{ scale: 1.1 }}
-        className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md mb-6 cursor-pointer"
-        style={{
-          background: `linear-gradient(to bottom right, ${theme.green}, ${theme.greenSoft})`,
-        }}
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        className="w-10 bg-[#7466FA] h-10 rounded-xl flex items-center justify-center shadow-lg mb-6 cursor-pointer"
+        // style={{
+        //   background: theme.greenGradient,
+        // }}
         onClick={onNewChat}
         title="New Project"
       >
@@ -14946,13 +30070,13 @@ const CollapsedSidebar = ({
         {recentChats.slice(0, 5).map((chat) => (
           <motion.div
             key={chat.id}
-            whileHover={{ scale: 1.05 }}
-            className="w-full flex justify-center mb-2 cursor-pointer relative"
+            whileHover={{ scale: 1.1 }}
+            className="w-full flex justify-center mb-3 cursor-pointer relative"
             onClick={() => onProjectClick && onProjectClick(chat.jobId)}
             title={`${chat.title} - ${chat.status}`}
           >
             <div
-              className="p-2 rounded-lg"
+              className="p-2 rounded-lg hover:shadow-lg transition-all"
               style={{ backgroundColor: theme.card }}
             >
               <span style={{ color: chat.color }} className="text-lg">
@@ -14973,3 +30097,4 @@ const CollapsedSidebar = ({
 };
 
 export default Home;
+
