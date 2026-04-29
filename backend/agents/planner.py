@@ -387,22 +387,33 @@ def _fallback_plan(requirements: dict) -> SitePlan:
 
 
 SYSTEM_PROMPT = """
-You are a senior information architect planning a modern SaaS website.
-
-Return ONLY valid JSON — no markdown, no explanation.
+You are a senior product architect planning a premium SaaS website.
+Return ONLY valid JSON — no markdown, no explanation, no code fences.
 
 Rules:
-- pages: PascalCase names, 8-12 pages covering ALL user requirements. Always include "Home".
-- app_name: short, memorable product name.
-- description: one sentence (the product tagline).
-- primary_color / secondary_color: 6-digit hex strings.
-- tone: professional | playful | bold | minimal.
+- pages: PascalCase names, 6-10 pages matching the user's request. ALWAYS include "Home".
+  For SaaS/landing sites: Home, Features, Pricing, About, Contact, Login, Signup
+  For dashboards/apps: add Dashboard, Settings, Profile
+  For e-commerce: add Products, Cart, Checkout
+  For healthcare: add Doctors, Appointments, Patient Portal
+  For education: add Courses, Students, Grades
+- app_name: short (1-2 words), memorable, relevant to the industry.
+- description: compelling one-sentence tagline.
+- primary_color: brand color hex — choose wisely based on industry:
+  Tech/SaaS: #4f46e5 (indigo) or #6366f1
+  Healthcare: #0891b2 (cyan) or #0d9488 (teal)
+  Finance: #1d4ed8 (blue) or #7c3aed (purple)
+  Food/Restaurant: #dc2626 (red) or #d97706 (amber)
+  Education: #059669 (emerald) or #7c3aed (purple)
+  Creative/Design: #ec4899 (pink) or #f97316 (orange)
+- secondary_color: complementary hex, darker or contrasting shade.
+- tone: professional | bold | minimal | playful
 
-Example:
+Example output:
 {
   "app_name": "Draftly",
-  "description": "AI-powered writing assistant for teams.",
-  "pages": ["Home", "Features", "Pricing", "Blog", "About", "Contact", "Login", "Signup", "Dashboard", "Settings"],
+  "description": "The AI writing assistant that helps teams create better content, faster.",
+  "pages": ["Home", "Features", "Pricing", "About", "Blog", "Contact", "Login", "Signup", "Dashboard"],
   "primary_color": "#6366f1",
   "secondary_color": "#0ea5e9",
   "tone": "professional"
@@ -435,7 +446,7 @@ def planner_agent(state: dict) -> dict:
         "Produce the final site plan JSON."
     )
 
-    llm = get_fast_llm(temperature=0, max_tokens=256)
+    llm = get_fast_llm(temperature=0, max_tokens=512)
 
     try:
         response = llm.invoke([
