@@ -11,15 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*.local
-coverage
-.cache
-.next
-out
-build
-public/static
-.svelte-kit
 
 # Editor directories and files
 .vscode/*
@@ -31,3 +22,4 @@ public/static
 *.njsproj
 *.sln
 *.sw?
+.env
